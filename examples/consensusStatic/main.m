@@ -59,8 +59,7 @@ for t = 1:iterations
         end      
     end   
     
-    %%% END ALGORITHM %%%
-    
+    %%% END ALGORITHM %%%   
     
     % Transform the single-integrator dynamics to unicycle dynamics using a
     % diffeomorphism, which can be found in the utilities
