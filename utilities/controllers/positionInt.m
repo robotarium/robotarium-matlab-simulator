@@ -6,8 +6,7 @@ function [ dx ] = positionInt( states, poses , l)
     dx = zeros(2, N);
     
     for i = 1:N
-       states(1:2, i) = states(1:2, i) + l*[cos(states(3, i)) ; sin(states(3, i))];
-       dx(:, i) = (poses(1:2, i) - states(1:2, i)); 
+       dx(:, i) = poses(1:2, i) - states(1:2, i); 
     end   
 end
 
