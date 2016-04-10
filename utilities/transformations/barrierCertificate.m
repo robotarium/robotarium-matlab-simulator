@@ -1,14 +1,22 @@
 function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
-%BARRIERCERTIFICATE Summary of this function goes here
-%   Detailed explanation goes here
-
-            % barrier certificates, centralized case
+%BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier
+%certificates
+%   This function accepts single-integrator dynamics and wraps them in
+%   barrier certificates to ensure that collisions do not occur.  Note that
+%   this algorithm bounds the magnitude of the generated output to 0.1.
+%
+%   dx = BARRIERCERTIFICATE(dxi, x, safetyRadius) 
+%   dx: generated safe, single-integrator inputs
+%   dxi: single-integrator synamics 
+%   x: States of the agents 
+%   safetyRadius:  Size of the agents (or desired separation distance)
+         
         N = size(dxi, 2);
         opts = optimoptions('quadprog','Display','off');
         gamma = 1e3;
         x = x(1:2, :);
 
-        % apply barrier certificates
+        %Determine dimension of constraints
         count = 0; 
         for i = 1:(N-1)
             for j = (i+1):N
@@ -16,6 +24,8 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
             end
         end    
         
+        %Generate constraints for barrier certificates based on the size of
+        %the safety radius
         A=zeros(count, 2*N);  b=zeros(count, 1);
         for i = 1:(N-1)
             for j = (i+1):N
@@ -28,6 +38,7 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
             end
         end
 
+        %Solve QP program generated earlier
         vhat = reshape(dxi,2*N,1);
         k_relax = 1;
         H = 2*eye(2*N);
