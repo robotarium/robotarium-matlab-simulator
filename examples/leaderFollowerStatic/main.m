@@ -14,8 +14,7 @@ N = r.getAvailableAgents();
 
 r.initialize(N);
 
-%Graph laplacian 
-L = -completeGL(N); 
+%Graph laplacian  
 followers = -completeGL(N-1); 
 L = zeros(N, N); 
 L(2:N, 2:N) = followers;
@@ -28,7 +27,7 @@ dx = zeros(2, N);
 %State for leader
 state = 0;
 
-collisionAvoidanceGain = 0.001; 
+%collisionAvoidanceGain = 0.001; 
 formationControlGain = 10;
 desiredDistance = 0.09;
 

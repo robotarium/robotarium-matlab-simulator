@@ -34,9 +34,11 @@ classdef Robotarium < APIInterface
         offset = 0.05
         
         %Barrier Certificates 
-        safetyRadius = 0.1
-        maxLinearVelocity = 0.1
-        maxAngularVelocity = 2*pi
+%         gamma = 1e4 
+%         safetyRadius = 0.1
+%         maxLinearVelocity = 0.1
+%         maxAngularVelocity = 2*pi
+%         diffeomorphismGain = 0.05
     end
     
     methods
