@@ -1,5 +1,5 @@
 # robotarium-matlab-simulator
-MATLAB simulator for the Robotarium!
+MATLAB simulator for the Robotarium!  The purpose of the Robotarium simulator is to ensure that algorithms perform reasonably well before deployment onto the Robotarium.  Note that scripts created for the simulator can be directly deployed onto the Robotarium.  To ensure minimum modification after deployment, the simulator has been created to closely approximate the actual behavior of the Robotarium's agents. 
 
 # Usage 
 
@@ -7,4 +7,4 @@ First, take a look at the "examples" folder for a few, simple examples.  Note th
 
 # Documentation 
 
-For example mathematical documentation, visit http://www.robotarium.org.
+For example mathematical documentation and more information, visit http://www.robotarium.org.
