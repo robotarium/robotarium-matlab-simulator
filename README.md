@@ -7,4 +7,4 @@ First, take a look at the "examples" folder for a few, simple examples.  Note th
 
 # Documentation 
 
-For example mathematical documentation and more information, visit http://www.robotarium.org.
+For example mathematical documentation, FAQs, and more, visit http://www.robotarium.org.
