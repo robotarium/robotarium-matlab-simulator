@@ -6,7 +6,7 @@ function [ dx ] = positionInt( states, poses )
     dx = zeros(2, N);
     
     for i = 1:N
-       dx(:, i) = int2uni((poses(1:2, i) - states(1:2, i)), states(:, i), 0.1); 
+       dx(:, i) = (poses(1:2, i) - states(1:2, i)); 
     end   
 end
 

@@ -13,7 +13,7 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
          
         N = size(dxi, 2);
         opts = optimoptions('quadprog','Display','off');
-        gamma = 1e3;
+        gamma = 1e4;
         x = x(1:2, :);
 
         %Determine dimension of constraints
