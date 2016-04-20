@@ -4,6 +4,7 @@ classdef Robotarium < APIInterface
     
     properties(GetAccess = public, SetAccess = private)
         timeStep
+        figureHandle
     end
     
     properties(GetAccess = private, SetAccess = private)
@@ -28,7 +29,9 @@ classdef Robotarium < APIInterface
         %Visualization
         robotHandle
         boundaries
+        boundaryPoints
         robotBody
+        offset = 0.05
         
         %Barrier Certificates 
         safetyRadius = 0.1
@@ -80,7 +83,10 @@ classdef Robotarium < APIInterface
             
             %Save data parameters
             
-            this.boundaries = [-0.6, 0.6, -0.35, 0.35];         
+            this.boundaries = [-0.6, 0.6, -0.35, 0.35];      
+                               
+            this.boundaryPoints = {[-0.6, 0.6, 0.6, -0.6], [-0.35, -0.35, 0.35, 0.35]}; 
+                                   
             this.InitRobotVisualize();          
             this.saveLength = 0;           
             this.saveEvery = 0;
@@ -278,13 +284,22 @@ classdef Robotarium < APIInterface
             % Scale factor (max. value of single Gaussian)
             scaleFactor = 0.5;  
             figPhi = figure(1);
+            r.figureHandle = figPhi;
+            
+            % Plot Robotarium boundaries
+            patch('XData', r.boundaryPoints{1}, 'YData', r.boundaryPoints{2}, ...
+            'FaceColor', 'none', ...
+            'LineWidth', 3, ... 
+            'EdgeColor', [0, 0.74, 0.95]);
+            
+            %plot(im)
             set(figPhi,'color','white','menubar','none');
             
             % Set axis
             robotPlaneAxes = gca;
             
             % Limit view to xMin/xMax/yMin/yMax
-            axis(robotPlaneAxes,[r.boundaries(1),r.boundaries(2),r.boundaries(3),r.boundaries(4)])
+            axis(robotPlaneAxes,[r.boundaries(1) - r.offset,r.boundaries(2)+r.offset,r.boundaries(3)-r.offset,r.boundaries(4)+r.offset])
             caxis([0,1.5*scaleFactor])
             set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[1 1 1])
             
