@@ -187,7 +187,7 @@ classdef Robotarium < APIInterface
         
         %Gets the (x, y, theta) poses of the robots
         function poses = getPoses(this)
-            poses = this.states;
+            poses = this.states(1:3, :);
         end
                       
         function step(this)         
@@ -201,7 +201,7 @@ classdef Robotarium < APIInterface
             this.states(3, i) = this.states(3, i) + this.angularVelocityCoef*this.timeStep.*this.states(5, i);            
             
             %Ensure that we're in the right range
-            %this.states(3, i) = atan2(sin(this.states(3, i)) , cos(this.states(3, i)));
+            this.states(3, i) = atan2(sin(this.states(3, i)) , cos(this.states(3, i)));
             
             this.save();
             this.drawRobots();
