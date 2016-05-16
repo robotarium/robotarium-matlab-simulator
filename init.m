@@ -2,10 +2,22 @@
 %Get path to simulator
 display('Initializing MATLAB simulator')
 
-path = pwd;
+paths = {'utilities'}; 
 
-addpath(pwd);
-addpath(strcat(path, '/utilities/graph'));
-addpath(strcat(path, '/utilities/transformations'));
-addpath(strcat(path, '/utilities/controllers'));
-addpath(strcat(path, '/utilities/misc'));
+path = pwd;
+warned = 0;
+
+for i = 1:length(paths) 
+   addpath(strcat(path, '/', paths{i})); 
+   if(exist(paths{i}) ~= 7) 
+      warning('The path %s was not correctly added.  Make sure that you are in the directory of the simulator!', paths{i}); 
+      warned = 1;
+   end
+end
+
+if(warned == 0) 
+   addpath(pwd);
+   display('MATLAB simulator initialized successfully!')
+end
+
+    

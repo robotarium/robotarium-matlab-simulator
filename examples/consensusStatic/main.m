@@ -2,6 +2,13 @@
 %Paul Glotfelter 
 %3/24/2016
 
+%After running the init script, we can import some of the Robotarium's
+%utilities 
+
+import graph.*
+import controllers.*
+import transformations.*
+
 % Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium();
 

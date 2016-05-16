@@ -20,8 +20,10 @@ classdef Robotarium < APIInterface
         
         %Dynamics
         numAgents
-        linearVelocityCoef 
-        angularVelocityCoef
+        linearVelocityCoef = 0.7
+        angularVelocityCoef = 0.7
+        maxLinearVelocity = 0.1
+        maxAngularVelocity = 2*pi
         
         %Controllers (functions)
         positionController
@@ -34,9 +36,9 @@ classdef Robotarium < APIInterface
         offset = 0.05
         
         %Barrier Certificates 
+        gamma = 1e4 
         safetyRadius = 0.1
-        maxLinearVelocity = 0.1
-        maxAngularVelocity = 2*pi
+        diffeomorphismGain = 0.05
     end
     
     methods
@@ -55,11 +57,8 @@ classdef Robotarium < APIInterface
             this.linearVelocityCoef = 0.7;
             this.angularVelocityCoef = 0.7;
             
-            %Generate random states...sloppy
             this.states = zeros(5, N);
-            
-            %this.states(1:3, :) = unifrnd(0, 0.6, 3, N) - 0.3;
-            
+                     
             numX = floor(1.2 / this.safetyRadius);
             numY = floor(0.7 / this.safetyRadius);
             values = randperm(numX * numY, N);
@@ -111,13 +110,14 @@ classdef Robotarium < APIInterface
             % Threshold velocities 
             
             [~, N] = size(vs);
+                     
             for i = 1:N
-                if(abs(vs(1, i)) > 0.1) 
-                   vs(1, i) = 0.1*sign(vs(1,i)); 
+                if(abs(vs(1, i)) > this.maxLinearVelocity) 
+                   vs(1, i) = this.maxLinearVelocity*sign(vs(1,i)); 
                 end
                 
-                if(abs(vs(2, i)) > (2*pi))
-                   vs(2, i) = 2*pi*sign(vs(2, i)); 
+                if(abs(vs(2, i)) > this.maxAngularVelocity)
+                   vs(2, i) = this.maxAngularVelocity*sign(vs(2, i)); 
                 end
             end
             
@@ -225,12 +225,12 @@ classdef Robotarium < APIInterface
             
             this.saveLength = length;
             this.saveEvery = every;
-            this.tempStates = zeros(5 * this.numAgents, every);   
+            this.tempStates = zeros(5 * this.numAgents, every);
             this.filePath = filePath;
             
             robotStates = zeros(5 * this.numAgents, length);
             
-            save(filePath, 'robotStates', '-v7.3');
+            save(filePath, 'robotStates', '-v7.3')
         end
     end
     
@@ -240,12 +240,11 @@ classdef Robotarium < APIInterface
         function save(this)           
             if(~isempty(this.tempStates))
                 if(this.prevIters <= this.saveLength)
-                    m = matfile(strcat(this.filePath, '.mat'), 'Writable', true);                    
+                    m = matfile(this.filePath, 'Writable', true);                    
 
                     if((this.iters - 1) == this.saveEvery)
-
                         m.robotStates(:, this.prevIters:(this.prevIters + this.iters - 2)) = this.tempStates;
-
+                        
                         % Save previous iteration count
                         this.prevIters = this.prevIters + this.saveEvery;
 
