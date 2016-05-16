@@ -31,11 +31,11 @@ classdef Robotarium < APIInterface
         robotBody
         
         %Barrier Certificates 
-%         gamma = 1e4 
-%         safetyRadius = 0.1
-%         maxLinearVelocity = 0.1
-%         maxAngularVelocity = 2*pi
-%         diffeomorphismGain = 0.05
+        gamma = 1e4 
+        safetyRadius = 0.1
+        maxLinearVelocity = 0.1
+        maxAngularVelocity = 2*pi
+        diffeomorphismGain = 0.05
     end
     
     methods
@@ -221,12 +221,12 @@ classdef Robotarium < APIInterface
             
             this.saveLength = length;
             this.saveEvery = every;
-            this.tempStates = zeros(5 * this.numAgents, every);   
+            this.tempStates = zeros(5 * this.numAgents, every);
             this.filePath = filePath;
             
             robotStates = zeros(5 * this.numAgents, length);
             
-            save(filePath, 'robotStates', '-v7.3');
+            save([filePath, '.mat'], 'robotStates', '-v7.3')
         end
     end
     
@@ -239,9 +239,8 @@ classdef Robotarium < APIInterface
                     m = matfile(strcat(this.filePath, '.mat'), 'Writable', true);                    
 
                     if((this.iters - 1) == this.saveEvery)
-
                         m.robotStates(:, this.prevIters:(this.prevIters + this.iters - 2)) = this.tempStates;
-
+                        
                         % Save previous iteration count
                         this.prevIters = this.prevIters + this.saveEvery;
 

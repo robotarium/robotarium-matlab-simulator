@@ -14,6 +14,8 @@ iterations = 20000;
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
 
+r.setSaveParameters(uniqueFilename('barrier-data'), 5000, 10);
+
 % Initialize velocity vector for agents.  Each agent expects a 2 x 1
 % velocity vector containing the linear and angular velocity, respectively.
 dx = zeros(2, N);
@@ -36,7 +38,7 @@ for t = 1:iterations
     %%% ALGORITHM %%%
   
     % nominal controller, go2goal
-    if norm(x_goal-x_temp,1)<0.03
+    if norm(x_goal-x_temp,1)<0.08
          flag = 1-flag;
     end
     
@@ -48,7 +50,7 @@ for t = 1:iterations
     
     
     %Use different go-to-goal
-    dx = positionInt(x, x_goal);
+    dx = positionInt(x, x_goal, 0.05);
     
     
     % saturation of controls
@@ -66,7 +68,7 @@ for t = 1:iterations
     
     % Transform the single-integrator dynamics to unicycle dynamics using a
     % diffeomorphism, which can be found in the utilities
-    dx = int2uni2(dx, x, 0.5, pi);    
+    dx = int2uni2(dx, x, 0.75, pi);    
     
     % Set velocities of agents 1,...,N
     r.setVelocities(1:N, dx);
