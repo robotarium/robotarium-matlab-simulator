@@ -59,23 +59,23 @@ for t = 1:iterations
     switch state 
 
         case 0             
-            dx(:, 1) = positionInt(x(:, 1), [0.25 ; 0.15]);
-            if(norm(x(1:2, 1) - [0.25 ; 0.15]) < 0.02) 
+            dx(:, 1) = positionInt(x(:, 1), [0.25 ; 0.15], 0.05);
+            if(norm(x(1:2, 1) - [0.25 ; 0.15]) < 0.05) 
                state = 1; 
             end           
         case 1
-            dx(:, 1) = positionInt(x(:, 1), [-0.25 ; 0.15]);
-            if(norm(x(1:2, 1) - [-0.25 ; 0.15]) < 0.02) 
+            dx(:, 1) = positionInt(x(:, 1), [-0.25 ; 0.15], 0.05);
+            if(norm(x(1:2, 1) - [-0.25 ; 0.15]) < 0.05) 
                state = 2; 
             end
         case 2
-            dx(:, 1) = positionInt(x(:, 1), [-0.25 ; -0.15]);
-            if(norm(x(1:2, 1) - [-0.25 ; -0.15]) < 0.02)
+            dx(:, 1) = positionInt(x(:, 1), [-0.25 ; -0.15], 0.05);
+            if(norm(x(1:2, 1) - [-0.25 ; -0.15]) < 0.05)
                state = 3; 
             end
         case 3
-            dx(:, 1) = positionInt(x(:, 1), [0.25 ; -0.15]);
-            if(norm(x(1:2, 1) - [0.25 ; -0.15]) < 0.02)
+            dx(:, 1) = positionInt(x(:, 1), [0.25 ; -0.15], 0.05);
+            if(norm(x(1:2, 1) - [0.25 ; -0.15]) < 0.05)
                state = 0; 
             end
     end
