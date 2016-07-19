@@ -2,7 +2,7 @@
 %Get path to simulator
 display('Initializing MATLAB simulator')
 
-paths = {'utilities'}; 
+paths = {'utilities/transformations', 'utilities/misc', 'utilities/graph', 'utilities/controllers'}; 
 
 path_local_sim_init = pwd;
 warned = 0;

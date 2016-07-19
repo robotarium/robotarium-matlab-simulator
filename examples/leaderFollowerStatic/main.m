@@ -1,12 +1,5 @@
 %Leader-follower with static topology
 
-%After running the init script, we can import some of the Robotarium's
-%utilities 
-
-import graph.*
-import controllers.*
-import transformations.*
-
 %Run for 300 iterations
 iterations = 2000;
 u_h = [];

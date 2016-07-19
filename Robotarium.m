@@ -17,6 +17,7 @@ classdef Robotarium < APIInterface
         prevIters
         iters
         filePath
+        previousTimestep
         
         %Dynamics and parameters
         numAgents
@@ -88,6 +89,7 @@ classdef Robotarium < APIInterface
             this.iters = 1;            
             this.prevIters = 1;            
             this.tempStates = [];  
+            this.previousTimestep = tic;
         end
                        
         function this = setPositionController(this, controller)
@@ -201,7 +203,7 @@ classdef Robotarium < APIInterface
             
             this.save();
             this.drawRobots();
-            %pause(this.timeStep); 
+            pause(this.timeStep - min(0, toc(this.previousTimestep))); 
         end
         
         function numAgents = getAvailableAgents(this) 
