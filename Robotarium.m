@@ -203,7 +203,8 @@ classdef Robotarium < APIInterface
             
             this.save();
             this.drawRobots();
-            pause(this.timeStep - min(0, toc(this.previousTimestep))); 
+            pause(this.timeStep - max(0, toc(this.previousTimestep))); 
+            this.previousTimestep = tic;
         end
         
         function numAgents = getAvailableAgents(this) 

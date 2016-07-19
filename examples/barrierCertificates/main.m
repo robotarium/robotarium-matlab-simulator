@@ -74,7 +74,6 @@ for t = 1:iterations
     r.setVelocities(1:N, dx);
     
     % Send the previously set velocities to the agents.  This function must be called!
-    r.step();
-    
+    r.step();    
 end
 
