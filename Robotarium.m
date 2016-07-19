@@ -18,10 +18,10 @@ classdef Robotarium < APIInterface
         iters
         filePath
         
-        %Dynamics
+        %Dynamics and parameters
         numAgents
-        linearVelocityCoef = 0.7
-        angularVelocityCoef = 0.7
+        linearVelocityCoef = 1 %0.7
+        angularVelocityCoef = 1 %0.7
         maxLinearVelocity = 0.1
         maxAngularVelocity = 2*pi
         
@@ -52,10 +52,6 @@ classdef Robotarium < APIInterface
         function this = initialize(this, N)
            %INITIALIZE Initializer for the robotarium 
             % N - number of agents to simulate
-            
-            %Coefficients determined from system identification
-            this.linearVelocityCoef = 0.7;
-            this.angularVelocityCoef = 0.7;
             
             this.states = zeros(5, N);
                      
@@ -205,7 +201,7 @@ classdef Robotarium < APIInterface
             
             this.save();
             this.drawRobots();
-            pause(this.timeStep); 
+            %pause(this.timeStep); 
         end
         
         function numAgents = getAvailableAgents(this) 

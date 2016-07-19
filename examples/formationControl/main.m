@@ -27,7 +27,7 @@ formationControlGain = 4;
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
-iterations = 1000;
+iterations = 100000;
 
 % Communication topology for the desired formation.  We need 2 * N - 3 = 9
 % edges to ensure that the formation is rigid.
