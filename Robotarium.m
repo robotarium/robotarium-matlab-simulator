@@ -199,7 +199,7 @@ classdef Robotarium < APIInterface
             this.states(3, i) = this.states(3, i) + this.angularVelocityCoef*this.timeStep.*this.states(5, i);            
             
             %Ensure that we're in the right range
-            this.states(3, i) = atan2(sin(this.states(3, i)) , cos(this.states(3, i)));
+            this.states(3, i) = atan2(sin(this.states(3, i)), cos(this.states(3, i)));
             
             this.save();
             this.drawRobots();
@@ -261,6 +261,9 @@ classdef Robotarium < APIInterface
         end
             
         function drawRobots(r)
+            gcf_ = gcf;
+            previousFigureNumber = gcf_.Number;
+            figure(r.figureHandle.Number)
             for ii = 1:r.numAgents
                 x  = r.states(1, ii);
                 y  = r.states(2, ii);
@@ -272,6 +275,8 @@ classdef Robotarium < APIInterface
                 robotBodyTransformed = r.robotBody*poseTransformationMatrix';
                 set(r.robotHandle{ii},'Vertices', robotBodyTransformed);
             end
+            drawnow 
+            figure(previousFigureNumber)
         end
         
         function InitRobotVisualize(r)
