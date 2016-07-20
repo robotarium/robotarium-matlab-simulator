@@ -286,7 +286,7 @@ classdef Robotarium < APIInterface
             
             % Scale factor (max. value of single Gaussian)
             scaleFactor = 0.5;  
-            figPhi = figure(1);
+            figPhi = figure;
             r.figureHandle = figPhi;
             
             % Plot Robotarium boundaries
