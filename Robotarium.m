@@ -8,7 +8,10 @@ classdef Robotarium < APIInterface
     end
     
     %TODO Change back to private!
-    properties(GetAccess = public, SetAccess = public)
+    properties(GetAccess = private, SetAccess = private)
+        
+        % Error prevention 
+        checked_poses_already = false
         
         %Data logging parameters
         states
@@ -160,7 +163,6 @@ classdef Robotarium < APIInterface
             end
         end
         
-        %Gets topological neighbors given a graph laplacian, L
         function neighbors = getTopNeighbors(this, id, L)
             %GETTOPNEIGHBORS Gets the topological neighbors of an agent,
             %given a graph Laplacian
@@ -187,11 +189,16 @@ classdef Robotarium < APIInterface
         
         %Gets the (x, y, theta) poses of the robots
         function poses = getPoses(this)
+            
+            assert(~this.checked_poses_already, 'Can only check get poses once per call of step()!');
+            
             poses = this.states(1:3, :);
             
             %Include delay to mimic behavior of real system
-            %pause(this.timeStep - max(0, toc(this.previousTimestep))); 
             this.previousTimestep = tic;
+            
+            %Make sure it's only called once per iteration
+            this.checked_poses_already = true;
         end
                       
         function step(this)         
@@ -199,13 +206,18 @@ classdef Robotarium < APIInterface
             %Vectorize update to states
             i = 1:this.numAgents;
             
+            total_time = this.timeStep + max(0, toc(this.previousTimestep) - this.timeStep);
+            
             %Update velocities using unicycle dynamics 
-            this.states(1, i) = this.states(1, i) + this.xLinearVelocityCoef*this.timeStep.*this.states(4, i).*cos(this.states(3, i));
-            this.states(2, i) = this.states(2, i) + this.yLinearVelocityCoef*this.timeStep.*this.states(4, i).*sin(this.states(3, i));
-            this.states(3, i) = this.states(3, i) + this.angularVelocityCoef*this.timeStep.*this.states(5, i);            
+            this.states(1, i) = this.states(1, i) + this.xLinearVelocityCoef*total_time.*this.states(4, i).*cos(this.states(3, i));
+            this.states(2, i) = this.states(2, i) + this.yLinearVelocityCoef*total_time.*this.states(4, i).*sin(this.states(3, i));
+            this.states(3, i) = this.states(3, i) + this.angularVelocityCoef*total_time.*this.states(5, i);            
             
             %Ensure that we're in the right range
             this.states(3, i) = atan2(sin(this.states(3, i)), cos(this.states(3, i)));
+            
+            %Allow getting of poses again 
+            this.checked_poses_already = false;                                    
             
             this.save();
             this.drawRobots();

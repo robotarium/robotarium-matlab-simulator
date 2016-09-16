@@ -1,5 +1,5 @@
 function [ dx ] = int2uni(dxi, x, lambda)
-%DIFFEOMORPHISM Translates from single integrator to unicycle dynamics
+%Translates from single integrator to unicycle dynamics
 %   dxi - single integrator control input 
 %   x - unicycle states 3 x N
     

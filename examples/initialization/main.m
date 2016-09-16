@@ -1,4 +1,5 @@
-%Initializing the agents to random positions
+%Initializing the agents to random positions with barrier certificates 
+%and data plotting
 %Paul Glotfelter 
 %3/24/2016
 
@@ -70,7 +71,6 @@ for iteration = 1:iterations
 
         minimum_distance = [minimum_distance min];
     end
-
 end
 
 figure 

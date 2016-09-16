@@ -1,4 +1,6 @@
 %Leader-follower with static topology
+%Paul Glotfelter 
+%3/24/2016
 
 %Run for 300 iterations
 iterations = 2000;
@@ -45,14 +47,14 @@ for t = 1:iterations
         
         for j = neighbors 
             dx(:, i) = dx(:, i) + ...
-            formationControlGain*(norm(x(1:2, j) - x(1:2, i))^2 -  desiredDistance^2) ...
-            *(x(1:2, j) - x(1:2, i));
-            %- collisionAvoidanceGain/(norm(x(1:2, j) - x(1:2, i))^3)) ...
+            formationControlGain*(norm(x(1:2, j) - x(1:2, i))^2 -  desiredDistance^2)*(x(1:2, j) - x(1:2, i));
         end      
     end   
     
     %%% END ALGORITHM %%%   
         
+    % Make the leader travel between waypoints
+    
     switch state 
 
         case 0             
@@ -77,7 +79,6 @@ for t = 1:iterations
             end
     end
 
-    dx(:, 1) = (dx(:, 1)/norm(dx(:, 1)))*0.05;
     dx = barrierCertificate(dx, x, 0.08);
     dx = int2uni2(dx, x, 1, 2);
     

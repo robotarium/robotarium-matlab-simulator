@@ -15,12 +15,8 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius, varargin)
 
         parser = inputParser;
         parser.addParameter('BarrierGain', 1e4);
-        parser.addParameter('MaxVelocity', 0.1);
-        parser.addParameter('SafetyDistance', 0.08);
         parse(parser, varargin{:})
         gamma = parser.Results.BarrierGain;
-        safetyRadius = parser.Results.SafetyDistance;
-        max_velocity = parser.Results.MaxVelocity;
          
         N = size(dxi, 2);
         opts = optimoptions('quadprog','Display','off');
@@ -28,33 +24,27 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius, varargin)
         
         %Generate constraints for barrier certificates based on the size of
         %the safety radius
-        A = []; 
-        b = [];
+        num_constraints = nchoosek(N, 2);
+        A = zeros(num_constraints, 2*N);
+        b = zeros(num_constraints, 1);
+        count = 1;
         for i = 1:(N-1)
             for j = (i+1):N
                 h = norm(x(1:2,i)-x(1:2,j))^2-safetyRadius^2;
-                Anew = zeros(1,2*N);
-                Anew((2*i-1):(2*i)) = -2*(x(:,i)-x(:,j))';
-                Anew((2*j-1):(2*j)) =  2*(x(:,i)-x(:,j))';
-                A = [A ; Anew];
-                b = [b ; gamma*h^3];
+                A(count, (2*i-1):(2*i)) = -2*(x(:,i)-x(:,j));
+                A(count, (2*j-1):(2*j)) =  2*(x(:,i)-x(:,j))';
+                b(count) = gamma*h^3;
+                count = count + 1;
             end
-        end                
+        end           
 
         %Solve QP program generated earlier
         vhat = reshape(dxi,2*N,1);
         H = 2*eye(2*N);
         f = -2*vhat;
-        bounds = max_velocity*ones(2*N, 1);
-        
-        %If we can't solve the current problem, relax the conditions
-        vnew = [];
-        i = 1;
-        while isempty(vnew)
-            vnew = quadprog(H, double(f), A, b, [],[], -i*bounds, i*bounds, [], opts);
-            i = i*2;
-        end
 
+        vnew = quadprog(H, double(f), A, b, [],[], [], [], [], opts);
+        
         %Set robot velocities to new velocities
         dx = reshape(vnew, 2, N);
 end

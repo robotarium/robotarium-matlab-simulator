@@ -1,9 +1,8 @@
 function [ dx ] = barrierUnicycle(dxu, x, safetyRadius, lambda, varargin)
-%BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier
+% Wraps unicycle dynamics in safety barrier
 %certificates
-%   This function accepts single-integrator dynamics and wraps them in
-%   barrier certificates to ensure that collisions do not occur.  Note that
-%   this algorithm bounds the magnitude of the generated output to 0.1.
+%   This function accepts unicycle dynamics and wraps them in
+%   barrier certificates to ensure that collisions do not occur. 
 %
 %   dx = BARRIERCERTIFICATE(dxi, x, safetyRadius) 
 %   dx: generated safe, single-integrator inputs
@@ -15,14 +14,12 @@ function [ dx ] = barrierUnicycle(dxu, x, safetyRadius, lambda, varargin)
 
         parser = inputParser;
         parser.addParameter('BarrierGain', 3);
-        parser.addParameter('MaxVelocity', 0.1);
         parse(parser, varargin{:})
         
         
         N = size(dxu, 2);
         opts = optimoptions('quadprog','Display','off');       
         gamma = parser.Results.BarrierGain;
-        max_velocity = parser.Results.MaxVelocity;
         
         
         %Shift to single integrator
@@ -32,16 +29,17 @@ function [ dx ] = barrierUnicycle(dxu, x, safetyRadius, lambda, varargin)
         
         %Generate constraints for barrier certificates based on the size of
         %the safety radius
-        A = []; 
-        b = [];
+        num_constraints = nchoosek(N, 2);
+        A = zeros(num_constraints, 2*N);
+        b = zeros(num_constraints, 1);
+        count = 1;
         for i = 1:(N-1)
             for j = (i+1):N
                 h = norm(xi(:,i)-xi(:,j))^2-(safetyRadius + 2*lambda)^2;
-                Anew = zeros(1,2*N);
-                Anew((2*i-1):(2*i)) = 2*(xi(:,i)-xi(:,j))';
-                Anew((2*j-1):(2*j)) = -2*(xi(:,i)-xi(:,j))';
-                A = [A ; Anew];
-                b = [b ; -gamma*h];
+                A(count, (2*i-1):(2*i)) = 2*(xi(:,i)-xi(:,j))';
+                A(count, (2*j-1):(2*j)) = -2*(xi(:,i)-xi(:,j))';
+                b(count) = -gamma*h;
+                count = count + 1;
             end
         end
         
@@ -51,16 +49,9 @@ function [ dx ] = barrierUnicycle(dxu, x, safetyRadius, lambda, varargin)
         %Solve QP program generated earlier
         vhat = reshape(dxi,2*N,1);
         H = 2*eye(2*N);
-        f = -2*vhat;     
-        bounds = max_velocity*ones(2*N, 1);
+        f = -2*vhat;          
         
-        %If we can't solve the current problem, relax the conditions
-        vnew = [];
-        i = 1;
-        while isempty(vnew)
-            vnew = quadprog(H, double(f), A, b, [],[], -i*bounds, i*bounds, [], opts);
-            i = i*2;
-        end                
+        vnew = quadprog(H, double(f), A, b, [], [], [], [], [], opts);  
 
         %Set robot velocities to new velocities
         dx = int2uni(reshape(vnew, 2, N), x, lambda);

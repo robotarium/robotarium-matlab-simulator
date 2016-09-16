@@ -30,6 +30,7 @@ dx = zeros(2, N);
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
+    tic
     
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
@@ -63,18 +64,18 @@ for t = 1:iterations
     
     % Transform the single-integrator dynamics to unicycle dynamics using a
     % diffeomorphism, which can be found in the utilities
-    
+   
     dx = barrierCertificate(dx, x, 0.1);
     
     dx = int2uni(dx, x, diffeomorphismGain);
-        
+           
     % Set velocities of agents 1,...,N
     r.setVelocities(1:N, dx);
-    
-    1
-    
+
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();
+    
+    toc
     
 end
 

@@ -1,4 +1,4 @@
-%Vanilla consensus with a static, undirected topology
+%Barrier certificates for unicycle-modeled systems
 %Paul Glotfelter 
 %3/24/2016
 
@@ -18,6 +18,9 @@ r.initialize(N);
 % velocity vector containing the linear and angular velocity, respectively.
 dx = zeros(2, N);
 
+
+% Distribute the agents into a circle that fits into the Robotarium
+% boundaries
 xybound = [-0.5, 0.5, -0.3, 0.3];
 p_theta = (1:2:2*N)/(2*N)*2*pi;
 p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
@@ -50,7 +53,7 @@ for t = 1:iterations
     end
     
     
-    %Use different go-to-goal
+    % Convert to single-integrator domain
     x_int = x; 
     x_int(1:2, :) = x_int(1:2, :) + lambda*[cos(x(3, :)) ; sin(x(3, :))];
     
@@ -59,6 +62,7 @@ for t = 1:iterations
         
     % END ALGORITHM%     
     
+    % Threshold velocities for safety
     dxmax = 0.1;
     for i = 1:N
         if norm(dx(:,i)) > dxmax
@@ -70,8 +74,7 @@ for t = 1:iterations
     
     
     %Ensure the robots don't collide
-    dx = barrierUnicycle(dx, x, safety, lambda);
-    
+    dx = barrierUnicycle(dx, x, safety, lambda);    
     
     % Set velocities of agents 1,...,N
     r.setVelocities(1:N, dx);
