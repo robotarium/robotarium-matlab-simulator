@@ -1,4 +1,4 @@
-function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
+function [ dx ] = barrierCertificate(dxi, x, safetyRadius, varargin)
 %BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier
 %certificates
 %   This function accepts single-integrator dynamics and wraps them in
@@ -10,23 +10,24 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
 %   dxi: single-integrator synamics 
 %   x: States of the agents 
 %   safetyRadius:  Size of the agents (or desired separation distance)
+
+        persistent parser
+
+        parser = inputParser;
+        parser.addParameter('BarrierGain', 1e4);
+        parser.addParameter('MaxVelocity', 0.1);
+        parser.addParameter('SafetyDistance', 0.08);
+        parse(parser, varargin{:})
+        gamma = parser.Results.BarrierGain;
+        safetyRadius = parser.Results.SafetyDistance;
+        max_velocity = parser.Results.MaxVelocity;
          
         N = size(dxi, 2);
         opts = optimoptions('quadprog','Display','off');
-        gamma = 1e4;
-        x = x(1:2, :);
-
-        %Determine dimension of constraints
-%         count = 0; 
-%         for i = 1:(N-1)
-%             for j = (i+1):N
-%                 count = count + 1;
-%             end
-%         end    
+        x = x(1:2, :);    
         
         %Generate constraints for barrier certificates based on the size of
         %the safety radius
-%         A=zeros(count, 2*N);  b=zeros(count, 1);
         A = []; 
         b = [];
         for i = 1:(N-1)
@@ -35,25 +36,26 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
                 Anew = zeros(1,2*N);
                 Anew((2*i-1):(2*i)) = -2*(x(:,i)-x(:,j))';
                 Anew((2*j-1):(2*j)) =  2*(x(:,i)-x(:,j))';
-                %A((i * (N-1))+j, :) = Anew;
                 A = [A ; Anew];
                 b = [b ; gamma*h^3];
-                %b((i * (N-1))+j, :) = gamma*h^3;
-                %A
-                %b
             end
         end                
 
         %Solve QP program generated earlier
         vhat = reshape(dxi,2*N,1);
-        k_relax = 100;
         H = 2*eye(2*N);
         f = -2*vhat;
-        relaxationVariables = k_relax*0.1*ones(1, 2*N);
-        vnew = quadprog(H, double(f), A, double(b), [],[], -relaxationVariables, relaxationVariables,[],opts);
+        bounds = max_velocity*ones(2*N, 1);
+        
+        %If we can't solve the current problem, relax the conditions
+        vnew = [];
+        i = 1;
+        while isempty(vnew)
+            vnew = quadprog(H, double(f), A, b, [],[], -i*bounds, i*bounds, [], opts);
+            i = i*2;
+        end
 
         %Set robot velocities to new velocities
         dx = reshape(vnew, 2, N);
-
 end
 
