@@ -7,7 +7,8 @@ classdef Robotarium < APIInterface
         figureHandle
     end
     
-    properties(GetAccess = private, SetAccess = private)
+    %TODO Change back to private!
+    properties(GetAccess = public, SetAccess = public)
         
         %Data logging parameters
         states
@@ -21,8 +22,9 @@ classdef Robotarium < APIInterface
         
         %Dynamics and parameters
         numAgents
-        linearVelocityCoef = 1 %0.7
-        angularVelocityCoef = 1 %0.7
+        xLinearVelocityCoef = 0.86
+        yLinearVelocityCoef = 0.81
+        angularVelocityCoef = 0.46
         maxLinearVelocity = 0.1
         maxAngularVelocity = 2*pi
         
@@ -186,6 +188,10 @@ classdef Robotarium < APIInterface
         %Gets the (x, y, theta) poses of the robots
         function poses = getPoses(this)
             poses = this.states(1:3, :);
+            
+            %Include delay to mimic behavior of real system
+            %pause(this.timeStep - max(0, toc(this.previousTimestep))); 
+            this.previousTimestep = tic;
         end
                       
         function step(this)         
@@ -194,8 +200,8 @@ classdef Robotarium < APIInterface
             i = 1:this.numAgents;
             
             %Update velocities using unicycle dynamics 
-            this.states(1, i) = this.states(1, i) + this.linearVelocityCoef*this.timeStep.*this.states(4, i).*cos(this.states(3, i));
-            this.states(2, i) = this.states(2, i) + this.linearVelocityCoef*this.timeStep.*this.states(4, i).*sin(this.states(3, i));
+            this.states(1, i) = this.states(1, i) + this.xLinearVelocityCoef*this.timeStep.*this.states(4, i).*cos(this.states(3, i));
+            this.states(2, i) = this.states(2, i) + this.yLinearVelocityCoef*this.timeStep.*this.states(4, i).*sin(this.states(3, i));
             this.states(3, i) = this.states(3, i) + this.angularVelocityCoef*this.timeStep.*this.states(5, i);            
             
             %Ensure that we're in the right range
@@ -203,8 +209,6 @@ classdef Robotarium < APIInterface
             
             this.save();
             this.drawRobots();
-            pause(this.timeStep - max(0, toc(this.previousTimestep))); 
-            this.previousTimestep = tic;
         end
         
         function numAgents = getAvailableAgents(this) 

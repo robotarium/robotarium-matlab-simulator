@@ -12,8 +12,6 @@ N = r.getAvailableAgents();
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
 
-r.setSaveParameters('hi.mat', 100, 50);
-
 % Generate a cyclic graph Laplacian from our handy utilities.  For this
 % algorithm, any connected graph will yield consensus
 L = cycleGL(N); 
@@ -35,11 +33,8 @@ for t = 1:iterations
     
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    %tic
     x = r.getPoses();
-    %toc
-    x_ = x(1, :); 
-    y_ = x(2, :);
+
     %%% ALGORITHM %%%
     
     % See the documentation (LINK HERE) for the math that generated this
@@ -71,12 +66,12 @@ for t = 1:iterations
     
     dx = barrierCertificate(dx, x, 0.1);
     
-    dx = int2uni3(dx, x, diffeomorphismGain);
-    
-    %dx = ones(2, N) * 0.1;
+    dx = int2uni(dx, x, diffeomorphismGain);
         
     % Set velocities of agents 1,...,N
     r.setVelocities(1:N, dx);
+    
+    1
     
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();

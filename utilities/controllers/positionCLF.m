@@ -12,8 +12,8 @@ function [ dx ] = positionCLF(states, poses)
 
         dist = sqrt(dx_^2 + dy^2);
 
-        dx(1, i) = cos(dt - states(3, i));
-        dx(2, i) = sin(dt - states(3, i));
+        dx(1, i) = dist*cos(dt - states(3, i));
+        dx(2, i) = dist*sin(dt - states(3, i));
     end 
 end
 

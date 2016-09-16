@@ -9,7 +9,7 @@ r = Robotarium();
 % specific value for this algorithm
 N = r.getAvailableAgents(); 
 
-iterations = 20000;
+iterations = 1000;
 
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
@@ -56,8 +56,7 @@ for t = 1:iterations
     
     %Currently in integrator dynamics
     dx = positionInt(x_int, x_goal);
-    
-    
+        
     % END ALGORITHM%     
     
     dxmax = 0.1;

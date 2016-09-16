@@ -42,7 +42,7 @@ function [ dx ] = barrierCertificate(dxi, x, safetyRadius)
                 %A
                 %b
             end
-        end
+        end                
 
         %Solve QP program generated earlier
         vhat = reshape(dxi,2*N,1);
