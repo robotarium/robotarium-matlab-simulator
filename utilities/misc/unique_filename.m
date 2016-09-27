@@ -1,4 +1,4 @@
-function [ filePath ] = uniqueFilename(fileName)
+function [ filePath ] = unique_filename(fileName)
 %UNIQUEFILENAME Returns a time-stamped file name
 %  Appends the current time information to the passed argument
 

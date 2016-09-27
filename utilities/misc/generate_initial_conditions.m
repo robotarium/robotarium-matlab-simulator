@@ -1,4 +1,4 @@
-function [ poses ] = generateInitialConditions(N)
+function [ poses ] = generate_initial_conditions(N)
 %GENERATEINITIALCONDITIONS Summary of this function goes here
 %   Detailed explanation goes here
 

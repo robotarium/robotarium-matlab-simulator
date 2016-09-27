@@ -1,6 +1,8 @@
 classdef APIInterface < handle
-    %APIINTERFACE Summary of this class goes here
-    %   Detailed explanation goes here
+    %APIINTERFACE This is an interface for the Robotarium class that
+    %ensures the simulator and the robots match up properly.  You should
+    %definitely NOT MODIFY this file.  Also, don't submit this file with
+    %your algorithm. 
     
     properties
     end
@@ -20,8 +22,7 @@ classdef APIInterface < handle
         getTopNeighbors(this, id, L)
         getPoses(this)
         getAvailableAgents(this);
-    
-        
+            
         %Update functions
         step(this);
         time2iters(this, time);

@@ -34,9 +34,7 @@ minimum_distance = [];
 safety = 0.06;
 lambda = 0.03;
 
-% Create a barrier certificate for use with the above parameters 
-unicycle_barrier_certificate = create_uni_barrier_certificate('SafetyRadius', safety, ... 
-    'ProjectionDistance', lambda);
+% Create a barrier certificate for use with the above parameter
 
 for iteration = 1:iterations
         
@@ -54,7 +52,7 @@ for iteration = 1:iterations
 
         x = r.getPoses();
         dxu = automatic_parker(x, initialConditions);
-        dxu = unicycle_barrier_certificate(dxu, x);      
+        dxu = barrierUnicycle(dxu, x, safety, lambda, 'BarrierGain', 1);      
         
         %dxu
         

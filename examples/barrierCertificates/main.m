@@ -26,6 +26,12 @@ p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_t
 x_goal = p_circ(:,1:N);
 flag = 0; %flag of task completion
 
+% Let's retrieve some of the tools we'll need.  We would like a
+% single-integrator position controller, a single-integrator barrier
+% function, and a mapping from single-integrator to unicycle dynamics
+position_int = create_si_position_controller('XVelocityGain', 1, 'YVelocityGain', 1);
+si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 0.1);
+
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
     
@@ -50,7 +56,7 @@ for t = 1:iterations
     
     
     %Use different go-to-goal
-    dx = positionInt(x, x_goal, 0.05);
+    dx = position_int(x, x_goal);
     
     
     % saturation of controls
@@ -64,7 +70,7 @@ for t = 1:iterations
     %%% END ALGORITHM %%%
     
     %Ensure the robots don't collide
-    dx = barrierCertificate(dx, x, 0.1);
+    dx = si_barrier_certificate(dx, x);
     
     % Transform the single-integrator dynamics to unicycle dynamics using a
     % diffeomorphism, which can be found in the utilities

@@ -3,9 +3,9 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
 %   Detailed explanation goes here
 
     parser = inputParser;
-    parser.addParameter('BarrierGain', 3);
-    parser.addParmeter('SafetyRadius', 0.05);
-    parser.addParameter('ProjectionDistance', 0.05);
+    addOptional(parser, 'BarrierGain', 3);
+    addOptional(parser, 'SafetyRadius', 0.05);
+    addOptional(parser, 'ProjectionDistance', 0.05);
     parse(parser, varargin{:})
     
     opts = optimoptions('quadprog','Display','off');       
