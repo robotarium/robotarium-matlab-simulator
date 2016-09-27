@@ -1,19 +1,32 @@
 classdef Robotarium < APIInterface
-    %ROBOTARIUM Simulator interface for the Robotarium
-    %   Detailed explanation goes here
+    %ROBOTARIUM The Robotarium class inherits from the API Interface, which
+    % connects this simulator interface with the actual, physical robots on
+    % the Robotarium.  Thus, please: 
+    % DO NOT MODIFY THIS FILE.  IF YOU DO, YOUR CODE WILL NOT RUN.
     
+    % Allow users to have access to the figure handle for the Robotarium 
+    % as well as the current time step; but they can't modify the value.
     properties(GetAccess = public, SetAccess = private)
+        
+        % Time step for the Robotarium
         timeStep
+        
+        % Figure handle for simulator
         figureHandle
+        
+        % Arena parameters
+        boundaries = [-0.6, 0.6, -0.35, 0.35];     
     end
     
-    %TODO Change back to private!
+    % Make sure that the user doesn't have access to variables that are not
+    % available on the actual hardware!
     properties(GetAccess = private, SetAccess = private)
         
-        % Error prevention 
+        % A flag to ensure that the users do not call get_poses() more than
+        % once per iteration of their algorithm.
         checked_poses_already = false
         
-        %Data logging parameters
+        % Parameters for data logging to *.mat files.
         states
         tempStates
         saveLength
@@ -23,56 +36,60 @@ classdef Robotarium < APIInterface
         filePath
         previousTimestep
         
-        %Dynamics and parameters
+        % System ID parameters for unicycle model
         numAgents
         xLinearVelocityCoef = 0.86
         yLinearVelocityCoef = 0.81
         angularVelocityCoef = 0.46
         maxLinearVelocity = 0.1
         maxAngularVelocity = 2*pi
+        robotDiameter = 0.08
         
-        %Controllers (functions)
+        %  Higher-level controllers for position (rather than velocity)
         positionController
         
-        %Visualization
+        % Visualization parameters for displaying the simulator
         robotHandle
-        boundaries
         boundaryPoints
         robotBody
         offset = 0.05
-        
-        %Barrier Certificates 
-        gamma = 1e4 
-        safetyRadius = 0.1
-        diffeomorphismGain = 0.05
     end
     
     methods
         %Functions for setting velocities
         
         function this = Robotarium()    
-            %Random, typical value
+            %ROBOTARIUM This function returns a Robotarium class object for
+            %use in the simulator.  
+            % In particular, this objects allows you to interact with the
+            % simulated agents, controlling their velocities and iterating
+            % through the simulation.  Before use, you must call
+            % INITIALIZE() with the number of agents that you wish to use.
             this.numAgents = 4;
         end
         
         function this = initialize(this, N)
-           %INITIALIZE Initializer for the robotarium 
-            % N - number of agents to simulate
+           %INITIALIZE Initializes the Robotarium object with the desired number of agents.
+           % obj = INITIALIZE(obj, number_of_agents)
+           % N: The number of agents to use in the simulation.  This
+           % function must be called before beginning a simulation of your
+           % algorithm.
             
             this.states = zeros(5, N);
                      
-            numX = floor(1.2 / this.safetyRadius);
-            numY = floor(0.7 / this.safetyRadius);
+            % Make sure that we place robots in disparate locations to
+            % prevent collisions on initial conditions
+            numX = floor(1.2 / this.robotDiameter);
+            numY = floor(0.7 / this.robotDiameter);
             values = randperm(numX * numY, N);
             
             for i = 1:N
                [x, y] = ind2sub([numX numY], values(i));
-               x = x*this.safetyRadius - 0.6; 
-               y = y*this.safetyRadius - 0.35;
+               x = x*this.robotDiameter - 0.6; 
+               y = y*this.robotDiameter - 0.35;
                this.states(1:2, i) = [x ; y];
             end
-        
-                                                
+                                                        
             this.states(3, :) = rand(1, N)*2*pi;
             
             %Approx. time update for the Robotarium
@@ -82,9 +99,7 @@ classdef Robotarium < APIInterface
             %Controllers (CLF default)
             this.positionController = @positionCLF; 
             
-            %Save data parameters
-            
-            this.boundaries = [-0.6, 0.6, -0.35, 0.35];      
+            %Save data parameters 
                                
             this.boundaryPoints = {[-0.6, 0.6, 0.6, -0.6], [-0.35, -0.35, 0.35, 0.35]}; 
                                    
@@ -107,13 +122,12 @@ classdef Robotarium < APIInterface
         function this = setVelocities(this, ids, vs)  
             %SETVELOCITIES Sets the velocities of the current agents
             % obj = SETVELOCITIES(identities, velocities)
-            % identities: Identities of agents whose velocities to set
-            % velocities: Velocities to set
-            
-            % Threshold velocities 
-            
-            [~, N] = size(vs);
+            % ids: Identities of agents whose velocities to set
+            % vs: Velocities to set           
+
+            N = size(vs, 2);
                      
+            % Threshold velocities
             for i = 1:N
                 if(abs(vs(1, i)) > this.maxLinearVelocity) 
                    vs(1, i) = this.maxLinearVelocity*sign(vs(1,i)); 
@@ -136,31 +150,31 @@ classdef Robotarium < APIInterface
             % identities: identities of agent positions to set
             % positions: Goal positions of agents 2 x N
             
+           N = size(ps, 2); 
+           
+           if(N ~= this.numAgents)
+              warning('The second dimension length of supplied positions (%i) was not equal to the number of specified agents (%i)', N, this.numAgents);
+           end
+            
             this.setVelocities(ids, this.positionController(this.states(:, ids), ps));
         end
         
         function neighbors = getDDiskNeighbors(this, id, r) 
-            %GETDDISKNEIGHBORS Gets the neighbors of a particular agent
-            %within r distance in the 2 norm
+            %GETDDISKNEIGHBORS Returns identities of neighbors within
+            %euclidean distance r
             % neighbors = GETDDISKNEIGHBORS(obj, identity, radius) 
-            % identity: identy of agent whose neighbors to get 
-            % radius: radius of delta disk
+            % identity: identy of agent
+            % radius: radius of disk;
             
-            neighbors = zeros(1, this.numAgents);
-            count = 0;
             
-            for i = 1:this.numAgents
-                if((i ~= id) && (norm(this.states(1:2, id) - this.states(1:2, i)) < r))
-                    count = count + 1;
-                    neighbors(:, count) = i;
-                end
-            end
+            assert(id <= this.numAgents, 'Error: supplied id (%i) was greater than the number of agents (%i)', id, this.numAgents);                       
             
-            if(count == 0) 
-                neighbors = [];
-            else 
-               neighbors = neighbors(1:count); 
-            end
+            % Make sure we don't count ourselves
+            ids = 1:this.numAgents; 
+            ids(id) = [];
+            
+            distances = arrayfun(@(x) norm(this.states(1:2, id) - this.states(1:2, x)), ids);           
+            neighbors = ids(find(distances <= r));                                     
         end
         
         function neighbors = getTopNeighbors(this, id, L)
@@ -170,21 +184,10 @@ classdef Robotarium < APIInterface
             % identity: identity of agents whose neighbors to get
             % laplacian: Graph Laplacian of the communication topology
             
-            neighbors = zeros(1, this.numAgents);
-            count = 0;
+            assert(id <= this.numAgents, 'Error: supplied id (%i) was greater than the number of agents (%i)', id, this.numAgents)
             
-            for i = 1:this.numAgents
-                if((i ~= id) && (L(id, i) ~= 0))
-                    count = count + 1;
-                    neighbors(:, count) = i;
-                end
-            end
-            
-            if(count == 0) 
-                neighbors = [];
-            else
-                neighbors = neighbors(1:count); 
-            end
+            L(id, id) = 0;
+            neighbors = find(L(id, :) ~= 0);            
         end
         
         %Gets the (x, y, theta) poses of the robots
@@ -278,7 +281,7 @@ classdef Robotarium < APIInterface
             
         function drawRobots(r)
             gcf_ = gcf;
-            previousFigureNumber = gcf_.Number;
+            previousFigureNumber = gcf_.Number;            
             figure(r.figureHandle.Number)
             for ii = 1:r.numAgents
                 x  = r.states(1, ii);

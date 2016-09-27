@@ -3,6 +3,9 @@
 %Paul Glotfelter 
 %3/24/2016
 
+close all
+clear all
+
 % Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium();
 
@@ -13,10 +16,8 @@ N = r.getAvailableAgents();
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
 
-%Get randomized initial conditions 
-initialConditions = generateInitialConditions(N);
-
 x = r.getPoses();
+r.step();
 
 iterations = 20;
 
@@ -35,11 +36,15 @@ for iteration = 1:iterations
     initialConditions = generateInitialConditions(N);
     
     initial_conditions_c{iteration} = initialConditions;
+    
+    args = {'PositionError', 0.01, 'RotationError', 0.1};
+    init_checker = create_is_initialized(args{:});
+    automatic_parker = create_automatic_parking_controller(args{:});
 
-    while(~isInitialized(x, initialConditions))
+    while(~init_checker(x, initialConditions))
 
         x = r.getPoses();
-        dxu = automaticPark(x, initialConditions);
+        dxu = automatic_parker(x, initialConditions);
         dxu = barrierUnicycle(dxu, x, safety, lambda, 'BarrierGain', 1);      
         
         %dxu

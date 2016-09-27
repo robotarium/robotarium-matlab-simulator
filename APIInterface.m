@@ -29,7 +29,6 @@ classdef APIInterface < handle
         %Save parameters
         setSaveParameters(this, filePath, length, chunks);
         
-    end
-    
+    end 
 end
 

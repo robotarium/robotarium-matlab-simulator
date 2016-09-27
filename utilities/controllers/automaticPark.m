@@ -12,9 +12,7 @@ function [ dxu ] = automaticPark(states, desiredPoses, varargin)
     parser.addParameter('h', 0.4);
     parse(parser, varargin{:});    
     position_error = parser.Results.PositionError; 
-    rotation_error = parser.Results.RotationError;
-
-    [~, N] = size(states);    
+    rotation_error = parser.Results.RotationError; 
     
     
     dxu = park(states, desiredPoses, parser.Results.y,  parser.Results.k,  parser.Results.h);      

@@ -1,3 +1,5 @@
+% This script initializes the Robotarium simulator, adding the required
+% paths to the MATLAB instance.
 
 %Get path to simulator
 display('Initializing MATLAB simulator')
