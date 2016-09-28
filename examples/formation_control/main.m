@@ -1,7 +1,9 @@
-%Formation control utilizing edge tension energy with a static, undirected
+%% Formation control utilizing edge tension energy with a static, undirected
 %communication topology
 %Paul Glotfelter 
 %3/24/2016
+
+%% Setup Robotarium object
 
 % Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium();
@@ -12,6 +14,8 @@ N = 6;
 
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
+
+%% Set up constants for experiment
 
 %Gains for the transformation from single-integrator to unicycle dynamics
 linearVelocityGain = 1; 
@@ -50,6 +54,13 @@ weights = [ 0 d 0 d 0 ddiag; ...
 % velocity vector containing the linear and angular velocity, respectively.
 dx = zeros(2, N);
 
+%% Grab tools for converting to single-integrator dynamics and ensuring safety 
+
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.08);
+si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', linearVelocityGain, ... 
+    'AngularVelocityLimit', angularVelocityGain);
+
+
 % Iterate for the previously specified number of iterations
 for t = 0:iterations
     
@@ -58,7 +69,7 @@ for t = 0:iterations
     % approximately 0.033 seconds
     x = r.getPoses();
     
-    %%% ALGORITHM %%%
+    %% ALGORITHM
     
     %This section contains the actual algorithm for formation control!
     
@@ -76,20 +87,15 @@ for t = 0:iterations
             % For each neighbor, calculate appropriate formation control term and
             % add it to the total velocity
 
-            %%% FORMATION CONTROL %%%
-
             dx(:, i) = dx(:, i) + ...
             formationControlGain*(norm(x(1:2, i) - x(1:2, j))^2 - weights(i, j)^2) ... 
             *(x(1:2, j) - x(1:2, i));
-
-            %%% END FORMATION CONTROL %%%
         end 
     end
     
-    %%% END ALGORITHM %%%
-    
     % Transform the single-integrator dynamics to unicycle dynamics using a provided utility function
-    dx = int2uni2(dx, x, linearVelocityGain, angularVelocityGain);  
+    dx = si_barrier_cert(dx, x);
+    dx = si_to_uni_dyn(dx, x);  
     
     % Set velocities of agents 1:N
     r.setVelocities(1:N, dx);

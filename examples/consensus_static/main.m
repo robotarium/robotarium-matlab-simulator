@@ -1,8 +1,8 @@
-%Vanilla consensus with a static, undirected topology
+%% Vanilla consensus with a static, undirected topology
 %Paul Glotfelter 
 %3/24/2016
 
-% Get Robotarium object used to communicate with the robots/simulator
+%% Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium();
 
 % Get the number of available agents from the Robotarium.  We don't need a
@@ -12,12 +12,13 @@ N = r.getAvailableAgents();
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
 
+%% Experiment constants
+
 % Generate a cyclic graph Laplacian from our handy utilities.  For this
 % algorithm, any connected graph will yield consensus
 L = cycleGL(N); 
 
-% Declare all the tools we need to handle deploying this single-integrator
-% algorithm!
+%% Grab tools we need to convert from single-integrator to unicycle dynamics
 
 % Gain for the diffeomorphism transformation between single-integrator and
 % unicycle dynamics
@@ -45,7 +46,7 @@ for t = 1:iterations
     % Convert to SI states 
     xi = uni_to_si_states(x);
 
-    %%% ALGORITHM %%%
+    %% Algorithm
     
     for i = 1:N
         
@@ -64,15 +65,17 @@ for t = 1:iterations
             %add it to the total velocity
             dxi(:, i) = dxi(:, i) + (xi(:, j) - xi(:, i));
         end      
-    end   
+    end        
     
-    %%% END ALGORITHM %%%       
+    %% Utilize barrier certificates
    
     dxi = si_barrier_cert(dxi, xi);
     
     % Transform the single-integrator to unicycle dynamics using the the
     % transformation we created earlier
     dxu = si_to_uni_dyn(dxi, x);
+    
+    %% Send velocities to agents
            
     % Set velocities of agents 1,...,N
     r.setVelocities(1:N, dxu);

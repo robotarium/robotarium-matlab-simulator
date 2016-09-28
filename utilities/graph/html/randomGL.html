@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_si_position_controller</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="create_si_position_controller.m"><style type="text/css">
+      --><title>randomGL</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="randomGL.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,84 +66,67 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_si_position_controller</h1><!--introduction--><p>Returns a controller for a single-integrator system.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#2">Example Usage</a></li><li><a href="#3">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>XVelocityGain - affects the horizontal velocity of the single integrator</li><li>YVelocityGain - affects the vertical velocity of the single integrator</li></ul></div><h2>Example Usage<a name="2"></a></h2><pre class="language-matlab">si_position_controller = create_si_position_controller(<span class="string">'XVelocityGain'</span>,
-1, <span class="string">'YVelocityGain'</span>, 1);
-</pre><h2>Implementation<a name="3"></a></h2><pre class="codeinput"><span class="keyword">function</span> [si_position_controller] = create_si_position_controller(varargin)
+  </style></head><body><div class="content"><h1>randomGL</h1><!--introduction--><p>Returns a random grab laplacian with a specified number of verticies and edges</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Usage</a></li><li><a href="#2">Implementation</a></li></ul></div><h2>Example Usage<a name="1"></a></h2><pre class="language-matlab">L = randomGL(5, 3);
+</pre><h2>Implementation<a name="2"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ L ] = randomGL(v, e)
 
-    parser = inputParser;
-    addOptional(parser, <span class="string">'XVelocityGain'</span>, 1);
-    addOptional(parser, <span class="string">'YVelocityGain'</span>, 1);
+    L = tril(ones(v, v));
 
-    parse(parser, varargin{:});
+    <span class="comment">%This works becuase I can't select diagonals</span>
+    potEdges = find(triu(L) == 0);
+    sz = size(L);
 
-    x_vel_gain = parser.Results.XVelocityGain;
-    y_vel_gain = parser.Results.YVelocityGain;
-    gains = diag([x_vel_gain ; y_vel_gain]);
+    <span class="comment">%Rest to zeros</span>
+    L = L - L;
 
-    si_position_controller = @(states, poses) position_si(states, poses);
+    numEdges = min(e, length(potEdges));
+    edgeIndices = randperm(length(potEdges), numEdges);
 
+    <span class="keyword">for</span> index = edgeIndices
 
-    <span class="keyword">function</span> [ dx ] = position_si(states, poses)
-    <span class="comment">%POSITIONINT Position controller via single integrator dynamics</span>
+       [i, j] = ind2sub(sz, potEdges(index));
 
-        <span class="comment">% Error checking</span>
+        <span class="comment">%Update adjacency relation</span>
+        L(i, j) = -1;
+        L(j, i) = -1;
 
-        [M, N] = size(states);
-        [M_poses, N_poses] = size(poses);
-
-        assert(M == 2, <span class="string">'Row size of states (%i) must be 2'</span>, M);
-        assert(M_poses==2, <span class="string">'Row size of SI poses (%i) must be 2'</span>, M_poses);
-        assert(N==N_poses, <span class="string">'Column size of states (%i) must be the same as poses (%i)'</span>, N, N_poses);
-
-        dx = zeros(2, N);
-        <span class="keyword">for</span> i = 1:N
-           dx(:, i) = gains*(poses(:, i) - states(:, i));
-        <span class="keyword">end</span>
+        <span class="comment">%Update degree relation</span>
+        L(i, i) = L(i, i) + 1;
+        L(j, j) = L(j, j) + 1;
     <span class="keyword">end</span>
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% create_si_position_controller 
-% Returns a controller for a single-integrator system.
-%% Detailed Description 
-% * XVelocityGain - affects the horizontal velocity of the
-% single integrator
-% * YVelocityGain - affects the vertical velocity of the single integrator
+%% randomGL 
+% Returns a random grab laplacian with a specified number of verticies and
+% edges 
 %% Example Usage 
-%   si_position_controller = create_si_position_controller('XVelocityGain',
-%   1, 'YVelocityGain', 1);
+%   L = randomGL(5, 3);
 %% Implementation
-function [si_position_controller] = create_si_position_controller(varargin)
-    
-    parser = inputParser;
-    addOptional(parser, 'XVelocityGain', 1);
-    addOptional(parser, 'YVelocityGain', 1);
-    
-    parse(parser, varargin{:});
-    
-    x_vel_gain = parser.Results.XVelocityGain;
-    y_vel_gain = parser.Results.YVelocityGain;
-    gains = diag([x_vel_gain ; y_vel_gain]);
-    
-    si_position_controller = @(states, poses) position_si(states, poses);
-    
+function [ L ] = randomGL(v, e)
 
-    function [ dx ] = position_si(states, poses)
-    %POSITIONINT Position controller via single integrator dynamics
+    L = tril(ones(v, v));
     
-        % Error checking
+    %This works becuase I can't select diagonals
+    potEdges = find(triu(L) == 0);
+    sz = size(L); 
     
-        [M, N] = size(states);
-        [M_poses, N_poses] = size(poses); 
+    %Rest to zeros
+    L = L - L;
+   
+    numEdges = min(e, length(potEdges)); 
+    edgeIndices = randperm(length(potEdges), numEdges);
+    
+    for index = edgeIndices 
         
-        assert(M == 2, 'Row size of states (%i) must be 2', M); 
-        assert(M_poses==2, 'Row size of SI poses (%i) must be 2', M_poses);
-        assert(N==N_poses, 'Column size of states (%i) must be the same as poses (%i)', N, N_poses);
+       [i, j] = ind2sub(sz, potEdges(index));
         
-        dx = zeros(2, N);
-        for i = 1:N   
-           dx(:, i) = gains*(poses(:, i) - states(:, i));
-        end   
+        %Update adjacency relation
+        L(i, j) = -1;
+        L(j, i) = -1; 
+        
+        %Update degree relation
+        L(i, i) = L(i, i) + 1;
+        L(j, j) = L(j, j) + 1;
     end
 end
 

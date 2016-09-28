@@ -1,7 +1,9 @@
-function [ L ] = randomConnectedGL(v, e)
-%RANDOMGL Outputs a randomly generated, undirected, connected graph
-%Laplacian with v - 1 + e edges
-%   Detailed explanation goes here
+%% random_connectedGL 
+% Returns a random, connected GL with v verticies and (v-1) + e edges 
+%% Example Usage 
+%   L = random_connectedGL(4, 3);
+%% Implementation
+function [ L ] = random_connectedGL(v, e)
 
     L = zeros(v, v); 
 

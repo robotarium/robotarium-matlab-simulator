@@ -1,21 +1,27 @@
+%% create_is_initialized 
+% Creates a function to check for initialization
+%% Detailed Description
+% * PositionError - affects how close the agents are required to get to the
+% desired position 
+% * RotationError - affects how close the agents are required to get to the
+% desired rotation
+%% Example Usage 
+%   initialization_checker = create_is_initialized('PositionError', 0.l,
+%   'RotationError', 0.01)
+%% Implementation
 function [ created_is_initialized ] = create_is_initialized(varargin)
-%CREATE_IS_INITIALIZED Creates a function to check for initialization
-%  initialization_checker = CREATE_IS_INITIALIZED('PositionError', 0.l,
-%  'RotationError', 0.01)
 
-        persistent parser
+    parser = inputParser;
+    parser.addParameter('PositionError', 0.01);
+    parser.addParameter('RotationError', 0.5);
+    parse(parser, varargin{:});
 
-        parser = inputParser;
-        parser.addParameter('PositionError', 0.01);
-        parser.addParameter('RotationError', 0.5);    
-        parse(parser, varargin{:});
+    position_error = parser.Results.PositionError;
+    rotation_error = parser.Results.RotationError;
 
-        position_error = parser.Results.PositionError;
-        rotation_error = parser.Results.RotationError;
+    created_is_initialized = @(states, initial_conditions) is_initialized(states, initial_conditions);
         
-        created_is_initialized = @(states, initial_conditions) is_initialized(states, initial_conditions, position_error, rotation_error);
-        
-    function [done, idxs] = is_initialized(states, initial_conditions, position_error, rotation_error)               
+    function [done, idxs] = is_initialized(states, initial_conditions)               
         
         [M, N] = size(states);
         [M_ic, N_ic] = size(initial_conditions);

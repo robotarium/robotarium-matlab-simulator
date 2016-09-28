@@ -1,10 +1,13 @@
-%Leader-follower with static topology
-%Paul Glotfelter 
-%3/24/2016
+%% Leader-follower with static topology
+% Paul Glotfelter 
+% 3/24/2016
+
+%% Experiment Constants
 
 %Run for 300 iterations
 iterations = 2000;
-u_h = [];
+
+%% Set up the Robotarium object
 
 %Get Robotarium object and set the save parameters
 
@@ -12,6 +15,8 @@ r = Robotarium();
 N = r.getAvailableAgents();
 
 r.initialize(N);
+
+%% Create the desired Laplacian
 
 %Graph laplacian  
 followers = -completeGL(N-1); 
@@ -21,14 +26,23 @@ L(2, 2) = L(2, 2) + 1;
 L(2, 1) = -1; 
 
 %Initialize velocity vector
-dx = zeros(2, N);
+dxi = zeros(2, N);
 
 %State for leader
 state = 0;
 
+%% Grab tools we need to convert from single-integrator to unicycle dynamics
+
 %collisionAvoidanceGain = 0.001; 
 formationControlGain = 10;
 desiredDistance = 0.09;
+
+% Single-integrator -> unicycle dynamics mapping
+si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 1, 'AngularVelocityLimit', 2);
+% Single-integrator barrier certificates
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.08);
+% Single-integrator position controller 
+si_pos_controller = create_si_position_controller();
 
 for t = 1:iterations
            
@@ -36,54 +50,55 @@ for t = 1:iterations
     % approximately 0.033 seconds
     x = r.getPoses();
     
-    %%% ALGORITHM %%%
+    %% Algorithm
     
     for i = 2:N
         
         %Zero velocity and get the topological neighbors of agent i
-        dx(:, i) = [0 ; 0];
+        dxi(:, i) = [0 ; 0];
         
         neighbors = r.getTopNeighbors(i, L);
         
         for j = neighbors 
-            dx(:, i) = dx(:, i) + ...
+            dxi(:, i) = dxi(:, i) + ...
             formationControlGain*(norm(x(1:2, j) - x(1:2, i))^2 -  desiredDistance^2)*(x(1:2, j) - x(1:2, i));
         end      
-    end   
-    
-    %%% END ALGORITHM %%%   
+    end    
         
-    % Make the leader travel between waypoints
+    %% Make the leader travel between waypoints
     
     switch state 
 
         case 0             
-            dx(:, 1) = positionInt(x(:, 1), [0.25 ; 0.15], 0.05);
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; 0.15]);
             if(norm(x(1:2, 1) - [0.25 ; 0.15]) < 0.05) 
                state = 1; 
             end           
         case 1
-            dx(:, 1) = positionInt(x(:, 1), [-0.25 ; 0.15], 0.05);
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; 0.15]);
             if(norm(x(1:2, 1) - [-0.25 ; 0.15]) < 0.05) 
                state = 2; 
             end
         case 2
-            dx(:, 1) = positionInt(x(:, 1), [-0.25 ; -0.15], 0.05);
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; -0.15]);
             if(norm(x(1:2, 1) - [-0.25 ; -0.15]) < 0.05)
                state = 3; 
             end
         case 3
-            dx(:, 1) = positionInt(x(:, 1), [0.25 ; -0.15], 0.05);
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; -0.15]);
             if(norm(x(1:2, 1) - [0.25 ; -0.15]) < 0.05)
                state = 0; 
             end
     end
 
-    dx = barrierCertificate(dx, x, 0.08);
-    dx = int2uni2(dx, x, 1, 2);
+    %% Use barrier certificate and convert to unicycle dynamics
+    dxi = si_barrier_cert(dxi, x);
+    dxu = si_to_uni_dyn(dxi, x);
+    
+    %% Send velocities to agents
     
     %Set velocities 
-    r.setVelocities(1:N, dx);
+    r.setVelocities(1:N, dxu);
     
     %Iterate experiment
     r.step();

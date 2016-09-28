@@ -1,14 +1,15 @@
+%% generate_initial_conditions 
+% Returns a set of random poses distributed in the Robotarium workspace
+%% Example Usage 
+%   initial_conditions = generate_initial_conditions(4);
+%% Implementation
 function [ poses ] = generate_initial_conditions(N)
-%GENERATEINITIALCONDITIONS Summary of this function goes here
-%   Detailed explanation goes here
 
     poses = zeros(3, N);
-
-    persistent safetyRadius;
     
     safetyRadius = 0.2;
-    width = 1.15; %1.2
-    height = 0.65; %0.7
+    width = 1.15;
+    height = 0.65;
 
     numX = floor(width / safetyRadius);
     numY = floor(height / safetyRadius);

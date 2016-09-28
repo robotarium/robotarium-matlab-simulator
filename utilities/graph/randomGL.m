@@ -1,7 +1,10 @@
+%% randomGL 
+% Returns a random grab laplacian with a specified number of verticies and
+% edges 
+%% Example Usage 
+%   L = randomGL(5, 3);
+%% Implementation
 function [ L ] = randomGL(v, e)
-%RANDOMGL Outputs a randomly generated, undirected, connected graph Laplacian with 'n'
-%nodes
-%   Detailed explanation goes here
 
     L = tril(ones(v, v));
     

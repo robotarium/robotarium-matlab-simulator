@@ -25,13 +25,13 @@ function [si_to_uni_dyn] = create_si_to_uni_mapping2(varargin)
     % A mapping from si -> uni dynamics.  THis is more of a
     % projection-based method.  Though, it's definitely similar to the
     % NIDs.
-    function dxi = si_to_uni(dxi, states)
+    function dxu = si_to_uni(dxi, states)
         N = size(dxi, 2); 
-        dx = zeros(2, N);
+        dxu = zeros(2, N);
         for i = 1:N
-            dx(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
+            dxu(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
             %Normalizing the output of atan2 to between -kw and kw
-            dx(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), ...
+            dxu(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), ...
                                   [cos(states(3, i)) sin(states(3, i))]*dxi(:, i))/(pi/2);
         end
     end
