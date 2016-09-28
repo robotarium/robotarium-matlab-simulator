@@ -1,22 +1,26 @@
+%% create_unicycle_position_controller
+% Returns a unicycle model position controller given parameters
+%% Detailed Description 
+%%
+% * LinearVelocityGain - a gain for the produced unicycle linear velocity 
+% * AngularVelocityGain - a gain for the produced unicycle angular velocity
+%% Example Usage
+%% 
+%   controller = create_unicycle_position_controller('PositionErrorGain', 2) 
+%   controller = create_unicycle_position_controller('RotationErrorGain', 1,
+%   'PositionErrorGain, 2')
+%% Implementation
 function [ created_position_controller ] = create_unicycle_position_controller(varargin)
-%CREATE_UNICYCLE_POSITION_CONTROLLER Returns a unicycle model position
-%controller given parameters
-%   Parameterizes and returns a unicycle-model position controller
-% controller = CREATE_UNICYCLE_POSITION_CONTROLLER('PositionErrorGain', 2) 
-% controller = CREATE_UNICYCLE_POSITION_CONTROLLER('RotationErrorGain', 1,
-% 'PositionErrorGain, 2')
-
-    persistent p;
     p = inputParser;
     addOptional(p, 'LinearVelocityGain', 1);
     addOptional(p, 'AngularVelocityGain', 1);
     parse(p, varargin{:})
-    lvg = p.Results.LinearVelocityGain; 
-    avg = p.Results.AngularVelocityGain;
+    linear_velocity_gain = p.Results.LinearVelocityGain; 
+    angular_velocity_gain = p.Results.AngularVelocityGain;
     
-    created_position_controller = @(states, poses) position_uni_clf(states, poses, lvg, avg);
+    created_position_controller = @(states, poses) position_uni_clf(states, poses);
 
-    function [ dxu ] = position_uni_clf(states, poses, position_error_gain, rotation_error_gain)
+    function [ dxu ] = position_uni_clf(states, poses)
     %POSITIONCLF Utilizes a Controlled Lyapunov Function (CLF) to drive a
     %unicycle system to a desired position
     %  This function operates on unicycle states and desired poses and returns
@@ -36,8 +40,8 @@ function [ created_position_controller ] = create_unicycle_position_controller(v
             rot_error = atan2(pos_error(2), pos_error(1));
             dist = norm(pos_error);            
             
-            dxu(1, i) = position_error_gain*dist*cos(rot_error - states(3, i));
-            dxu(2, i) = rotation_error_gain*dist*sin(rot_error - states(3, i));
+            dxu(1, i) = linear_velocity_gain*dist*cos(rot_error - states(3, i));
+            dxu(2, i) = angular_velocity_gain*dist*sin(rot_error - states(3, i));
         end 
     end
 end

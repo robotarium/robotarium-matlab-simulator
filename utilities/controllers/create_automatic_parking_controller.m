@@ -1,14 +1,22 @@
-function [ automatic_parking_controller ] = create_automatic_parking_controller(varargin)
-%CREATE_AUTOMATIC_PARKING_CONTROLLER Returns a controller which
-%automatically parks agents at a desired pose
-%   parking_controller =
-%   CREATE_AUTOMATIC_PARKING_CONTROLLER('ApproachAngleGain', 1,
-%   'DesiredAngleGain', 1, 'RotationErrorGain', 1)
+%% create_automatic_parking_controller 
+% Returns a controller that automatically parks agents at desired poses 
+%% Detailed Description
 % This function returns a controller that allows for agents to be parked at
 % a desired position and orientation.  When the agents are within the error
 % bounds, this function will automatically stop their movement.
+%% 
+% * ApproachAngleGain - affects how the unicycle approaches the desired
+% position
+% * DesiredAngleGain - affects how the unicycle approaches th desired angle
+% * RotataionErrorGain - affects how quickly the unicycle corrects rotation
+% errors
+%% Example Usage 
+%   parking_controller =
+%   CREATE_AUTOMATIC_PARKING_CONTROLLER('ApproachAngleGain', 1,
+%   'DesiredAngleGain', 1, 'RotationErrorGain', 1)
+%% Implementation
+function [ automatic_parking_controller ] = create_automatic_parking_controller(varargin)
 
-    persistent p
     p = inputParser;
     addOptional(p, 'ApproachAngleGain', 1);
     addOptional(p, 'DesiredAngleGain', 1); 

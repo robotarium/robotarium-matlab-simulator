@@ -1,3 +1,13 @@
+%% create_si_position_controller 
+% Returns a controller for a single-integrator system 
+%% Detailed Description 
+% * XVelocityGain - affects the horizontal velocity of the
+% single integrator
+% * YVelocityGain - affects the vertical velocity of the single integrator
+%% Example Usage 
+% si_position_controller = create_si_position_controller('XVelocityGain',
+% 1, 'YVelocityGain', 1);
+%% Implementation
 function [si_position_controller] = create_si_position_controller(varargin)
     
     parser = inputParser;

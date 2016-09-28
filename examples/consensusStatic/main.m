@@ -16,36 +16,42 @@ r.initialize(N);
 % algorithm, any connected graph will yield consensus
 L = cycleGL(N); 
 
+% Declare all the tools we need to handle deploying this single-integrator
+% algorithm!
+
 % Gain for the diffeomorphism transformation between single-integrator and
 % unicycle dynamics
-diffeomorphismGain = 0.25;
+transformation_gain = 0.05;
+[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', transformation_gain);
+
+safety_radius = 0.09;
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', safety_radius);
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
-iterations = 100000;
+iterations = 1000;
 
 % Initialize velocity vector for agents.  Each agent expects a 2 x 1
 % velocity vector containing the linear and angular velocity, respectively.
-dx = zeros(2, N);
+dxi = zeros(2, N);
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
-    tic
     
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
     x = r.getPoses();
+    
+    % Convert to SI states 
+    xi = uni_to_si_states(x);
 
     %%% ALGORITHM %%%
-    
-    % See the documentation (LINK HERE) for the math that generated this
-    % section
     
     for i = 1:N
         
         % Initialize velocity to zero for each agent.  This allows us to sum
         %over agent i's neighbors
-        dx(:, i) = [0 ; 0];
+        dxi(:, i) = [0 ; 0];
         
         % Get the topological neighbors of agent i based on the graph
         %Laplacian L
@@ -56,26 +62,23 @@ for t = 1:iterations
             
             % For each neighbor, calculate appropriate consensus term and
             %add it to the total velocity
-            dx(:, i) = dx(:, i) + (x(1:2, j) - x(1:2, i));
+            dxi(:, i) = dxi(:, i) + (xi(:, j) - xi(:, i));
         end      
     end   
     
-    %%% END ALGORITHM %%%   
-    
-    % Transform the single-integrator dynamics to unicycle dynamics using a
-    % diffeomorphism, which can be found in the utilities
+    %%% END ALGORITHM %%%       
    
-    dx = barrierCertificate(dx, x, 0.1);
+    dxi = si_barrier_cert(dxi, xi);
     
-    dx = int2uni(dx, x, diffeomorphismGain);
+    % Transform the single-integrator to unicycle dynamics using the the
+    % transformation we created earlier
+    dxu = si_to_uni_dyn(dxi, x);
            
     % Set velocities of agents 1,...,N
-    r.setVelocities(1:N, dx);
+    r.setVelocities(1:N, dxu);
 
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();
-    
-    toc
     
 end
 

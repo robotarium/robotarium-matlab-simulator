@@ -1,8 +1,15 @@
+%% create_si_barrier_certificate 
+% Returns a single-integrator barrier certificate 
+%% Detailed Description 
+%%
+% * BarrierGain - affects how quickly the agents can approach each other 
+% * SafetyRadius - affects the distance the agents maintain 
+%% 
+% A good rule of thumb is to make SafetyRadius a bit larger than the agent
+% itself.
+
+%% Implementation
 function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
-%CREATE_SI_BARRIER_CERTIFICATE Creates a single-integrator barrier
-%certificate that will prevent collisions for single integrator dynamics 
-%  si_barrier_certificate = CREATE_SI_BARRIER_CERTIFICATE('BarrierGain',
-%  1e4, 'SafetyRadius', 0.1)
         
     parser = inputParser;
     parser.addParameter('BarrierGain', 1e4);

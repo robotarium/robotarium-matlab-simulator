@@ -4,9 +4,6 @@
 %Paul Glotfelter 
 %3/24/2016
 
-close all
-clear all
-
 % Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium();
 

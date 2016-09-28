@@ -1,8 +1,19 @@
-function [ created_parking_controller ] = create_parking_controller(varargin)
-%CREATE_PARKING_CONTROLLER Summary of this function goes here
-%   Detailed explanation goes here
+%% create_parking_controller 
+% Returns a controller that will drive a unicycle-modeled agent to a pose
+% (i.e., position & orientation).
+%% Detailed Description 
+%% 
+% * ApproachAngleGain - affects how the unicycle approaches the desired
+% position
+% * DesiredAngleGain - affects how the unicycle approaches th desired angle
+% * RotataionErrorGain - affects how quickly the unicycle corrects rotation
+% errors
+%% Example Usage 
+%   parking_controller = create_parking_controller('ApproachAngleGain', 1,
+%   DesiredAngleGain', 1, 'RotationErrorGain', 1);
+%% Implementation
+function [ parking_controller ] = create_parking_controller(varargin)
 
-    persistent p
     p = inputParser;
     addOptional(p, 'ApproachAngleGain', 1);
     addOptional(p, 'DesiredAngleGain', 1); 
@@ -13,9 +24,9 @@ function [ created_parking_controller ] = create_parking_controller(varargin)
     k = p.Results.DesiredAngleGain; 
     h = p.Results.RotationErrorGain;    
     
-    created_parking_controller = @(states, poses) park(states, poses, gamma, k, h);
+    parking_controller = @(states, poses) park(states, poses);
 
-    function [ dxu ] = park( states, poses, gamma, k, h)
+    function [ dxu ] = park(states, poses)
     %PARK Drives a unicycle-based system to a desired pose
     %   This controller employs a CLF to drive a unicycle-modeled system to
     %   a desired pose (i.e., position AND orientation)
