@@ -28,8 +28,7 @@ classdef APIInterface < handle
         time2iters(this, time);
                         
         %Save parameters
-        setSaveParameters(this, filePath, length, chunks);
-        
+        setSaveParameters(this, filePath, length, chunks);      
     end 
 end
 

@@ -1,23 +1,26 @@
-%Barrier certificates for unicycle-modeled systems
+%% Barrier certificates for unicycle-modeled systems
 %Paul Glotfelter 
 %3/24/2016
+
+%% Setup Robotarium object
 
 % Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = r.getAvailableAgents(); 
+N = 20; 
 
-iterations = 1000;
+iterations = 10000;
 
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
 
+%% Set up constants for experiments
+
 % Initialize velocity vector for agents.  Each agent expects a 2 x 1
 % velocity vector containing the linear and angular velocity, respectively.
 dx = zeros(2, N);
-
 
 % Distribute the agents into a circle that fits into the Robotarium
 % boundaries
@@ -28,7 +31,15 @@ x_goal = p_circ(:,1:N);
 flag = 0; %flag of task completion
 
 lambda = 0.05;
-safety = 0.03;
+safety = 0.05;
+
+%% Tools to map single-integrator -> unicycle
+
+% Get the tools we need to map from single-integrator
+[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', lambda);
+uni_barrier_cert = create_uni_barrier_certificate('SafetyRadius', 0.03, 'ProjectionDistance', lambda);
+
+si_pos_controller = create_si_position_controller();
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
@@ -36,13 +47,11 @@ for t = 1:iterations
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
     x = r.getPoses();
-
-    x_temp = x(1:2,:);
     
-    %%% ALGORITHM %%%
+    %% Algorithm
   
     % nominal controller, go2goal
-    if norm(x_goal-x_temp,1)<0.1
+    if norm(x_goal-x(1:2, :),1)<0.1
          flag = 1-flag;
     end
     
@@ -52,15 +61,11 @@ for t = 1:iterations
         x_goal = p_circ(:,N+1:2*N);
     end
     
-    
-    % Convert to single-integrator domain
-    x_int = x; 
-    x_int(1:2, :) = x_int(1:2, :) + lambda*[cos(x(3, :)) ; sin(x(3, :))];
+    % Convert to single-integrator domain 
+    x_int = uni_to_si_states(x);
     
     %Currently in integrator dynamics
-    dx = positionInt(x_int, x_goal);
-        
-    % END ALGORITHM%     
+    dx = si_pos_controller(x_int, x_goal);
     
     % Threshold velocities for safety
     dxmax = 0.1;
@@ -70,11 +75,11 @@ for t = 1:iterations
         end
     end
     
-    dx = int2uni(dx, x, lambda);
-    
+    % Map to unicycle dynamics
+    dx = si_to_uni_dyn(dx, x);    
     
     %Ensure the robots don't collide
-    dx = barrierUnicycle(dx, x, safety, lambda);    
+    dx = uni_barrier_cert(dx, x);    
     
     % Set velocities of agents 1,...,N
     r.setVelocities(1:N, dx);
