@@ -70,23 +70,23 @@ for t = 1:iterations
     switch state 
 
         case 0             
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; 0.15]);
-            if(norm(x(1:2, 1) - [0.25 ; 0.15]) < 0.05) 
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; 0.2]);
+            if(norm(x(1:2, 1) - [0.3 ; 0.2]) < 0.05) 
                state = 1; 
             end           
         case 1
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; 0.15]);
-            if(norm(x(1:2, 1) - [-0.25 ; 0.15]) < 0.05) 
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; 0.2]);
+            if(norm(x(1:2, 1) - [-0.3 ; 0.2]) < 0.05) 
                state = 2; 
             end
         case 2
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; -0.15]);
-            if(norm(x(1:2, 1) - [-0.25 ; -0.15]) < 0.05)
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; -0.2]);
+            if(norm(x(1:2, 1) - [-0.3 ; -0.2]) < 0.05)
                state = 3; 
             end
         case 3
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; -0.15]);
-            if(norm(x(1:2, 1) - [0.25 ; -0.15]) < 0.05)
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; -0.2]);
+            if(norm(x(1:2, 1) - [0.3 ; -0.2]) < 0.05)
                state = 0; 
             end
     end

@@ -38,19 +38,19 @@ unicycle_barrier_certificate = create_uni_barrier_certificate('SafetyRadius', sa
 for iteration = 1:iterations
         
     %Get randomized initial conditions 
-    initialConditions = generateInitialConditions(N);
+    initial_conditions = generate_initial_conditions(N);
     
     % Sto
-    initial_conditions_c{iteration} = initialConditions;
+    initial_conditions_c{iteration} = initial_conditions;
     
     args = {'PositionError', 0.01, 'RotationError', 0.1};
     init_checker = create_is_initialized(args{:});
     automatic_parker = create_automatic_parking_controller(args{:});
 
-    while(~init_checker(x, initialConditions))
+    while(~init_checker(x, initial_conditions))
 
         x = r.getPoses();
-        dxu = automatic_parker(x, initialConditions);
+        dxu = automatic_parker(x, initial_conditions);
         dxu = unicycle_barrier_certificate(dxu, x);      
         
         %dxu

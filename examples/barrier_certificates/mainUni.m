@@ -9,7 +9,7 @@ r = Robotarium();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = 20; 
+N = r.getAvailableAgents(); 
 
 iterations = 10000;
 
