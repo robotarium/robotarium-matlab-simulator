@@ -1,0 +1,209 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>create_uni_barrier_certificate</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="create_uni_barrier_certificate.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>create_uni_barrier_certificate</h1><!--introduction--><p>Returns a barrier certificate that operates on unicycle algorithms, preventing colisions.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#4">Example usage</a></li><li><a href="#5">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>BarrierGain - affects how quickly the robots can approach each other</li><li>SafetyRadius affects how far apart the robots must be</li><li>ProjectionDistance affects the utilized transformation to single-integrator dynamics</li></ul></div><p>A good rule of thumb is to make the safety radius and projection distance each 1/2 of the desired total distance for the agents to remain apart.</p><h2>Example usage<a name="4"></a></h2><pre class="language-matlab">uni_barrier_cert = CREATE_UNI_BARRIER_CERTIFICATE(<span class="string">'BarrierGain'</span>, 3,
+<span class="string">'SafetyRadius'</span>, 0.05, <span class="string">'ProjectionDistance'</span>, 0.05)
+dxu_safe = uni_barrier_cert(dxu, robot_poses)
+</pre><h2>Implementation<a name="5"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
+
+    parser = inputParser;
+    addOptional(parser, <span class="string">'BarrierGain'</span>, 3);
+    addOptional(parser, <span class="string">'SafetyRadius'</span>, 0.05);
+    addOptional(parser, <span class="string">'ProjectionDistance'</span>, 0.05);
+    parse(parser, varargin{:})
+
+    opts = optimoptions(<span class="string">'quadprog'</span>,<span class="string">'Display'</span>,<span class="string">'off'</span>);
+    gamma = parser.Results.BarrierGain;
+    safety_radius = parser.Results.SafetyRadius;
+    projection_distance = parser.Results.ProjectionDistance;
+
+    [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping(<span class="string">'ProjectionDistance'</span>, projection_distance);
+    uni_si_dyn = create_uni_to_si_mapping(<span class="string">'ProjectionDistance'</span>, projection_distance);
+
+    uni_barrier_certificate = @(dxu, x) barrier_unicycle(dxu, x);
+
+    <span class="keyword">function</span> [ dxu ] = barrier_unicycle(dxu, x)
+        N = size(dxu, 2);
+
+        <span class="comment">%Shift to single integrator domain</span>
+        xi = uni_si_states(x);
+        dxi = uni_si_dyn(dxu, x);
+
+        <span class="comment">%Generate constraints for barrier certificates based on the size of</span>
+        <span class="comment">%the safety radius</span>
+        num_constraints = nchoosek(N, 2);
+        A = zeros(num_constraints, 2*N);
+        b = zeros(num_constraints, 1);
+        count = 1;
+        <span class="keyword">for</span> i = 1:(N-1)
+            <span class="keyword">for</span> j = (i+1):N
+                h = norm(xi(:,i)-xi(:,j))^2-(safety_radius + 2*projection_distance)^2;
+                A(count, (2*i-1):(2*i)) = 2*(xi(:,i)-xi(:,j))';
+                A(count, (2*j-1):(2*j)) = -2*(xi(:,i)-xi(:,j))';
+                b(count) = -gamma*h;
+                count = count + 1;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        A = -A;
+        b = -b;
+
+        <span class="comment">%Solve QP program generated earlier</span>
+        vhat = reshape(dxi,2*N,1);
+        H = 2*eye(2*N);
+        f = -2*vhat;
+
+        vnew = quadprog(H, double(f), A, b, [], [], [], [], [], opts);
+
+        <span class="comment">%Set robot velocities to new velocities</span>
+        dxu = si_uni_dyn(reshape(vnew, 2, N), x);
+
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% create_uni_barrier_certificate 
+% Returns a barrier certificate that operates on unicycle algorithms, 
+% preventing colisions.
+
+%% Detailed Description
+%% 
+% * BarrierGain - affects how quickly the robots can approach each other 
+% * SafetyRadius affects how far apart the robots must be 
+% * ProjectionDistance affects the utilized transformation to
+% single-integrator dynamics
+%%  
+% A good rule of thumb is to make the safety radius and projection distance 
+% each 1/2 of the desired total distance for the agents to remain apart.
+
+%% Example usage
+%   uni_barrier_cert = CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', 3,
+%   'SafetyRadius', 0.05, 'ProjectionDistance', 0.05)
+%   dxu_safe = uni_barrier_cert(dxu, robot_poses)
+
+%% Implementation 
+function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
+
+    parser = inputParser;
+    addOptional(parser, 'BarrierGain', 3);
+    addOptional(parser, 'SafetyRadius', 0.05);
+    addOptional(parser, 'ProjectionDistance', 0.05);
+    parse(parser, varargin{:})
+    
+    opts = optimoptions('quadprog','Display','off');       
+    gamma = parser.Results.BarrierGain;
+    safety_radius = parser.Results.SafetyRadius;
+    projection_distance = parser.Results.ProjectionDistance;
+    
+    [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping('ProjectionDistance', projection_distance);
+    uni_si_dyn = create_uni_to_si_mapping('ProjectionDistance', projection_distance);
+    
+    uni_barrier_certificate = @(dxu, x) barrier_unicycle(dxu, x);
+
+    function [ dxu ] = barrier_unicycle(dxu, x)      
+        N = size(dxu, 2);
+        
+        %Shift to single integrator domain
+        xi = uni_si_states(x);
+        dxi = uni_si_dyn(dxu, x);
+        
+        %Generate constraints for barrier certificates based on the size of
+        %the safety radius
+        num_constraints = nchoosek(N, 2);
+        A = zeros(num_constraints, 2*N);
+        b = zeros(num_constraints, 1);
+        count = 1;
+        for i = 1:(N-1)
+            for j = (i+1):N
+                h = norm(xi(:,i)-xi(:,j))^2-(safety_radius + 2*projection_distance)^2;
+                A(count, (2*i-1):(2*i)) = 2*(xi(:,i)-xi(:,j))';
+                A(count, (2*j-1):(2*j)) = -2*(xi(:,i)-xi(:,j))';
+                b(count) = -gamma*h;
+                count = count + 1;
+            end
+        end
+        
+        A = -A;
+        b = -b;
+        
+        %Solve QP program generated earlier
+        vhat = reshape(dxi,2*N,1);
+        H = 2*eye(2*N);
+        f = -2*vhat;
+        
+        vnew = quadprog(H, double(f), A, b, [], [], [], [], [], opts);
+        
+        %Set robot velocities to new velocities
+        dxu = si_uni_dyn(reshape(vnew, 2, N), x);
+
+    end
+end
+
+
+##### SOURCE END #####
+--></body></html>

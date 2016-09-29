@@ -1,5 +1,6 @@
 %Initializing the agents to random positions with barrier certificates 
-%and data plotting
+%and data plotting.  This script shows how to initialize and record data 
+%using the Robotarium simulator
 %Paul Glotfelter 
 %3/24/2016
 
@@ -13,34 +14,44 @@ N = r.getAvailableAgents();
 % Initialize the Robotarium object with the desired number of agents
 r.initialize(N);
 
-%Get randomized initial conditions 
-initialConditions = generateInitialConditions(N);
-
+% Initialize x so that we don't run into problems later.  This isn't always
+% necessary
 x = r.getPoses();
+r.step();
 
+% Set the number of times we want to initialize the agents
 iterations = 20;
 
+% Set up some variables to store data
 initial_conditions_c = cell(iterations);
 minimum_distance = [];
 
+% Set some parameters for use with the barrier certificates.  We don't want
+% our agents to collide
 safety = 0.06;
 lambda = 0.03;
 
+% Create a barrier certificate for use with the above parameters 
+unicycle_barrier_certificate = create_uni_barrier_certificate('SafetyRadius', safety, ... 
+    'ProjectionDistance', lambda);
 
 for iteration = 1:iterations
-    
-    display('On iteration') 
-    iteration
+        
     %Get randomized initial conditions 
-    initialConditions = generateInitialConditions(N);
+    initial_conditions = generate_initial_conditions(N);
     
-    initial_conditions_c{iteration} = initialConditions;
+    % Sto
+    initial_conditions_c{iteration} = initial_conditions;
+    
+    args = {'PositionError', 0.01, 'RotationError', 0.1};
+    init_checker = create_is_initialized(args{:});
+    automatic_parker = create_automatic_parking_controller(args{:});
 
-    while(~isInitialized(x, initialConditions))
+    while(~init_checker(x, initial_conditions))
 
         x = r.getPoses();
-        dxu = automaticPark(x, initialConditions);
-        dxu = barrierUnicycle(dxu, x, safety, lambda, 'BarrierGain', 1);      
+        dxu = automatic_parker(x, initial_conditions);
+        dxu = unicycle_barrier_certificate(dxu, x);      
         
         %dxu
         
