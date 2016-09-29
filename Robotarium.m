@@ -300,7 +300,6 @@ classdef Robotarium < APIInterface
         
         function InitRobotVisualize(r)
             % Initialize variables
-            robotDiameter = 0.03;
             numRobots = r.numAgents;
             
             % Scale factor (max. value of single Gaussian)
@@ -336,6 +335,8 @@ classdef Robotarium < APIInterface
             curUnits = get(robotPlaneAxes, 'Units');
             set(robotPlaneAxes, 'Units', 'Points');
             set(robotPlaneAxes, 'Units', curUnits);
+            
+            assert(numRobots <= 100, 'Number of robots (%i) must be <= 100', numRobots);
 
             r.robotHandle = cell(1, numRobots);
             load('patches.mat');
