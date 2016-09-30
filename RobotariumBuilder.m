@@ -4,7 +4,6 @@ classdef RobotariumBuilder < APIBuilder
     
     % Gets properties from abstract class as well.
     properties
-        available_agents
         boundaries = [-0.6, 0.6, -0.35, 0.35]; 
         robot_diameter = 0.08
     end

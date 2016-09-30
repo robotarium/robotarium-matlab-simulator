@@ -65,7 +65,7 @@ classdef APIAbstract < handle
                 this.file_path = 'robotarium_data';
                 this.file_path = strcat(this.file_path, '_', num2str(date.Month), '_', num2str(date.Day), '_', ...
                 num2str(date.Year), '_', num2str(date.Hour), '_', ...
-                num2str(date.Minute), '_', num2str(date.Second), '.mat');
+                num2str(date.Minute), '_', num2str(round(date.Second)), '.mat');
             
                 this.current_file_size = 100;
                 this.current_saved_iterations = 1;
@@ -202,7 +202,7 @@ classdef APIAbstract < handle
             % expansions
             if(this.current_saved_iterations > (this.current_file_size / 2))
                 new_robotarium_data = zeros(5*this.number_of_agents, this.current_file_size * 2);
-                new_robotarium_data(5, 1:this.current_saved_iterations) = ...
+                new_robotarium_data(:, 1:this.current_saved_iterations) = ...
                     this.mat_file_path.robotarium_data(:, 1:this.current_saved_iterations);
                 
                 % Set file to new data

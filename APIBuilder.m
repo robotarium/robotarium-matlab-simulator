@@ -2,7 +2,8 @@ classdef APIBuilder < handle
     %APIBUILDER Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
+    properties (GetAccess = public, SetAccess = protected)
+        available_agents
         number_of_agents
         save_data = true
     end

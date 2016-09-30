@@ -50,10 +50,10 @@ si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.75, 'AngularVe
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
-    
+
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    x = r.get_poses()
+    x = r.get_poses();
 
     x_temp = x(1:2,:);
     
