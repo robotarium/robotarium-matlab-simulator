@@ -5,16 +5,18 @@
 %% Setup Robotarium object
 
 % Get Robotarium object used to communicate with the robots/simulator
-r = Robotarium();
+rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = r.getAvailableAgents(); 
+N = rb.get_available_agents(); 
 
-iterations = 10000;
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 
-% Initialize the Robotarium object with the desired number of agents
-r.initialize(N);
+% This is a totally arbitrary number
+iterations = 20000;
 
 %% Set up constants for experiments
 
@@ -89,3 +91,6 @@ for t = 1:iterations
     
 end
 
+% Though we didn't save any data, we still should call r.flush() after our
+% experiment is over!
+r.flush();

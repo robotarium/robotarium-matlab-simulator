@@ -5,18 +5,19 @@
 %3/24/2016
 
 % Get Robotarium object used to communicate with the robots/simulator
-r = Robotarium();
+rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = r.getAvailableAgents();
+N = rb.get_available_agents(); 
 
-% Initialize the Robotarium object with the desired number of agents
-r.initialize(N);
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 % Initialize x so that we don't run into problems later.  This isn't always
 % necessary
-x = r.getPoses();
+x = r.get_poses();
 r.step();
 
 % Set the number of times we want to initialize the agents
@@ -49,7 +50,7 @@ for iteration = 1:iterations
 
     while(~init_checker(x, initial_conditions))
 
-        x = r.getPoses();
+        x = r.get_poses();
         dxu = automatic_parker(x, initial_conditions);
         dxu = unicycle_barrier_certificate(dxu, x);      
         
@@ -67,7 +68,7 @@ for iteration = 1:iterations
            end
         end
 
-        r.setVelocities(1:N, dxu);
+        r.set_velocities(1:N, dxu);
         r.step();                   
     
         min = 1000; 
@@ -83,6 +84,10 @@ for iteration = 1:iterations
         minimum_distance = [minimum_distance min];
     end
 end
+
+% Though we didn't save any data, we still should call r.flush() after our
+% experiment is over!
+r.flush();
 
 figure 
 hold on 

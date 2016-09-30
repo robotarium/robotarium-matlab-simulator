@@ -9,7 +9,7 @@ classdef APIInterface < handle
     
     methods (Abstract)
         
-        %Initializer 
+        %Initializer    
         initialize(this, N);
         
         %Setters 
