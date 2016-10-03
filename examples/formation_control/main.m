@@ -106,6 +106,6 @@ for t = 0:iterations
     r.step();   
 end
 
-% Though we didn't save any data, we still should call r.flush() after our
+% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
 % experiment is over!
-r.flush();
+r.call_at_scripts_end();

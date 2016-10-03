@@ -41,7 +41,7 @@ classdef APIAbstract < handle
         
         %Try this one out... 
         % We can use this to finish saving / clean up after MQTT
-        flush(this)
+        call_at_scripts_end(this)
         
         % Getters 
         % Get poses must be implemented independently
