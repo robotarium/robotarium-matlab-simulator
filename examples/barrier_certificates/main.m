@@ -7,17 +7,18 @@
 % object so that we can communicate with the agents
 
 % Get Robotarium object used to communicate with the robots/simulator
-r = Robotarium();
+rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = r.getAvailableAgents(); 
+N = rb.get_available_agents(); 
+
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 % This is a totally arbitrary number
 iterations = 20000;
-
-% Initialize the Robotarium object with the desired number of agents
-r.initialize(N);
 
 %% Experiment constants 
 % Next, we set up some experiment constants
@@ -49,10 +50,10 @@ si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.75, 'AngularVe
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
-    
+
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    x = r.getPoses();
+    x = r.get_poses();
 
     x_temp = x(1:2,:);
     
@@ -99,9 +100,13 @@ for t = 1:iterations
     %% Set the velocities of the agents
     
     % Set velocities of agents 1,...,N
-    r.setVelocities(1:N, dx);
+    r.set_velocities(1:N, dx);
     
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();    
 end
+
+% Though we didn't save any data, we still should call r.flush() after our
+% experiment is over!
+r.flush();
 

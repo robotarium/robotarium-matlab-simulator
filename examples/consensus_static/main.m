@@ -3,14 +3,15 @@
 %3/24/2016
 
 %% Get Robotarium object used to communicate with the robots/simulator
-r = Robotarium();
+rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = r.getAvailableAgents(); 
+N = rb.get_available_agents(); 
 
-% Initialize the Robotarium object with the desired number of agents
-r.initialize(N);
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 %% Experiment constants
 
@@ -41,7 +42,7 @@ for t = 1:iterations
     
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    x = r.getPoses();
+    x = r.get_poses();
     
     % Convert to SI states 
     xi = uni_to_si_states(x);
@@ -56,7 +57,7 @@ for t = 1:iterations
         
         % Get the topological neighbors of agent i based on the graph
         %Laplacian L
-        neighbors = r.getTopNeighbors(i, L);
+        neighbors = topological_neighbors(L, i);
         
         % Iterate through agent i's neighbors
         for j = neighbors
@@ -78,7 +79,7 @@ for t = 1:iterations
     %% Send velocities to agents
            
     % Set velocities of agents 1,...,N
-    r.setVelocities(1:N, dxu);
+    r.set_velocities(1:N, dxu);
 
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();

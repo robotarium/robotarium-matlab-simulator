@@ -6,14 +6,16 @@
 %% Setup Robotarium object
 
 % Get Robotarium object used to communicate with the robots/simulator
-r = Robotarium();
+% Get Robotarium object used to communicate with the robots/simulator
+rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
 N = 6; 
 
-% Initialize the Robotarium object with the desired number of agents
-r.initialize(N);
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 %% Set up constants for experiment
 
@@ -67,7 +69,7 @@ for t = 0:iterations
     
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    x = r.getPoses();
+    x = r.get_poses();
     
     %% ALGORITHM
     
@@ -82,7 +84,7 @@ for t = 0:iterations
         
         % Get the topological neighbors of agent i from the communication
         % topology
-        for j = r.getTopNeighbors(i, L)
+        for j = topological_neighbors(L, i)
                 
             % For each neighbor, calculate appropriate formation control term and
             % add it to the total velocity
@@ -98,10 +100,12 @@ for t = 0:iterations
     dx = si_to_uni_dyn(dx, x);  
     
     % Set velocities of agents 1:N
-    r.setVelocities(1:N, dx);
+    r.set_velocities(1:N, dx);
     
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();   
 end
 
-
+% Though we didn't save any data, we still should call r.flush() after our
+% experiment is over!
+r.flush();

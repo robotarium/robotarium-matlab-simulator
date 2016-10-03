@@ -10,11 +10,15 @@ iterations = 2000;
 %% Set up the Robotarium object
 
 %Get Robotarium object and set the save parameters
+rb = RobotariumBuilder();
 
-r = Robotarium();
-N = r.getAvailableAgents();
+% Get the number of available agents from the Robotarium.  We don't need a
+% specific value for this algorithm
+N = rb.get_available_agents(); 
 
-r.initialize(N);
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 %% Create the desired Laplacian
 
@@ -48,7 +52,7 @@ for t = 1:iterations
            
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    x = r.getPoses();
+    x = r.get_poses();
     
     %% Algorithm
     
@@ -57,7 +61,7 @@ for t = 1:iterations
         %Zero velocity and get the topological neighbors of agent i
         dxi(:, i) = [0 ; 0];
         
-        neighbors = r.getTopNeighbors(i, L);
+        neighbors = topological_neighbors(L, i);
         
         for j = neighbors 
             dxi(:, i) = dxi(:, i) + ...
@@ -98,8 +102,12 @@ for t = 1:iterations
     %% Send velocities to agents
     
     %Set velocities 
-    r.setVelocities(1:N, dxu);
+    r.set_velocities(1:N, dxu);
     
     %Iterate experiment
     r.step();
 end
+
+% Though we didn't save any data, we still should call r.flush() after our
+% experiment is over!
+r.flush();
