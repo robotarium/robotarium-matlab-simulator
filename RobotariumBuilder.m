@@ -1,6 +1,40 @@
-classdef RobotariumBuilder < APIBuilder
-    %ROBOTARIUM Summary of this class goes here
-    %   Detailed explanation goes here
+%% RobotariumBuilder
+% This class handles the creation of the Robotarium object.  In particular,
+% it controls and sets the parameters for your simulation/experiment.
+%% Function Summary 
+% * get_available_agents(): $\emptyset \to \mathbf{Z}^{+}$ returns the number of available agents
+% (random for each instantiation)
+% * set_number_of_agents(): $\mathbf{Z}^{+} \to RobotariumBuilder$ sets the number of
+% agents, returning the RobotariumBuilder object
+% * set_save_data(): $\{false, true\} \to RobotariumBuilder$ sets whether
+% to save data for this experiment.  
+% * build(): $\emptyset \to Robotarium$ builds a Robotarium object with the
+% specified parameters
+%% Example Usage 
+%   % Example showing potential usage of the RobotariumBuilder object.
+%   % ote that get_available_agents() returns the number of available
+%   % agents, which is random.  If you need a particular number of agents,
+%   % this should be specified in the experiment descriptor when you
+%   % eventually submit your experiment to the Robotarium.  
+%   % Or you can design your experiment to handle any number of agents.
+%
+%   % set_save_data() controls whether the Robotarium records
+%   % your simulation/experimental data.
+%
+%   robo_builder = RobotariumBuilder() 
+%   N = robo_builder.get_available_agents()
+%   robo_obj =
+%   robo_builder.set_number_of_agents(N).set_save_data(true).build()
+
+classdef RobotariumBuilder < ARobotariumBuilder
+    %ROBOTARIUMBUILDER This class handles creation of the Robotarium object
+    %that communicates with the GRITSbots.
+    %  This class is really just a helper to assist with creating the
+    %  Robotarium object.  In particular, this object allows you to set
+    %  properties for your simulation and eventual experiment.  Right now,
+    %  these properties are: number of agents and whether to save data.
+    
+    % THIS CLASS SHOULD NEVER BE MODIFIED
     
     % Gets properties from abstract class as well.
     properties
@@ -11,7 +45,8 @@ classdef RobotariumBuilder < APIBuilder
     methods
         
         function this = RobotariumBuilder()
-          this.available_agents = randi(10); 
+          this.available_agents = randi(14) + 1; 
+          this.number_of_agents = -1;
         end
         
         function number_of_agents = get_available_agents(this)
@@ -19,6 +54,9 @@ classdef RobotariumBuilder < APIBuilder
         end
         
         function robotarium_obj = build(this)
+            
+            assert(this.number_of_agents > 0, 'You must set the number of agents for this experiment');
+            
             arena_width = this.boundaries(2) - this.boundaries(1);
             arena_height = this.boundaries(4) - this.boundaries(3);
             

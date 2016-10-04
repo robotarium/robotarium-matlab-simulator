@@ -1,6 +1,26 @@
-classdef Robotarium < APIAbstract
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+%% Robotarium
+% A class that models your communications with the GRITSbots!
+%   This class handles retrieving the poses of agents, setting their
+%   velocities, iterating the simulation, and saving data.
+%% Method Description 
+% * get_poses(): $\emptyset \to \mathbf{R}^{3 \times N}$ retrieves the
+% poses of the agents in a 3 x N vector, where each column contains the
+% pose of an agent. 
+% * set_velocities(): $\mathbf{R}^{2 \times N} \to Robotarium$ sets the
+% velocities of each agent using a 2 x N vector.  Each column represents
+% the linear and angular velocity of an agent.
+% * step(): $\emptyset \to \emptyset$ iterates the simulation, updating the
+% state of each agent.  This function should be called for each "iteration"
+% of your experiment.  Additionally, it should only be called once per call
+% of get_poses().
+
+classdef Robotarium < ARobotarium
+    %Robotarium This is the Robotarium simulator object that represents
+    %your communications with the GRITSbots.
+    %   This class handles retrieving the poses of agents, setting their
+    %   velocities, iterating the simulation, and saving data.
+    
+    % THIS CLASS SHOULD NEVER BE MODIFIED
     
     properties (GetAccess = private, SetAccess = private)
         previous_timestep
@@ -14,7 +34,7 @@ classdef Robotarium < APIAbstract
     methods    
 
         function this = Robotarium(number_of_agents, save_data, initial_poses)
-           this = this@APIAbstract(number_of_agents, save_data, initial_poses);
+           this = this@ARobotarium(number_of_agents, save_data, initial_poses);
            this.previous_timestep = tic;
            
            this.initialize_visualization()
@@ -41,7 +61,7 @@ classdef Robotarium < APIAbstract
             %Vectorize update to states
             i = 1:this.number_of_agents;
             
-            total_time = this.time_step; %+ max(0, toc(this.previous_timestep) - this.time_step);
+            total_time = this.time_step + max(0, toc(this.previous_timestep) - this.time_step);
             
             %Update velocities using unicycle dynamics 
             this.poses(1, i) = this.poses(1, i) + this.x_lin_vel_coef*total_time.*this.velocities(1, i).*cos(this.poses(3, i));

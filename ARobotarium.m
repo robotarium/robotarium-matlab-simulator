@@ -1,4 +1,4 @@
-classdef APIAbstract < handle
+classdef ARobotarium < handle
     %APIAbstract This is an interface for the Robotarium class that
     %ensures the simulator and the robots match up properly.  You should
     %definitely NOT MODIFY this file.  Also, don't submit this file with
@@ -52,7 +52,7 @@ classdef APIAbstract < handle
     end 
     
     methods         
-        function this = APIAbstract(number_of_agents, save_data, initial_poses)
+        function this = ARobotarium(number_of_agents, save_data, initial_poses)
             this.number_of_agents = number_of_agents;
             this.save_data = save_data;
             
