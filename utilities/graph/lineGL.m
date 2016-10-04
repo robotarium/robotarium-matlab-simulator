@@ -1,4 +1,4 @@
-%% lineGL 
+%% lineGL: $\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$
 % Returns a line graph Laplacian of size n x n 
 %% Example Usage 
 %   L = lineGL(5)

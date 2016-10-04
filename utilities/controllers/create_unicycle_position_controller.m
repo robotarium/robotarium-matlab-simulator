@@ -1,5 +1,6 @@
 %% create_unicycle_position_controller
-% Returns a unicycle model position controller given parameters
+% Returns a unicycle model position controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2 \times N}$) 
+% given parameters
 %% Detailed Description 
 %%
 % * LinearVelocityGain - a gain for the produced unicycle linear velocity 

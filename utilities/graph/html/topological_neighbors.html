@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>topological_neighbors</h1><p>Returns the topological neighbors of a given agent</p><pre class="codeinput"><span class="keyword">function</span> [neighbors] = topological_neighbors(L, agent)
+  </style></head><body><div class="content"><h1>topological_neighbors</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">signature: <img src="topological_neighbors_eq12941163982435923632.png" alt="$\mathbf{R}^{N \times N} \times \mathbf{Z}^{+} \to \mathbf{Z}^{+}$"></a></li></ul></div><h2>signature: <img src="topological_neighbors_eq12941163982435923632.png" alt="$\mathbf{R}^{N \times N} \times \mathbf{Z}^{+} \to \mathbf{Z}^{+}$"><a name="1"></a></h2><p>Returns the topological neighbors of a given agent</p><pre class="codeinput"><span class="keyword">function</span> [neighbors] = topological_neighbors(L, agent)
 
     N = size(L, 2);
 
@@ -79,7 +79,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% topological_neighbors 
+%% topological_neighbors
+%%% signature: $\mathbf{R}^{N \times N} \times \mathbf{Z}^{+} \to \mathbf{Z}^{+}$
 % Returns the topological neighbors of a given agent
 
 function [neighbors] = topological_neighbors(L, agent)

@@ -1,5 +1,7 @@
-%% create_automatic_parking_controller 
-% Returns a controller that automatically parks agents at desired poses 
+%% create_automatic_parking_controller
+% Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that automatically parks agents at desired poses,
+% zeroing out their velocities when the point (within a tolerance) is
+% reached.
 %% Detailed Description
 % This function returns a controller that allows for agents to be parked at
 % a desired position and orientation.  When the agents are within the error

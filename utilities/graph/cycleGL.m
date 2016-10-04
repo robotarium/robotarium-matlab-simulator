@@ -1,4 +1,4 @@
-%% cycleGL 
+%% cycleGL: $\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$
 % Returns a cycle graph Laplacian 
 %% Example Usage 
 %   L = cycleGL(4)

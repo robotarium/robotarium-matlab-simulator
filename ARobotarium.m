@@ -148,6 +148,13 @@ classdef ARobotarium < handle
             set(robotPlaneAxes, 'Units', 'Points');
             set(robotPlaneAxes, 'Units', curUnits);
             
+            xlim([-0.65, 0.65]); ylim([-0.35, 0.35]);  % static limits
+ 
+            % Static legend
+            %set(gca,'LegendColorbarListeners',[]); 
+            setappdata(gca,'LegendColorbarManualSpace',1);
+            setappdata(gca,'LegendColorbarReclaimSpace',1);
+            
             assert(numRobots <= 100, 'Number of robots (%i) must be <= 100', numRobots);
 
             this.robot_handle = cell(1, numRobots);
@@ -190,7 +197,7 @@ classdef ARobotarium < handle
                 robotBodyTransformed = this.robot_body*poseTransformationMatrix';
                 set(this.robot_handle{ii},'Vertices', robotBodyTransformed);
             end
-            drawnow 
+            drawnow limitrate
             figure(previousFigureNumber)
         end
         

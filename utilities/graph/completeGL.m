@@ -1,4 +1,4 @@
-%% completeGL 
+%% completeGL: $\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$
 % Returns a completely connected graph Laplacian 
 %% Example Usage
 %   L = completeGL(5); 

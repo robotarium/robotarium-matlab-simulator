@@ -1,4 +1,4 @@
-%% randomGL 
+%% randomGL: $\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$
 % Returns a random grab laplacian with a specified number of verticies and
 % edges 
 %% Example Usage 

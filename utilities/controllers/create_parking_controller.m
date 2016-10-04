@@ -1,5 +1,5 @@
 %% create_parking_controller 
-% Returns a controller that will drive a unicycle-modeled agent to a pose
+% Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that will drive a unicycle-modeled agent to a pose
 % (i.e., position & orientation).
 %% Detailed Description 
 %% 

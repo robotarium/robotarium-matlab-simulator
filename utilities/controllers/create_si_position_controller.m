@@ -1,5 +1,6 @@
 %% create_si_position_controller 
-% Returns a controller for a single-integrator system.
+% Returns a controller ($u: \mathbf{R}^{2 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2 \times N}$) 
+% for a single-integrator system.
 %% Detailed Description 
 % * XVelocityGain - affects the horizontal velocity of the
 % single integrator

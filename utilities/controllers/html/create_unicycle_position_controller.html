@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_unicycle_position_controller</h1><!--introduction--><p>Returns a unicycle model position controller given parameters</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#3">Example Usage</a></li><li><a href="#5">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>LinearVelocityGain - a gain for the produced unicycle linear velocity</li><li>AngularVelocityGain - a gain for the produced unicycle angular velocity</li></ul></div><h2>Example Usage<a name="3"></a></h2><pre class="language-matlab">controller = create_unicycle_position_controller(<span class="string">'PositionErrorGain'</span>, 2)
+  </style></head><body><div class="content"><h1>create_unicycle_position_controller</h1><!--introduction--><p>Returns a unicycle model position controller (<img src="create_unicycle_position_controller_eq02666751231460450596.png" alt="$u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2 \times N}$">) given parameters</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#3">Example Usage</a></li><li><a href="#5">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>LinearVelocityGain - a gain for the produced unicycle linear velocity</li><li>AngularVelocityGain - a gain for the produced unicycle angular velocity</li></ul></div><h2>Example Usage<a name="3"></a></h2><pre class="language-matlab">controller = create_unicycle_position_controller(<span class="string">'PositionErrorGain'</span>, 2)
 controller = create_unicycle_position_controller(<span class="string">'RotationErrorGain'</span>, 1,
 <span class="string">'PositionErrorGain, 2'</span>)
 </pre><h2>Implementation<a name="5"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ created_position_controller ] = create_unicycle_position_controller(varargin)
@@ -107,7 +107,8 @@ controller = create_unicycle_position_controller(<span class="string">'RotationE
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% create_unicycle_position_controller
-% Returns a unicycle model position controller given parameters
+% Returns a unicycle model position controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2 \times N}$) 
+% given parameters
 %% Detailed Description 
 %%
 % * LinearVelocityGain - a gain for the produced unicycle linear velocity 

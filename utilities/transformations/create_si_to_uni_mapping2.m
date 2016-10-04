@@ -1,5 +1,7 @@
 %% create_si_to_uni_mapping2 
-% Returns a mapping from single-integrator to unicycle dynamics
+% Returns a mapping $\left( f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3
+% \times N} \to \mathbf{R}^{2 \times N} \right)$
+% from single-integrator to unicycle dynamics
 %% Detailed Description 
 % * LinearVelocityGain - affects the linear velocity for the unicycle
 % * AngularVelocityLimit - affects the upper (lower) bound for the

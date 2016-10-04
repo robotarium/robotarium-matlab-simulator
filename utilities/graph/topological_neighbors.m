@@ -1,4 +1,4 @@
-%% topological_neighbors 
+%% topological_neighbors $\mathbf{R}^{N \times N} \times \mathbf{Z}^{+} \to \mathbf{Z}^{+}$
 % Returns the topological neighbors of a given agent
 
 function [neighbors] = topological_neighbors(L, agent)

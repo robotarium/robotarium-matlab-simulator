@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_parking_controller</h1><!--introduction--><p>Returns a controller that will drive a unicycle-modeled agent to a pose (i.e., position &amp; orientation).</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#3">Example Usage</a></li><li><a href="#4">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>ApproachAngleGain - affects how the unicycle approaches the desired position</li><li>DesiredAngleGain - affects how the unicycle approaches th desired angle</li><li>RotataionErrorGain - affects how quickly the unicycle corrects rotation errors</li></ul></div><h2>Example Usage<a name="3"></a></h2><pre class="language-matlab">parking_controller = create_parking_controller(<span class="string">'ApproachAngleGain'</span>, 1,
+  </style></head><body><div class="content"><h1>create_parking_controller</h1><!--introduction--><p>Returns a controller (<img src="create_parking_controller_eq17505963355495861468.png" alt="$u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$">) that will drive a unicycle-modeled agent to a pose (i.e., position &amp; orientation).</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#3">Example Usage</a></li><li><a href="#4">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>ApproachAngleGain - affects how the unicycle approaches the desired position</li><li>DesiredAngleGain - affects how the unicycle approaches th desired angle</li><li>RotataionErrorGain - affects how quickly the unicycle corrects rotation errors</li></ul></div><h2>Example Usage<a name="3"></a></h2><pre class="language-matlab">parking_controller = create_parking_controller(<span class="string">'ApproachAngleGain'</span>, 1,
 DesiredAngleGain', 1, <span class="string">'RotationErrorGain'</span>, 1);
 </pre><h2>Implementation<a name="4"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ parking_controller ] = create_parking_controller(varargin)
 
@@ -118,7 +118,7 @@ DesiredAngleGain', 1, <span class="string">'RotationErrorGain'</span>, 1);
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% create_parking_controller 
-% Returns a controller that will drive a unicycle-modeled agent to a pose
+% Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that will drive a unicycle-modeled agent to a pose
 % (i.e., position & orientation).
 %% Detailed Description 
 %% 

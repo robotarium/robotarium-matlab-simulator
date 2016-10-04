@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>delta_disk_neighbors</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-03"><meta name="DC.source" content="delta_disk_neighbors.m"><style type="text/css">
+      --><title>delta_disk_neighbors </title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-03"><meta name="DC.source" content="delta_disk_neighbors.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>delta_disk_neighbors</h1><!--introduction--><p>Returns the agents within the 2-norm of the supplied agent</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Usage</a></li></ul></div><h2>Example Usage<a name="1"></a></h2><pre class="language-matlab">neighbors = delta_disk_neighbors(robot_poses, 1, 0.5);
+  </style></head><body><div class="content"><h1>delta_disk_neighbors <img src="delta_disk_neighbors_eq14324477822824332334.png" alt="$\mathbf{R}^{2 \times N} \times \mathbf{Z}^{+} \times \mathbf{R} \to \mathbf{Z}^{+}$"></h1><!--introduction--><p>Returns the agents within the 2-norm of the supplied agent</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Usage</a></li></ul></div><h2>Example Usage<a name="1"></a></h2><pre class="language-matlab">neighbors = delta_disk_neighbors(robot_poses, 1, 0.5);
 </pre><pre class="codeinput"><span class="keyword">function</span> [ neighbors ] = delta_disk_neighbors(poses, agent, delta)
 
     N = size(poses, 2);
@@ -80,7 +80,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% delta_disk_neighbors
+%% delta_disk_neighbors $\mathbf{R}^{2 \times N} \times \mathbf{Z}^{+} \times \mathbf{R} \to \mathbf{Z}^{+}$
 % Returns the agents within the 2-norm of the supplied agent
 %% Example Usage 
 %   neighbors = delta_disk_neighbors(robot_poses, 1, 0.5);

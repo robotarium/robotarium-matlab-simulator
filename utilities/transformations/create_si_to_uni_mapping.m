@@ -1,6 +1,10 @@
 %% create_si_to_uni_Mapping
 % Returns a mapping from single-integrator to
-% unicycle dynamics and a mapping between their states.  Using this
+% unicycle dynamics $\left( f: \mathbf{R}^{2 \times N} \times 
+% \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N} \right)$ 
+% and a mapping between their states $\left(f: \mathbf{R}^{3 \times N} \to
+% \mathbf{R}^{2 \times N} \right)$
+% Using this
 % particular method, the single-integrator dynamics must be computed in the
 % single-integrator domain.
 %% Detailed Description 
