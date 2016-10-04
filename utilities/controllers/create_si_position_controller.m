@@ -21,7 +21,7 @@ function [si_position_controller] = create_si_position_controller(varargin)
     y_vel_gain = parser.Results.YVelocityGain;
     gains = diag([x_vel_gain ; y_vel_gain]);
     
-    si_position_controller = @(states, poses) position_si(states, poses);
+    si_position_controller = @position_si;
     
 
     function [ dx ] = position_si(states, poses)

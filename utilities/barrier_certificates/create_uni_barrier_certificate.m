@@ -28,7 +28,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     addOptional(parser, 'ProjectionDistance', 0.05);
     parse(parser, varargin{:})
     
-    opts = optimoptions('quadprog','Display','off');       
+    opts = optimoptions(@quadprog,'Display','off');       
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
     projection_distance = parser.Results.ProjectionDistance;
@@ -36,7 +36,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping('ProjectionDistance', projection_distance);
     uni_si_dyn = create_uni_to_si_mapping('ProjectionDistance', projection_distance);
     
-    uni_barrier_certificate = @(dxu, x) barrier_unicycle(dxu, x);
+    uni_barrier_certificate = @barrier_unicycle;
 
     function [ dxu ] = barrier_unicycle(dxu, x)      
         N = size(dxu, 2);

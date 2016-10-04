@@ -19,7 +19,7 @@ function [ created_position_controller ] = create_unicycle_position_controller(v
     linear_velocity_gain = p.Results.LinearVelocityGain; 
     angular_velocity_gain = p.Results.AngularVelocityGain;
     
-    created_position_controller = @(states, poses) position_uni_clf(states, poses);
+    created_position_controller = @position_uni_clf;
 
     function [ dxu ] = position_uni_clf(states, poses)
     %POSITIONCLF Utilizes a Controlled Lyapunov Function (CLF) to drive a

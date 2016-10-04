@@ -24,7 +24,7 @@ function [ parking_controller ] = create_parking_controller(varargin)
     k = p.Results.DesiredAngleGain; 
     h = p.Results.RotationErrorGain;    
     
-    parking_controller = @(states, poses) park(states, poses);
+    parking_controller = @park;
 
     function [ dxu ] = park(states, poses)
     %PARK Drives a unicycle-based system to a desired pose

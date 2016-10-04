@@ -19,12 +19,12 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
     parser.addParameter('BarrierGain', 1e4);
     parser.addParameter('SafetyRadius', 0.1);
     parse(parser, varargin{:})
-    opts = optimoptions('quadprog','Display','off');
+    opts = optimoptions(@quadprog,'Display','off');
 
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
 
-    si_barrier_certificate = @(dxi, x) barrier_certificate(dxi, x);
+    si_barrier_certificate = @barrier_certificate;
 
     function [ dx ] = barrier_certificate(dxi, x)
         %BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier

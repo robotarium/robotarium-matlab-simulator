@@ -2,10 +2,10 @@
 % A class that models your communications with the GRITSbots!
 %   This class handles retrieving the poses of agents, setting their
 %   velocities, iterating the simulation, and saving data.
-%% Method Description 
+%% Method Description
 % * get_poses(): $\emptyset \to \mathbf{R}^{3 \times N}$ retrieves the
 % poses of the agents in a 3 x N vector, where each column contains the
-% pose of an agent. 
+% pose of an agent.
 % * set_velocities(): $\mathbf{R}^{2 \times N} \to Robotarium$ sets the
 % velocities of each agent using a 2 x N vector.  Each column represents
 % the linear and angular velocity of an agent.
@@ -31,13 +31,13 @@ classdef Robotarium < ARobotarium
         ang_vel_coef = 0.46;
     end
     
-    methods    
-
+    methods
+        
         function this = Robotarium(number_of_agents, save_data, initial_poses)
-           this = this@ARobotarium(number_of_agents, save_data, initial_poses);
-           this.previous_timestep = tic;
-           
-           this.initialize_visualization()
+            this = this@ARobotarium(number_of_agents, save_data, initial_poses);
+            this.previous_timestep = tic;
+            
+            this.initialize_visualization()
         end
         
         function poses = get_poses(this)
@@ -55,7 +55,7 @@ classdef Robotarium < ARobotarium
         end
         
         function step(this)
-                      
+            
             assert(~this.called_step_already, 'Make sure you call get_poses before calling step!');
             
             %Vectorize update to states
@@ -63,18 +63,18 @@ classdef Robotarium < ARobotarium
             
             total_time = this.time_step + max(0, toc(this.previous_timestep) - this.time_step);
             
-            %Update velocities using unicycle dynamics 
+            %Update velocities using unicycle dynamics
             this.poses(1, i) = this.poses(1, i) + this.x_lin_vel_coef*total_time.*this.velocities(1, i).*cos(this.poses(3, i));
             this.poses(2, i) = this.poses(2, i) + this.y_lin_vel_coef*total_time.*this.velocities(1, i).*sin(this.poses(3, i));
-            this.poses(3, i) = this.poses(3, i) + this.ang_vel_coef*total_time.*this.velocities(2, i);            
+            this.poses(3, i) = this.poses(3, i) + this.ang_vel_coef*total_time.*this.velocities(2, i);
             
             %Ensure that we're in the right range
             this.poses(3, i) = atan2(sin(this.poses(3, i)), cos(this.poses(3, i)));
             
-            %Allow getting of poses again 
-            this.checked_poses_already = false;   
+            %Allow getting of poses again
+            this.checked_poses_already = false;
             this.called_step_already = true;
-    
+            
             if(this.save_data)
                 this.save();
             end
@@ -83,9 +83,9 @@ classdef Robotarium < ARobotarium
         end
         
         function call_at_scripts_end(this)
-           if(this.save_data)
-              this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
-           end
+            if(this.save_data)
+                this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
+            end
         end
     end
     

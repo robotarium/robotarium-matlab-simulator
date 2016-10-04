@@ -24,7 +24,7 @@ function [uni_to_si_dyn, si_to_uni_states] = create_uni_to_si_mapping(varargin)
     projection_distance = parser.Results.ProjectionDistance;
     
     uni_to_si_dyn = @uni_to_si;
-    si_to_uni_states = @(states) si_to_uni_states_(states, projection_distance);
+    si_to_uni_states = @si_to_uni_states_;
     
     T = [1 0; 0 projection_distance];
     % First mapping from SI -> unicycle.  Keeps the projected SI system at
