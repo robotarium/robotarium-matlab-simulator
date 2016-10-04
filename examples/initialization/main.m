@@ -53,25 +53,13 @@ for iteration = 1:iterations
         x = r.get_poses();
         dxu = automatic_parker(x, initial_conditions);
         dxu = unicycle_barrier_certificate(dxu, x);      
-        
-        %dxu
-        
-        for i = 1:N
-           if(abs(dxu(1, i)) < 0.000001)
-              dxu(1, i) = double(0.0); 
-           end
-        end
-
-        for i = 1:N
-           if(abs(dxu(2, i)) < 0.000001)
-              dxu(2, i) = double(0.0); 
-           end
-        end
 
         r.set_velocities(1:N, dxu);
-        r.step();                   
+        r.step();   
+        
+        % Determine minimum distance and save it for plotting
     
-        min = 1000; 
+        min = 1000;         
 
         for i = 1:N 
            for j = 1:N
