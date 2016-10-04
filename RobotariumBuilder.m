@@ -12,7 +12,7 @@
 % specified parameters
 %% Example Usage 
 %   % Example showing potential usage of the RobotariumBuilder object.
-%   % ote that get_available_agents() returns the number of available
+%   % Note that get_available_agents() returns the number of available
 %   % agents, which is random.  If you need a particular number of agents,
 %   % this should be specified in the experiment descriptor when you
 %   % eventually submit your experiment to the Robotarium.  
