@@ -1,0 +1,518 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ARobotarium</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="ARobotarium.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">classdef</span> ARobotarium &lt; handle
+    <span class="comment">%APIAbstract This is an interface for the Robotarium class that</span>
+    <span class="comment">%ensures the simulator and the robots match up properly.  You should</span>
+    <span class="comment">%definitely NOT MODIFY this file.  Also, don't submit this file with</span>
+    <span class="comment">%your algorithm.</span>
+
+    <span class="keyword">properties</span> (GetAccess = protected, SetAccess = protected)
+        robot_handle
+        robot_body
+
+        <span class="comment">% Stuff for saving data</span>
+        file_path
+        current_file_size
+        current_saved_iterations
+        <span class="comment">% Path to mat file to keep this in memory</span>
+        mat_file_path
+    <span class="keyword">end</span>
+
+    <span class="keyword">properties</span> (GetAccess = public, SetAccess = protected)
+        <span class="comment">% Time step for the Robotarium</span>
+        time_step = 0.033
+        maxLinearVelocity = 0.1
+        maxAngularVelocity = 2*pi
+        robot_diameter = 0.08
+        number_of_agents
+        velocities
+        poses
+
+        <span class="comment">%Saving parameters</span>
+        save_data
+
+        <span class="comment">% Figure handle for simulator</span>
+        figure_handle
+
+        <span class="comment">% Arena parameters</span>
+        boundaries = [-0.6, 0.6, -0.35, 0.35];
+        boundary_points = {[-0.6, 0.6, 0.6, -0.6], [-0.35, -0.35, 0.35, 0.35]};
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span> (Abstract)
+
+        <span class="comment">%Try this one out...</span>
+        <span class="comment">% We can use this to finish saving / clean up after MQTT</span>
+        call_at_scripts_end(this)
+
+        <span class="comment">% Getters</span>
+        <span class="comment">% Get poses must be implemented independently</span>
+        get_poses(this)
+
+        <span class="comment">%Update functions</span>
+        step(this);
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+        <span class="keyword">function</span> this = ARobotarium(number_of_agents, save_data, initial_poses)
+            this.number_of_agents = number_of_agents;
+            this.save_data = save_data;
+
+            this.velocities = zeros(2, number_of_agents);
+            this.poses = initial_poses;
+
+            <span class="comment">% If save data, set up the file saving variables</span>
+            <span class="keyword">if</span>(save_data)
+                date = datetime(<span class="string">'now'</span>);
+                this.file_path = <span class="string">'robotarium_data'</span>;
+                this.file_path = strcat(this.file_path, <span class="string">'_'</span>, num2str(date.Month), <span class="string">'_'</span>, num2str(date.Day), <span class="string">'_'</span>, <span class="keyword">...</span>
+                num2str(date.Year), <span class="string">'_'</span>, num2str(date.Hour), <span class="string">'_'</span>, <span class="keyword">...</span>
+                num2str(date.Minute), <span class="string">'_'</span>, num2str(round(date.Second)), <span class="string">'.mat'</span>);
+
+                this.current_file_size = 100;
+                this.current_saved_iterations = 1;
+
+                robotarium_data = zeros(5*number_of_agents, this.current_file_size);
+                save(this.file_path, <span class="string">'robotarium_data'</span>, <span class="string">'-v7.3'</span>)
+
+                this.mat_file_path = matfile(this.file_path, <span class="string">'Writable'</span>, true);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> agents = get_number_of_agents(this)
+           agents = this.number_of_agents;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> this = set_velocities(this, ids, vs)
+            N = size(vs, 2);
+
+            assert(N==this.number_of_agents, <span class="string">'Column size of vs (%i) must be the same as number of agents (%i)'</span>, <span class="keyword">...</span>
+                N, this.number_of_agents);
+
+            <span class="comment">% Threshold velocities</span>
+            <span class="keyword">for</span> i = 1:N
+                <span class="keyword">if</span>(abs(vs(1, i)) &gt; this.maxLinearVelocity)
+                   vs(1, i) = this.maxLinearVelocity*sign(vs(1,i));
+                <span class="keyword">end</span>
+
+                <span class="keyword">if</span>(abs(vs(2, i)) &gt; this.maxAngularVelocity)
+                   vs(2, i) = this.maxAngularVelocity*sign(vs(2, i));
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            this.velocities(:, ids) = vs;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> iters = time2iters(this, time)
+           iters = time / this.time_step;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span> (Access = protected)
+
+        <span class="comment">% Initializes visualization of GRITSbots</span>
+        <span class="keyword">function</span> initialize_visualization(this)
+            <span class="comment">% Initialize variables</span>
+            numRobots = this.number_of_agents;
+            offset = 0.05;
+
+            <span class="comment">% Scale factor (max. value of single Gaussian)</span>
+            scaleFactor = 0.5;
+            figPhi = figure;
+            this.figure_handle = figPhi;
+
+            <span class="comment">% Plot Robotarium boundaries</span>
+            patch(<span class="string">'XData'</span>, this.boundary_points{1}, <span class="string">'YData'</span>, this.boundary_points{2}, <span class="keyword">...</span>
+            <span class="string">'FaceColor'</span>, <span class="string">'none'</span>, <span class="keyword">...</span>
+            <span class="string">'LineWidth'</span>, 3, <span class="keyword">...</span>
+            <span class="string">'EdgeColor'</span>, [0, 0.74, 0.95]);
+
+            <span class="comment">%plot(im)</span>
+            set(figPhi,<span class="string">'color'</span>,<span class="string">'white'</span>,<span class="string">'menubar'</span>,<span class="string">'none'</span>);
+
+            <span class="comment">% Set axis</span>
+            robotPlaneAxes = gca;
+
+            <span class="comment">% Limit view to xMin/xMax/yMin/yMax</span>
+            axis(robotPlaneAxes,[this.boundaries(1) - offset,this.boundaries(2)+offset,this.boundaries(3)-offset,this.boundaries(4)+offset])
+            caxis([0,1.5*scaleFactor])
+            set(robotPlaneAxes,<span class="string">'PlotBoxAspectRatio'</span>,[1 1 1],<span class="string">'DataAspectRatio'</span>,[1 1 1])
+
+            <span class="comment">% Store axes</span>
+            axis(robotPlaneAxes,<span class="string">'off'</span>)
+
+            set(robotPlaneAxes,<span class="string">'position'</span>,[0 0 1 1],<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'YDir'</span>,<span class="string">'normal'</span>)
+
+            hold <span class="string">on</span> <span class="comment">% "This ride's about to get bumpy!"</span>
+
+            <span class="comment">% Let's jump through hoops to make the robot diameter look to data scale</span>
+            curUnits = get(robotPlaneAxes, <span class="string">'Units'</span>);
+            set(robotPlaneAxes, <span class="string">'Units'</span>, <span class="string">'Points'</span>);
+            set(robotPlaneAxes, <span class="string">'Units'</span>, curUnits);
+
+            xlim([-0.65, 0.65]); ylim([-0.35, 0.35]);  <span class="comment">% static limits</span>
+
+            <span class="comment">% Static legend</span>
+            <span class="comment">%set(gca,'LegendColorbarListeners',[]);</span>
+            setappdata(gca,<span class="string">'LegendColorbarManualSpace'</span>,1);
+            setappdata(gca,<span class="string">'LegendColorbarReclaimSpace'</span>,1);
+
+            assert(numRobots &lt;= 100, <span class="string">'Number of robots (%i) must be &lt;= 100'</span>, numRobots);
+
+            this.robot_handle = cell(1, numRobots);
+            load(<span class="string">'patches.mat'</span>);
+            num_patches = numel(patches);
+            chosen_patches = randsample(1:num_patches, numRobots);
+            patch_data = patches(chosen_patches);
+            <span class="keyword">for</span> ii = 1:numRobots
+                data = patch_data{ii};
+                this.robot_body = data.robot_body;
+                x  = this.poses(1, ii);
+                y  = this.poses(2, ii);
+                th = this.poses(3, ii);
+                poseTransformationMatrix = [<span class="keyword">...</span>
+                    cos(th) -sin(th) x;
+                    sin(th)  cos(th) y;
+                    0 0 1];
+                robot_bodyTransformed = data.robot_body*poseTransformationMatrix';
+                this.robot_handle{ii} = patch(<span class="keyword">...</span>
+                          <span class="string">'Vertices'</span>, robot_bodyTransformed, <span class="keyword">...</span>
+                          <span class="string">'Faces'</span>,data.robot_face, <span class="keyword">...</span>
+                          <span class="string">'FaceColor'</span>, <span class="string">'flat'</span>, <span class="keyword">...</span>
+                          <span class="string">'FaceVertexCData'</span>,data.robot_color, <span class="keyword">...</span>
+                          <span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> draw_robots(this)
+            gcf_ = gcf;
+            previousFigureNumber = gcf_.Number;
+            figure(this.figure_handle.Number)
+            <span class="keyword">for</span> ii = 1:this.number_of_agents
+                x  = this.poses(1, ii);
+                y  = this.poses(2, ii);
+                th = this.poses(3, ii);
+                poseTransformationMatrix = [<span class="keyword">...</span>
+                    cos(th) -sin(th) x;
+                    sin(th)  cos(th) y;
+                    0                    0                   1   ];
+                robotBodyTransformed = this.robot_body*poseTransformationMatrix';
+                set(this.robot_handle{ii},<span class="string">'Vertices'</span>, robotBodyTransformed);
+            <span class="keyword">end</span>
+            drawnow <span class="string">limitrate</span>
+            figure(previousFigureNumber)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> save(this)
+            this.mat_file_path.robotarium_data(:, this.current_saved_iterations) = <span class="keyword">...</span>
+                reshape([this.poses ; this.velocities], [], 1);
+
+            <span class="comment">% Use array list expansion criterion to amortize file</span>
+            <span class="comment">% expansions</span>
+            <span class="keyword">if</span>(this.current_saved_iterations &gt; (this.current_file_size / 2))
+                new_robotarium_data = zeros(5*this.number_of_agents, this.current_file_size * 2);
+                new_robotarium_data(:, 1:this.current_saved_iterations) = <span class="keyword">...</span>
+                    this.mat_file_path.robotarium_data(:, 1:this.current_saved_iterations);
+
+                <span class="comment">% Set file to new data</span>
+                this.mat_file_path.robotarium_data = new_robotarium_data;
+            <span class="keyword">end</span>
+
+            this.current_saved_iterations = this.current_saved_iterations + 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+classdef ARobotarium < handle
+    %APIAbstract This is an interface for the Robotarium class that
+    %ensures the simulator and the robots match up properly.  You should
+    %definitely NOT MODIFY this file.  Also, don't submit this file with
+    %your algorithm. 
+    
+    properties (GetAccess = protected, SetAccess = protected)
+        robot_handle
+        robot_body
+        
+        % Stuff for saving data 
+        file_path 
+        current_file_size 
+        current_saved_iterations 
+        % Path to mat file to keep this in memory
+        mat_file_path
+    end
+    
+    properties (GetAccess = public, SetAccess = protected)
+        % Time step for the Robotarium
+        time_step = 0.033
+        maxLinearVelocity = 0.1
+        maxAngularVelocity = 2*pi
+        robot_diameter = 0.08
+        number_of_agents 
+        velocities
+        poses
+                
+        %Saving parameters 
+        save_data
+        
+        % Figure handle for simulator
+        figure_handle
+        
+        % Arena parameters
+        boundaries = [-0.6, 0.6, -0.35, 0.35];    
+        boundary_points = {[-0.6, 0.6, 0.6, -0.6], [-0.35, -0.35, 0.35, 0.35]};
+    end
+    
+    methods (Abstract)                  
+        
+        %Try this one out... 
+        % We can use this to finish saving / clean up after MQTT
+        call_at_scripts_end(this)
+        
+        % Getters 
+        % Get poses must be implemented independently
+        get_poses(this)
+            
+        %Update functions
+        step(this);
+    end 
+    
+    methods         
+        function this = ARobotarium(number_of_agents, save_data, initial_poses)
+            this.number_of_agents = number_of_agents;
+            this.save_data = save_data;
+            
+            this.velocities = zeros(2, number_of_agents);
+            this.poses = initial_poses;
+            
+            % If save data, set up the file saving variables
+            if(save_data)
+                date = datetime('now');
+                this.file_path = 'robotarium_data';
+                this.file_path = strcat(this.file_path, '_', num2str(date.Month), '_', num2str(date.Day), '_', ...
+                num2str(date.Year), '_', num2str(date.Hour), '_', ...
+                num2str(date.Minute), '_', num2str(round(date.Second)), '.mat');
+            
+                this.current_file_size = 100;
+                this.current_saved_iterations = 1;
+                
+                robotarium_data = zeros(5*number_of_agents, this.current_file_size);            
+                save(this.file_path, 'robotarium_data', '-v7.3')
+            
+                this.mat_file_path = matfile(this.file_path, 'Writable', true);            
+            end
+        end
+        
+        function agents = get_number_of_agents(this)
+           agents = this.number_of_agents; 
+        end
+        
+        function this = set_velocities(this, ids, vs)
+            N = size(vs, 2);
+            
+            assert(N==this.number_of_agents, 'Column size of vs (%i) must be the same as number of agents (%i)', ... 
+                N, this.number_of_agents);
+                     
+            % Threshold velocities
+            for i = 1:N
+                if(abs(vs(1, i)) > this.maxLinearVelocity) 
+                   vs(1, i) = this.maxLinearVelocity*sign(vs(1,i)); 
+                end
+                
+                if(abs(vs(2, i)) > this.maxAngularVelocity)
+                   vs(2, i) = this.maxAngularVelocity*sign(vs(2, i)); 
+                end
+            end
+            
+            this.velocities(:, ids) = vs;
+        end
+        
+        function iters = time2iters(this, time)
+           iters = time / this.time_step; 
+        end
+    end
+    
+    methods (Access = protected)
+        
+        % Initializes visualization of GRITSbots
+        function initialize_visualization(this)
+            % Initialize variables
+            numRobots = this.number_of_agents;
+            offset = 0.05;
+                    
+            % Scale factor (max. value of single Gaussian)
+            scaleFactor = 0.5;  
+            figPhi = figure;
+            this.figure_handle = figPhi;
+            
+            % Plot Robotarium boundaries
+            patch('XData', this.boundary_points{1}, 'YData', this.boundary_points{2}, ...
+            'FaceColor', 'none', ...
+            'LineWidth', 3, ... 
+            'EdgeColor', [0, 0.74, 0.95]);
+            
+            %plot(im)
+            set(figPhi,'color','white','menubar','none');
+            
+            % Set axis
+            robotPlaneAxes = gca;
+            
+            % Limit view to xMin/xMax/yMin/yMax
+            axis(robotPlaneAxes,[this.boundaries(1) - offset,this.boundaries(2)+offset,this.boundaries(3)-offset,this.boundaries(4)+offset])
+            caxis([0,1.5*scaleFactor])
+            set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[1 1 1])
+            
+            % Store axes
+            axis(robotPlaneAxes,'off')
+            
+            set(robotPlaneAxes,'position',[0 0 1 1],'units','normalized','YDir','normal')
+
+            hold on % "This ride's about to get bumpy!"
+
+            % Let's jump through hoops to make the robot diameter look to data scale
+            curUnits = get(robotPlaneAxes, 'Units');
+            set(robotPlaneAxes, 'Units', 'Points');
+            set(robotPlaneAxes, 'Units', curUnits);
+            
+            xlim([-0.65, 0.65]); ylim([-0.35, 0.35]);  % static limits
+ 
+            % Static legend
+            %set(gca,'LegendColorbarListeners',[]); 
+            setappdata(gca,'LegendColorbarManualSpace',1);
+            setappdata(gca,'LegendColorbarReclaimSpace',1);
+            
+            assert(numRobots <= 100, 'Number of robots (%i) must be <= 100', numRobots);
+
+            this.robot_handle = cell(1, numRobots);
+            load('patches.mat');
+            num_patches = numel(patches);
+            chosen_patches = randsample(1:num_patches, numRobots);
+            patch_data = patches(chosen_patches);
+            for ii = 1:numRobots
+                data = patch_data{ii};
+                this.robot_body = data.robot_body;
+                x  = this.poses(1, ii);
+                y  = this.poses(2, ii);
+                th = this.poses(3, ii);
+                poseTransformationMatrix = [...
+                    cos(th) -sin(th) x;
+                    sin(th)  cos(th) y;
+                    0 0 1];
+                robot_bodyTransformed = data.robot_body*poseTransformationMatrix';
+                this.robot_handle{ii} = patch(...
+                          'Vertices', robot_bodyTransformed, ...
+                          'Faces',data.robot_face, ...
+                          'FaceColor', 'flat', ...
+                          'FaceVertexCData',data.robot_color, ...
+                          'EdgeColor','none');
+            end
+        end 
+        
+        function draw_robots(this)
+            gcf_ = gcf;
+            previousFigureNumber = gcf_.Number;            
+            figure(this.figure_handle.Number)
+            for ii = 1:this.number_of_agents
+                x  = this.poses(1, ii);
+                y  = this.poses(2, ii);
+                th = this.poses(3, ii);
+                poseTransformationMatrix = [...
+                    cos(th) -sin(th) x;
+                    sin(th)  cos(th) y;
+                    0                    0                   1   ];
+                robotBodyTransformed = this.robot_body*poseTransformationMatrix';
+                set(this.robot_handle{ii},'Vertices', robotBodyTransformed);
+            end
+            drawnow limitrate
+            figure(previousFigureNumber)
+        end
+        
+        function save(this)                              
+            this.mat_file_path.robotarium_data(:, this.current_saved_iterations) = ...
+                reshape([this.poses ; this.velocities], [], 1);
+            
+            % Use array list expansion criterion to amortize file
+            % expansions
+            if(this.current_saved_iterations > (this.current_file_size / 2))
+                new_robotarium_data = zeros(5*this.number_of_agents, this.current_file_size * 2);
+                new_robotarium_data(:, 1:this.current_saved_iterations) = ...
+                    this.mat_file_path.robotarium_data(:, 1:this.current_saved_iterations);
+                
+                % Set file to new data
+                this.mat_file_path.robotarium_data = new_robotarium_data; 
+            end
+                        
+            this.current_saved_iterations = this.current_saved_iterations + 1;
+        end
+    end
+end
+
+
+##### SOURCE END #####
+--></body></html>

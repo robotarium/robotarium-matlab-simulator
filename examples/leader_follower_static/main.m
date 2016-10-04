@@ -4,7 +4,7 @@
 
 %% Experiment Constants
 
-%Run for 300 iterations
+%Run the simulation for a specific number of iterations
 iterations = 2000;
 
 %% Set up the Robotarium object
@@ -35,11 +35,11 @@ dxi = zeros(2, N);
 %State for leader
 state = 0;
 
-%% Grab tools we need to convert from single-integrator to unicycle dynamics
+% These are gains for our formation control algorithm
+formation_control_gain = 10;
+desired_distance = 0.09;
 
-%collisionAvoidanceGain = 0.001;
-formationControlGain = 10;
-desiredDistance = 0.09;
+%% Grab tools we need to convert from single-integrator to unicycle dynamics
 
 % Single-integrator -> unicycle dynamics mapping
 si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 1, 'AngularVelocityLimit', 2);
@@ -65,7 +65,7 @@ for t = 1:iterations
         
         for j = neighbors
             dxi(:, i) = dxi(:, i) + ...
-                formationControlGain*(norm(x(1:2, j) - x(1:2, i))^2 -  desiredDistance^2)*(x(1:2, j) - x(1:2, i));
+                formation_control_gain*(norm(x(1:2, j) - x(1:2, i))^2 -  desired_distance^2)*(x(1:2, j) - x(1:2, i));
         end
     end
     

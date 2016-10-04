@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>RobotariumBuilder</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-03"><meta name="DC.source" content="RobotariumBuilder.m"><style type="text/css">
+      --><title>RobotariumBuilder</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="RobotariumBuilder.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>RobotariumBuilder</h1><!--introduction--><p>This class handles the creation of the Robotarium object.  In particular, it controls and sets the parameters for your simulation/experiment.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Function Summary</a></li><li><a href="#2">Example Usage</a></li></ul></div><h2>Function Summary<a name="1"></a></h2><div><ul><li>get_available_agents(): <img src="RobotariumBuilder_eq04533889791092028256.png" alt="$\emptyset \to \mathbf{Z}^{+}$"> returns the number of available agents (random for each instantiation)</li><li>set_number_of_agents(): <img src="RobotariumBuilder_eq00217751833041314466.png" alt="$\mathbf{Z}^{+} \to RobotariumBuilder$"> sets the number of agents, returning the RobotariumBuilder object</li><li>set_save_data(): <img src="RobotariumBuilder_eq18244870973272358820.png" alt="$\{false, true\} \to RobotariumBuilder$"> sets whether to save data for this experiment.</li></ul></div><h2>Example Usage<a name="2"></a></h2><pre class="language-matlab"><span class="comment">% Example showing potential usage of the RobotariumBuilder object.</span>
+  </style></head><body><div class="content"><h1>RobotariumBuilder</h1><!--introduction--><p>This class handles the creation of the Robotarium object.  In particular, it controls and sets the parameters for your simulation/experiment.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Function Summary</a></li><li><a href="#2">Example Usage</a></li></ul></div><h2>Function Summary<a name="1"></a></h2><div><ul><li>get_available_agents(): <img src="RobotariumBuilder_eq04533889791092028256.png" alt="$\emptyset \to \mathbf{Z}^{+}$"> returns the number of available agents (random for each instantiation)</li><li>set_number_of_agents(): <img src="RobotariumBuilder_eq00217751833041314466.png" alt="$\mathbf{Z}^{+} \to RobotariumBuilder$"> sets the number of agents, returning the RobotariumBuilder object</li><li>set_save_data(): <img src="RobotariumBuilder_eq18244870973272358820.png" alt="$\{false, true\} \to RobotariumBuilder$"> sets whether to save data for this experiment.</li><li>build(): <img src="RobotariumBuilder_eq01404369090342196456.png" alt="$\emptyset \to Robotarium$"> builds a Robotarium object with the specified parameters</li></ul></div><h2>Example Usage<a name="2"></a></h2><pre class="language-matlab"><span class="comment">% Example showing potential usage of the RobotariumBuilder object.</span>
 <span class="comment">% ote that get_available_agents() returns the number of available</span>
 <span class="comment">% agents, which is random.  If you need a particular number of agents,</span>
 <span class="comment">% this should be specified in the experiment descriptor when you</span>
@@ -78,7 +78,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 N = robo_builder.get_available_agents()
 robo_obj =
 robo_builder.set_number_of_agents(N).set_save_data(true).build()
-</pre><pre class="codeinput"><span class="keyword">classdef</span> RobotariumBuilder &lt; APIBuilder
+</pre><pre class="codeinput"><span class="keyword">classdef</span> RobotariumBuilder &lt; ARobotariumBuilder
     <span class="comment">%ROBOTARIUMBUILDER This class handles creation of the Robotarium object</span>
     <span class="comment">%that communicates with the GRITSbots.</span>
     <span class="comment">%  This class is really just a helper to assist with creating the</span>
@@ -97,7 +97,8 @@ robo_builder.set_number_of_agents(N).set_save_data(true).build()
     <span class="keyword">methods</span>
 
         <span class="keyword">function</span> this = RobotariumBuilder()
-          this.available_agents = randi(10);
+          this.available_agents = randi(14) + 1;
+          this.number_of_agents = -1;
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> number_of_agents = get_available_agents(this)
@@ -105,6 +106,9 @@ robo_builder.set_number_of_agents(N).set_save_data(true).build()
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> robotarium_obj = build(this)
+
+            assert(this.number_of_agents &gt; 0, <span class="string">'You must set the number of agents for this experiment'</span>);
+
             arena_width = this.boundaries(2) - this.boundaries(1);
             arena_height = this.boundaries(4) - this.boundaries(3);
 
@@ -138,6 +142,8 @@ robo_builder.set_number_of_agents(N).set_save_data(true).build()
 % agents, returning the RobotariumBuilder object
 % * set_save_data(): $\{false, true\} \to RobotariumBuilder$ sets whether
 % to save data for this experiment.  
+% * build(): $\emptyset \to Robotarium$ builds a Robotarium object with the
+% specified parameters
 %% Example Usage 
 %   % Example showing potential usage of the RobotariumBuilder object.
 %   % ote that get_available_agents() returns the number of available
@@ -154,7 +160,7 @@ robo_builder.set_number_of_agents(N).set_save_data(true).build()
 %   robo_obj =
 %   robo_builder.set_number_of_agents(N).set_save_data(true).build()
 
-classdef RobotariumBuilder < APIBuilder
+classdef RobotariumBuilder < ARobotariumBuilder
     %ROBOTARIUMBUILDER This class handles creation of the Robotarium object
     %that communicates with the GRITSbots.
     %  This class is really just a helper to assist with creating the
@@ -173,7 +179,8 @@ classdef RobotariumBuilder < APIBuilder
     methods
         
         function this = RobotariumBuilder()
-          this.available_agents = randi(10); 
+          this.available_agents = randi(14) + 1; 
+          this.number_of_agents = -1;
         end
         
         function number_of_agents = get_available_agents(this)
@@ -181,6 +188,9 @@ classdef RobotariumBuilder < APIBuilder
         end
         
         function robotarium_obj = build(this)
+            
+            assert(this.number_of_agents > 0, 'You must set the number of agents for this experiment');
+            
             arena_width = this.boundaries(2) - this.boundaries(1);
             arena_height = this.boundaries(4) - this.boundaries(3);
             

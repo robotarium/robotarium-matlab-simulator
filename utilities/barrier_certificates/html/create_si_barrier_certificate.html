@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_si_barrier_certificate</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-03"><meta name="DC.source" content="create_si_barrier_certificate.m"><style type="text/css">
+      --><title>create_si_barrier_certificate</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="create_si_barrier_certificate.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -72,12 +72,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     parser.addParameter(<span class="string">'BarrierGain'</span>, 1e4);
     parser.addParameter(<span class="string">'SafetyRadius'</span>, 0.1);
     parse(parser, varargin{:})
-    opts = optimoptions(<span class="string">'quadprog'</span>,<span class="string">'Display'</span>,<span class="string">'off'</span>);
+    opts = optimoptions(@quadprog,<span class="string">'Display'</span>,<span class="string">'off'</span>);
 
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
 
-    si_barrier_certificate = @(dxi, x) barrier_certificate(dxi, x);
+    si_barrier_certificate = @barrier_certificate;
 
     <span class="keyword">function</span> [ dx ] = barrier_certificate(dxi, x)
         <span class="comment">%BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier</span>
@@ -145,12 +145,12 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
     parser.addParameter('BarrierGain', 1e4);
     parser.addParameter('SafetyRadius', 0.1);
     parse(parser, varargin{:})
-    opts = optimoptions('quadprog','Display','off');
+    opts = optimoptions(@quadprog,'Display','off');
 
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
 
-    si_barrier_certificate = @(dxi, x) barrier_certificate(dxi, x);
+    si_barrier_certificate = @barrier_certificate;
 
     function [ dx ] = barrier_certificate(dxi, x)
         %BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier

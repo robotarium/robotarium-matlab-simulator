@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>main</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="main.m"><style type="text/css">
+      --><title>main_uni</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="main_uni.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,69 +66,83 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Vanilla consensus with a static, undirected topology</a></li><li><a href="#2">Get Robotarium object used to communicate with the robots/simulator</a></li><li><a href="#3">Experiment constants</a></li><li><a href="#4">Grab tools we need to convert from single-integrator to unicycle dynamics</a></li><li><a href="#6">Algorithm</a></li><li><a href="#7">Utilize barrier certificates</a></li><li><a href="#8">Send velocities to agents</a></li></ul></div><h2>Vanilla consensus with a static, undirected topology<a name="1"></a></h2><pre class="codeinput"><span class="comment">%Paul Glotfelter</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Barrier certificates for unicycle-modeled systems</a></li><li><a href="#2">Setup Robotarium object</a></li><li><a href="#3">Set up constants for experiments</a></li><li><a href="#4">Tools to map single-integrator -&gt; unicycle</a></li><li><a href="#6">Algorithm</a></li></ul></div><h2>Barrier certificates for unicycle-modeled systems<a name="1"></a></h2><pre class="codeinput"><span class="comment">%Paul Glotfelter</span>
 <span class="comment">%3/24/2016</span>
-</pre><h2>Get Robotarium object used to communicate with the robots/simulator<a name="2"></a></h2><pre class="codeinput">rb = RobotariumBuilder();
+</pre><h2>Setup Robotarium object<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Get Robotarium object used to communicate with the robots/simulator</span>
+rb = RobotariumBuilder();
 
 <span class="comment">% Get the number of available agents from the Robotarium.  We don't need a</span>
 <span class="comment">% specific value for this algorithm</span>
-N = 5; <span class="comment">%rb.get_available_agents();</span>
+N = rb.get_available_agents();
 
 <span class="comment">% Set the number of agents and whether we would like to save data.  Then,</span>
 <span class="comment">% build the Robotarium simulator object!</span>
 r = rb.set_number_of_agents(N).set_save_data(false).build();
-</pre><h2>Experiment constants<a name="3"></a></h2><pre class="codeinput"><span class="comment">% Generate a cyclic graph Laplacian from our handy utilities.  For this</span>
-<span class="comment">% algorithm, any connected graph will yield consensus</span>
-L = cycleGL(N);
-</pre><h2>Grab tools we need to convert from single-integrator to unicycle dynamics<a name="4"></a></h2><pre class="codeinput"><span class="comment">% Gain for the diffeomorphism transformation between single-integrator and</span>
-<span class="comment">% unicycle dynamics</span>
-transformation_gain = 0.05;
-[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping(<span class="string">'ProjectionDistance'</span>, transformation_gain);
 
-safety_radius = 0.09;
-si_barrier_cert = create_si_barrier_certificate(<span class="string">'SafetyRadius'</span>, safety_radius);
-
-<span class="comment">% Select the number of iterations for the experiment.  This value is</span>
-<span class="comment">% arbitrary</span>
+<span class="comment">%Run the simulation for a specific number of iterations</span>
 iterations = 1000;
-
-<span class="comment">% Initialize velocity vector for agents.  Each agent expects a 2 x 1</span>
+</pre><h2>Set up constants for experiments<a name="3"></a></h2><pre class="codeinput"><span class="comment">% Initialize velocity vector for agents.  Each agent expects a 2 x 1</span>
 <span class="comment">% velocity vector containing the linear and angular velocity, respectively.</span>
-dxi = zeros(2, N);
+dx = zeros(2, N);
+
+<span class="comment">% Distribute the agents into a circle that fits into the Robotarium</span>
+<span class="comment">% boundaries</span>
+xybound = [-0.5, 0.5, -0.3, 0.3];
+p_theta = (1:2:2*N)/(2*N)*2*pi;
+p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
+x_goal = p_circ(:,1:N);
+flag = 0; <span class="comment">%flag of task completion</span>
+
+lambda = 0.05;
+safety = 0.05;
+</pre><h2>Tools to map single-integrator -&gt; unicycle<a name="4"></a></h2><pre class="codeinput"><span class="comment">% Get the tools we need to map from single-integrator</span>
+[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping(<span class="string">'ProjectionDistance'</span>, lambda);
+
+<span class="comment">% Grab barrier certificates for unicycle dynamics</span>
+uni_barrier_cert = create_uni_barrier_certificate(<span class="string">'SafetyRadius'</span>, safety, <span class="string">'ProjectionDistance'</span>, lambda);
+
+<span class="comment">% Grab a position controller for single-integrator systems</span>
+si_pos_controller = create_si_position_controller();
 
 <span class="comment">%Iterate for the previously specified number of iterations</span>
 <span class="keyword">for</span> t = 1:iterations
 </pre><pre class="codeinput">    <span class="comment">% Retrieve the most recent poses from the Robotarium.  The time delay is</span>
     <span class="comment">% approximately 0.033 seconds</span>
     x = r.get_poses();
+</pre><h2>Algorithm<a name="6"></a></h2><pre class="codeinput">    <span class="comment">% Check if we've reached our destination on the ellipse</span>
+    <span class="keyword">if</span> norm(x_goal-x(1:2, :),1)&lt;0.1
+         flag = 1-flag;
+    <span class="keyword">end</span>
 
-    <span class="comment">% Convert to SI states</span>
-    xi = uni_to_si_states(x);
-</pre><h2>Algorithm<a name="6"></a></h2><pre class="codeinput">    <span class="keyword">for</span> i = 1:N
+    <span class="comment">% Switch positions on the ellipse</span>
+    <span class="keyword">if</span> flag == 0
+        x_goal = p_circ(:,1:N);
+    <span class="keyword">else</span>
+        x_goal = p_circ(:,N+1:2*N);
+    <span class="keyword">end</span>
 
-        <span class="comment">% Initialize velocity to zero for each agent.  This allows us to sum</span>
-        <span class="comment">%over agent i's neighbors</span>
-        dxi(:, i) = [0 ; 0];
+    <span class="comment">% Convert to single-integrator domain</span>
+    x_int = uni_to_si_states(x);
 
-        <span class="comment">% Get the topological neighbors of agent i based on the graph</span>
-        <span class="comment">%Laplacian L</span>
-        neighbors = topological_neighbors(L, i);
+    <span class="comment">%Currently in integrator dynamics</span>
+    dx = si_pos_controller(x_int, x_goal);
 
-        <span class="comment">% Iterate through agent i's neighbors</span>
-        <span class="keyword">for</span> j = neighbors
-
-            <span class="comment">% For each neighbor, calculate appropriate consensus term and</span>
-            <span class="comment">%add it to the total velocity</span>
-            dxi(:, i) = dxi(:, i) + (xi(:, j) - xi(:, i));
+    <span class="comment">% Threshold velocities for safety</span>
+    dxmax = 0.1;
+    <span class="keyword">for</span> i = 1:N
+        <span class="keyword">if</span> norm(dx(:,i)) &gt; dxmax
+            dx(:,i) = dx(:,i)/norm(dx(:,i))*dxmax;
         <span class="keyword">end</span>
     <span class="keyword">end</span>
-</pre><h2>Utilize barrier certificates<a name="7"></a></h2><pre class="codeinput">    dxi = si_barrier_cert(dxi, xi);
 
-    <span class="comment">% Transform the single-integrator to unicycle dynamics using the the</span>
-    <span class="comment">% transformation we created earlier</span>
-    dxu = si_to_uni_dyn(dxi, x);
-</pre><h2>Send velocities to agents<a name="8"></a></h2><pre class="codeinput">    <span class="comment">% Set velocities of agents 1,...,N</span>
-    r.set_velocities(1:N, dxu);
+    <span class="comment">% Map to unicycle dynamics</span>
+    dx = si_to_uni_dyn(dx, x);
+
+    <span class="comment">%Ensure the robots don't collide</span>
+    dx = uni_barrier_cert(dx, x);
+
+    <span class="comment">% Set velocities of agents 1,...,N</span>
+    r.set_velocities(1:N, dx);
 
     <span class="comment">% Send the previously set velocities to the agents.  This function must be called!</span>
     r.step();
@@ -139,44 +153,53 @@ dxi = zeros(2, N);
 r.call_at_scripts_end();
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% Vanilla consensus with a static, undirected topology
-%Paul Glotfelter
+%% Barrier certificates for unicycle-modeled systems
+%Paul Glotfelter 
 %3/24/2016
 
-%% Get Robotarium object used to communicate with the robots/simulator
+%% Setup Robotarium object
+
+% Get Robotarium object used to communicate with the robots/simulator
 rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = 5; %rb.get_available_agents();
+N = rb.get_available_agents(); 
 
 % Set the number of agents and whether we would like to save data.  Then,
 % build the Robotarium simulator object!
 r = rb.set_number_of_agents(N).set_save_data(false).build();
 
-%% Experiment constants
-
-% Generate a cyclic graph Laplacian from our handy utilities.  For this
-% algorithm, any connected graph will yield consensus
-L = cycleGL(N);
-
-%% Grab tools we need to convert from single-integrator to unicycle dynamics
-
-% Gain for the diffeomorphism transformation between single-integrator and
-% unicycle dynamics
-transformation_gain = 0.05;
-[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', transformation_gain);
-
-safety_radius = 0.09;
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', safety_radius);
-
-% Select the number of iterations for the experiment.  This value is
-% arbitrary
+%Run the simulation for a specific number of iterations
 iterations = 1000;
+
+%% Set up constants for experiments
 
 % Initialize velocity vector for agents.  Each agent expects a 2 x 1
 % velocity vector containing the linear and angular velocity, respectively.
-dxi = zeros(2, N);
+dx = zeros(2, N);
+
+% Distribute the agents into a circle that fits into the Robotarium
+% boundaries
+xybound = [-0.5, 0.5, -0.3, 0.3];
+p_theta = (1:2:2*N)/(2*N)*2*pi;
+p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
+x_goal = p_circ(:,1:N);
+flag = 0; %flag of task completion
+
+lambda = 0.05;
+safety = 0.05;
+
+%% Tools to map single-integrator -> unicycle
+
+% Get the tools we need to map from single-integrator
+[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', lambda);
+
+% Grab barrier certificates for unicycle dynamics
+uni_barrier_cert = create_uni_barrier_certificate('SafetyRadius', safety, 'ProjectionDistance', lambda);
+
+% Grab a position controller for single-integrator systems
+si_pos_controller = create_si_position_controller();
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
@@ -185,42 +208,42 @@ for t = 1:iterations
     % approximately 0.033 seconds
     x = r.get_poses();
     
-    % Convert to SI states
-    xi = uni_to_si_states(x);
-    
     %% Algorithm
+  
+    % Check if we've reached our destination on the ellipse
+    if norm(x_goal-x(1:2, :),1)<0.1
+         flag = 1-flag;
+    end
     
+    % Switch positions on the ellipse
+    if flag == 0
+        x_goal = p_circ(:,1:N);
+    else
+        x_goal = p_circ(:,N+1:2*N);
+    end
+    
+    % Convert to single-integrator domain 
+    x_int = uni_to_si_states(x);
+    
+    %Currently in integrator dynamics
+    dx = si_pos_controller(x_int, x_goal);
+    
+    % Threshold velocities for safety
+    dxmax = 0.1;
     for i = 1:N
-        
-        % Initialize velocity to zero for each agent.  This allows us to sum
-        %over agent i's neighbors
-        dxi(:, i) = [0 ; 0];
-        
-        % Get the topological neighbors of agent i based on the graph
-        %Laplacian L
-        neighbors = topological_neighbors(L, i);
-        
-        % Iterate through agent i's neighbors
-        for j = neighbors
-            
-            % For each neighbor, calculate appropriate consensus term and
-            %add it to the total velocity
-            dxi(:, i) = dxi(:, i) + (xi(:, j) - xi(:, i));
+        if norm(dx(:,i)) > dxmax
+            dx(:,i) = dx(:,i)/norm(dx(:,i))*dxmax;
         end
     end
     
-    %% Utilize barrier certificates
+    % Map to unicycle dynamics
+    dx = si_to_uni_dyn(dx, x);    
     
-    dxi = si_barrier_cert(dxi, xi);
-    
-    % Transform the single-integrator to unicycle dynamics using the the
-    % transformation we created earlier
-    dxu = si_to_uni_dyn(dxi, x);
-    
-    %% Send velocities to agents
+    %Ensure the robots don't collide
+    dx = uni_barrier_cert(dx, x);    
     
     % Set velocities of agents 1,...,N
-    r.set_velocities(1:N, dxu);
+    r.set_velocities(1:N, dx);
     
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();
@@ -230,5 +253,6 @@ end
 % Though we didn't save any data, we still should call r.call_at_scripts_end() after our
 % experiment is over!
 r.call_at_scripts_end();
+
 ##### SOURCE END #####
 --></body></html>

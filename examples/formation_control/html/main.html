@@ -1,0 +1,280 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>main</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="main.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Formation control utilizing edge tension energy with a static, undirected</a></li><li><a href="#2">Setup Robotarium object</a></li><li><a href="#3">Set up constants for experiment</a></li><li><a href="#4">Grab tools for converting to single-integrator dynamics and ensuring safety</a></li><li><a href="#6">Algorithm</a></li></ul></div><h2>Formation control utilizing edge tension energy with a static, undirected<a name="1"></a></h2><pre class="codeinput"><span class="comment">%communication topology</span>
+<span class="comment">%Paul Glotfelter</span>
+<span class="comment">%3/24/2016</span>
+</pre><h2>Setup Robotarium object<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Get Robotarium object used to communicate with the robots/simulator</span>
+<span class="comment">% Get Robotarium object used to communicate with the robots/simulator</span>
+rb = RobotariumBuilder();
+
+<span class="comment">% Get the number of available agents from the Robotarium.  We don't need a</span>
+<span class="comment">% specific value for this algorithm</span>
+N = 6;
+
+<span class="comment">% Set the number of agents and whether we would like to save data.  Then,</span>
+<span class="comment">% build the Robotarium simulator object!</span>
+r = rb.set_number_of_agents(N).set_save_data(false).build();
+</pre><h2>Set up constants for experiment<a name="3"></a></h2><pre class="codeinput"><span class="comment">%Gains for the transformation from single-integrator to unicycle dynamics</span>
+linearVelocityGain = 1;
+angularVelocityGain = pi/2;
+formationControlGain = 4;
+
+<span class="comment">% Select the number of iterations for the experiment.  This value is</span>
+<span class="comment">% arbitrary</span>
+iterations = 100000;
+
+<span class="comment">% Communication topology for the desired formation.  We need 2 * N - 3 = 9</span>
+<span class="comment">% edges to ensure that the formation is rigid.</span>
+L = [3 -1 0 -1 0 -1 ; <span class="keyword">...</span>
+    -1 3 -1 0 -1 0 ; <span class="keyword">...</span>
+    0 -1 3 -1 0 -1 ; <span class="keyword">...</span>
+    -1 0 -1 3 -1 0 ; <span class="keyword">...</span>
+    0 -1 0 -1 3 -1 ; <span class="keyword">...</span>
+   -1 0 -1 0 -1 3];
+
+<span class="comment">% The desired inter-agent distance for the formation</span>
+d = 0.2;
+
+<span class="comment">% Pre-compute diagonal values for the rectangular formation</span>
+ddiag = sqrt((2*d)^2 + d^2);
+
+<span class="comment">% Weight matrix containing the desired inter-agent distances to achieve a</span>
+<span class="comment">% rectuangular formation</span>
+weights = [ 0 d 0 d 0 ddiag; <span class="keyword">...</span>
+            d 0 d 0 d 0; <span class="keyword">...</span>
+            0 d 0 ddiag 0 d; <span class="keyword">...</span>
+            d 0 ddiag 0 d 0; <span class="keyword">...</span>
+            0 d 0 d 0 d; <span class="keyword">...</span>
+            ddiag 0 d 0 d 0];
+
+<span class="comment">% Initialize velocity vector for agents.  Each agent expects a 2 x 1</span>
+<span class="comment">% velocity vector containing the linear and angular velocity, respectively.</span>
+dx = zeros(2, N);
+</pre><h2>Grab tools for converting to single-integrator dynamics and ensuring safety<a name="4"></a></h2><pre class="codeinput">si_barrier_cert = create_si_barrier_certificate(<span class="string">'SafetyRadius'</span>, 0.08);
+si_to_uni_dyn = create_si_to_uni_mapping2(<span class="string">'LinearVelocityGain'</span>, linearVelocityGain, <span class="keyword">...</span>
+    <span class="string">'AngularVelocityLimit'</span>, angularVelocityGain);
+
+
+<span class="comment">% Iterate for the previously specified number of iterations</span>
+<span class="keyword">for</span> t = 0:iterations
+</pre><pre class="codeinput">    <span class="comment">% Retrieve the most recent poses from the Robotarium.  The time delay is</span>
+    <span class="comment">% approximately 0.033 seconds</span>
+    x = r.get_poses();
+</pre><h2>Algorithm<a name="6"></a></h2><pre class="codeinput">    <span class="comment">%This section contains the actual algorithm for formation control!</span>
+
+    <span class="comment">%Calculate single integrator control inputs using edge-energy consensus</span>
+    <span class="keyword">for</span> i = 1:N
+
+        <span class="comment">% Initialize velocity to zero for each agent.  This allows us to sum</span>
+        <span class="comment">% over agent i's neighbors</span>
+        dx(:, i) = [0 ; 0];
+
+        <span class="comment">% Get the topological neighbors of agent i from the communication</span>
+        <span class="comment">% topology</span>
+        <span class="keyword">for</span> j = topological_neighbors(L, i)
+
+            <span class="comment">% For each neighbor, calculate appropriate formation control term and</span>
+            <span class="comment">% add it to the total velocity</span>
+
+            dx(:, i) = dx(:, i) + <span class="keyword">...</span>
+            formationControlGain*(norm(x(1:2, i) - x(1:2, j))^2 - weights(i, j)^2) <span class="keyword">...</span>
+            *(x(1:2, j) - x(1:2, i));
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% Transform the single-integrator dynamics to unicycle dynamics using a provided utility function</span>
+    dx = si_barrier_cert(dx, x);
+    dx = si_to_uni_dyn(dx, x);
+
+    <span class="comment">% Set velocities of agents 1:N</span>
+    r.set_velocities(1:N, dx);
+
+    <span class="comment">% Send the previously set velocities to the agents.  This function must be called!</span>
+    r.step();
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="comment">% Though we didn't save any data, we still should call r.call_at_scripts_end() after our</span>
+<span class="comment">% experiment is over!</span>
+r.call_at_scripts_end();
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Formation control utilizing edge tension energy with a static, undirected
+%communication topology
+%Paul Glotfelter 
+%3/24/2016
+
+%% Setup Robotarium object
+
+% Get Robotarium object used to communicate with the robots/simulator
+% Get Robotarium object used to communicate with the robots/simulator
+rb = RobotariumBuilder();
+
+% Get the number of available agents from the Robotarium.  We don't need a
+% specific value for this algorithm
+N = 6; 
+
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
+
+%% Set up constants for experiment
+
+%Gains for the transformation from single-integrator to unicycle dynamics
+linearVelocityGain = 1; 
+angularVelocityGain = pi/2;
+formationControlGain = 4;
+
+% Select the number of iterations for the experiment.  This value is
+% arbitrary
+iterations = 100000;
+
+% Communication topology for the desired formation.  We need 2 * N - 3 = 9
+% edges to ensure that the formation is rigid.
+L = [3 -1 0 -1 0 -1 ; ... 
+    -1 3 -1 0 -1 0 ; ... 
+    0 -1 3 -1 0 -1 ; ... 
+    -1 0 -1 3 -1 0 ; ... 
+    0 -1 0 -1 3 -1 ; ... 
+   -1 0 -1 0 -1 3];
+
+% The desired inter-agent distance for the formation
+d = 0.2; 
+
+% Pre-compute diagonal values for the rectangular formation
+ddiag = sqrt((2*d)^2 + d^2);
+
+% Weight matrix containing the desired inter-agent distances to achieve a
+% rectuangular formation
+weights = [ 0 d 0 d 0 ddiag; ... 
+            d 0 d 0 d 0; ... 
+            0 d 0 ddiag 0 d; ... 
+            d 0 ddiag 0 d 0; ... 
+            0 d 0 d 0 d; ... 
+            ddiag 0 d 0 d 0];
+    
+% Initialize velocity vector for agents.  Each agent expects a 2 x 1
+% velocity vector containing the linear and angular velocity, respectively.
+dx = zeros(2, N);
+
+%% Grab tools for converting to single-integrator dynamics and ensuring safety 
+
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.08);
+si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', linearVelocityGain, ... 
+    'AngularVelocityLimit', angularVelocityGain);
+
+
+% Iterate for the previously specified number of iterations
+for t = 0:iterations
+    
+    
+    % Retrieve the most recent poses from the Robotarium.  The time delay is
+    % approximately 0.033 seconds
+    x = r.get_poses();
+    
+    %% Algorithm
+    
+    %This section contains the actual algorithm for formation control!
+    
+    %Calculate single integrator control inputs using edge-energy consensus
+    for i = 1:N
+        
+        % Initialize velocity to zero for each agent.  This allows us to sum
+        % over agent i's neighbors
+        dx(:, i) = [0 ; 0];
+        
+        % Get the topological neighbors of agent i from the communication
+        % topology
+        for j = topological_neighbors(L, i)
+                
+            % For each neighbor, calculate appropriate formation control term and
+            % add it to the total velocity
+
+            dx(:, i) = dx(:, i) + ...
+            formationControlGain*(norm(x(1:2, i) - x(1:2, j))^2 - weights(i, j)^2) ... 
+            *(x(1:2, j) - x(1:2, i));
+        end 
+    end
+    
+    % Transform the single-integrator dynamics to unicycle dynamics using a provided utility function
+    dx = si_barrier_cert(dx, x);
+    dx = si_to_uni_dyn(dx, x);  
+    
+    % Set velocities of agents 1:N
+    r.set_velocities(1:N, dx);
+    
+    % Send the previously set velocities to the agents.  This function must be called!
+    r.step();   
+end
+
+% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
+% experiment is over!
+r.call_at_scripts_end();
+
+##### SOURCE END #####
+--></body></html>

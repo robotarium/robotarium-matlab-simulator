@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Robotarium</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-03"><meta name="DC.source" content="Robotarium.m"><style type="text/css">
+      --><title>Robotarium</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="Robotarium.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Robotarium</h1><!--introduction--><p>A class that models your communications with the GRITSbots!   This class handles retrieving the poses of agents, setting their   velocities, iterating the simulation, and saving data.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Method Description</a></li></ul></div><h2>Method Description<a name="1"></a></h2><div><ul><li>get_poses(): <img src="Robotarium_eq09782105940901600018.png" alt="$\emptyset \to \mathbf{R}^{3 \times N}$"> retrieves the poses of the agents in a 3 x N vector, where each column contains the pose of an agent.</li><li>set_velocities(): <img src="Robotarium_eq14787410990528896327.png" alt="$\mathbf{R}^{2 \times N} \to Robotarium$"> sets the velocities of each agent using a 2 x N vector.  Each column represents the linear and angular velocity of an agent.</li><li>step(): <img src="Robotarium_eq17716958719866043637.png" alt="$\emptyset \to \emptyset$"> iterates the simulation, updating the state of each agent.  This function should be called for each "iteration" of your experiment.  Additionally, it should only be called once per call of get_poses().</li></ul></div><pre class="codeinput"><span class="keyword">classdef</span> Robotarium &lt; APIAbstract
+  </style></head><body><div class="content"><h1>Robotarium</h1><!--introduction--><p>A class that models your communications with the GRITSbots!   This class handles retrieving the poses of agents, setting their   velocities, iterating the simulation, and saving data.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Method Description</a></li></ul></div><h2>Method Description<a name="1"></a></h2><div><ul><li>get_poses(): <img src="Robotarium_eq09782105940901600018.png" alt="$\emptyset \to \mathbf{R}^{3 \times N}$"> retrieves the poses of the agents in a 3 x N vector, where each column contains the pose of an agent.</li><li>set_velocities(): <img src="Robotarium_eq14787410990528896327.png" alt="$\mathbf{R}^{2 \times N} \to Robotarium$"> sets the velocities of each agent using a 2 x N vector.  Each column represents the linear and angular velocity of an agent.</li><li>step(): <img src="Robotarium_eq17716958719866043637.png" alt="$\emptyset \to \emptyset$"> iterates the simulation, updating the state of each agent.  This function should be called for each "iteration" of your experiment.  Additionally, it should only be called once per call of get_poses().</li></ul></div><pre class="codeinput"><span class="keyword">classdef</span> Robotarium &lt; ARobotarium
     <span class="comment">%Robotarium This is the Robotarium simulator object that represents</span>
     <span class="comment">%your communications with the GRITSbots.</span>
     <span class="comment">%   This class handles retrieving the poses of agents, setting their</span>
@@ -86,10 +86,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     <span class="keyword">methods</span>
 
         <span class="keyword">function</span> this = Robotarium(number_of_agents, save_data, initial_poses)
-           this = this@APIAbstract(number_of_agents, save_data, initial_poses);
-           this.previous_timestep = tic;
+            this = this@ARobotarium(number_of_agents, save_data, initial_poses);
+            this.previous_timestep = tic;
 
-           this.initialize_visualization()
+            this.initialize_visualization()
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> poses = get_poses(this)
@@ -135,9 +135,9 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> call_at_scripts_end(this)
-           <span class="keyword">if</span>(this.save_data)
-              this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
-           <span class="keyword">end</span>
+            <span class="keyword">if</span>(this.save_data)
+                this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
+            <span class="keyword">end</span>
         <span class="keyword">end</span>
     <span class="keyword">end</span>
 
@@ -148,10 +148,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % A class that models your communications with the GRITSbots!
 %   This class handles retrieving the poses of agents, setting their
 %   velocities, iterating the simulation, and saving data.
-%% Method Description 
+%% Method Description
 % * get_poses(): $\emptyset \to \mathbf{R}^{3 \times N}$ retrieves the
 % poses of the agents in a 3 x N vector, where each column contains the
-% pose of an agent. 
+% pose of an agent.
 % * set_velocities(): $\mathbf{R}^{2 \times N} \to Robotarium$ sets the
 % velocities of each agent using a 2 x N vector.  Each column represents
 % the linear and angular velocity of an agent.
@@ -160,7 +160,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % of your experiment.  Additionally, it should only be called once per call
 % of get_poses().
 
-classdef Robotarium < APIAbstract
+classdef Robotarium < ARobotarium
     %Robotarium This is the Robotarium simulator object that represents
     %your communications with the GRITSbots.
     %   This class handles retrieving the poses of agents, setting their
@@ -177,13 +177,13 @@ classdef Robotarium < APIAbstract
         ang_vel_coef = 0.46;
     end
     
-    methods    
-
+    methods
+        
         function this = Robotarium(number_of_agents, save_data, initial_poses)
-           this = this@APIAbstract(number_of_agents, save_data, initial_poses);
-           this.previous_timestep = tic;
-           
-           this.initialize_visualization()
+            this = this@ARobotarium(number_of_agents, save_data, initial_poses);
+            this.previous_timestep = tic;
+            
+            this.initialize_visualization()
         end
         
         function poses = get_poses(this)
@@ -201,7 +201,7 @@ classdef Robotarium < APIAbstract
         end
         
         function step(this)
-                      
+            
             assert(~this.called_step_already, 'Make sure you call get_poses before calling step!');
             
             %Vectorize update to states
@@ -209,18 +209,18 @@ classdef Robotarium < APIAbstract
             
             total_time = this.time_step + max(0, toc(this.previous_timestep) - this.time_step);
             
-            %Update velocities using unicycle dynamics 
+            %Update velocities using unicycle dynamics
             this.poses(1, i) = this.poses(1, i) + this.x_lin_vel_coef*total_time.*this.velocities(1, i).*cos(this.poses(3, i));
             this.poses(2, i) = this.poses(2, i) + this.y_lin_vel_coef*total_time.*this.velocities(1, i).*sin(this.poses(3, i));
-            this.poses(3, i) = this.poses(3, i) + this.ang_vel_coef*total_time.*this.velocities(2, i);            
+            this.poses(3, i) = this.poses(3, i) + this.ang_vel_coef*total_time.*this.velocities(2, i);
             
             %Ensure that we're in the right range
             this.poses(3, i) = atan2(sin(this.poses(3, i)), cos(this.poses(3, i)));
             
-            %Allow getting of poses again 
-            this.checked_poses_already = false;   
+            %Allow getting of poses again
+            this.checked_poses_already = false;
             this.called_step_already = true;
-    
+            
             if(this.save_data)
                 this.save();
             end
@@ -229,9 +229,9 @@ classdef Robotarium < APIAbstract
         end
         
         function call_at_scripts_end(this)
-           if(this.save_data)
-              this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
-           end
+            if(this.save_data)
+                this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
+            end
         end
     end
     

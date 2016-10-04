@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_uni_to_si_mapping</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-03"><meta name="DC.source" content="create_uni_to_si_mapping.m"><style type="text/css">
+      --><title>create_uni_to_si_mapping</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="create_uni_to_si_mapping.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -81,7 +81,7 @@ dx_si = uni_to_si_dyn(dx_uni, states)
     projection_distance = parser.Results.ProjectionDistance;
 
     uni_to_si_dyn = @uni_to_si;
-    si_to_uni_states = @(states) si_to_uni_states_(states, projection_distance);
+    si_to_uni_states = @si_to_uni_states_;
 
     T = [1 0; 0 projection_distance];
     <span class="comment">% First mapping from SI -&gt; unicycle.  Keeps the projected SI system at</span>
@@ -128,7 +128,7 @@ function [uni_to_si_dyn, si_to_uni_states] = create_uni_to_si_mapping(varargin)
     projection_distance = parser.Results.ProjectionDistance;
     
     uni_to_si_dyn = @uni_to_si;
-    si_to_uni_states = @(states) si_to_uni_states_(states, projection_distance);
+    si_to_uni_states = @si_to_uni_states_;
     
     T = [1 0; 0 projection_distance];
     % First mapping from SI -> unicycle.  Keeps the projected SI system at

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_automatic_parking_controller: </title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-03"><meta name="DC.source" content="create_automatic_parking_controller.m"><style type="text/css">
+      --><title>create_automatic_parking_controller</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="create_automatic_parking_controller.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_automatic_parking_controller: <img src="create_automatic_parking_controller_eq05450636752409081850.png" alt="$\mathbf{R} \times \mathbf{R} \to \left(\mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N} \right)$"></h1><!--introduction--><p>Returns a controller (<img src="create_automatic_parking_controller_eq17505963355495861468.png" alt="$u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$">) that automatically parks agents at desired poses, zeroing out their velocities when the point (within a tolerance) is reached.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#3">Example Usage</a></li><li><a href="#4">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><p>This function returns a controller that allows for agents to be parked at a desired position and orientation.  When the agents are within the error bounds, this function will automatically stop their movement.</p><div><ul><li>ApproachAngleGain - affects how the unicycle approaches the desired position</li><li>DesiredAngleGain - affects how the unicycle approaches th desired angle</li><li>RotataionErrorGain - affects how quickly the unicycle corrects rotation errors</li></ul></div><h2>Example Usage<a name="3"></a></h2><pre class="language-matlab">parking_controller =
+  </style></head><body><div class="content"><h1>create_automatic_parking_controller</h1><!--introduction--><p>Returns a controller (<img src="create_automatic_parking_controller_eq17505963355495861468.png" alt="$u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$">) that automatically parks agents at desired poses, zeroing out their velocities when the point (within a tolerance) is reached.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#3">Example Usage</a></li><li><a href="#4">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><p>This function returns a controller that allows for agents to be parked at a desired position and orientation.  When the agents are within the error bounds, this function will automatically stop their movement.</p><div><ul><li>ApproachAngleGain - affects how the unicycle approaches the desired position</li><li>DesiredAngleGain - affects how the unicycle approaches th desired angle</li><li>RotataionErrorGain - affects how quickly the unicycle corrects rotation errors</li></ul></div><h2>Example Usage<a name="3"></a></h2><pre class="language-matlab">parking_controller =
 CREATE_AUTOMATIC_PARKING_CONTROLLER(<span class="string">'ApproachAngleGain'</span>, 1,
 <span class="string">'DesiredAngleGain'</span>, 1, <span class="string">'RotationErrorGain'</span>, 1)
 </pre><h2>Implementation<a name="4"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ automatic_parking_controller ] = create_automatic_parking_controller(varargin)
@@ -99,7 +99,7 @@ CREATE_AUTOMATIC_PARKING_CONTROLLER(<span class="string">'ApproachAngleGain'</sp
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% create_automatic_parking_controller: $\mathbf{R} \times \mathbf{R} \to \left(\mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N} \right)$ 
+%% create_automatic_parking_controller
 % Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that automatically parks agents at desired poses,
 % zeroing out their velocities when the point (within a tolerance) is
 % reached.

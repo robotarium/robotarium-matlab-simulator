@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>random_connectedGL: </title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="random_connectedGL.m"><style type="text/css">
+      --><title>ARobotariumBuilder</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="ARobotariumBuilder.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,101 +66,75 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>random_connectedGL: <img src="random_connectedGL_eq12942671300991736101.png" alt="$\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$"></h1><!--introduction--><p>Returns a random, connected GL with v verticies and (v-1) + e edges</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Usage</a></li><li><a href="#2">Implementation</a></li></ul></div><h2>Example Usage<a name="1"></a></h2><pre class="language-matlab">L = random_connectedGL(4, 3);
-</pre><h2>Implementation<a name="2"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ L ] = random_connectedGL(v, e)
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">classdef</span> ARobotariumBuilder &lt; handle
+    <span class="comment">%ARobotariumBuilder This is an abstract class for the RobotariumBuilder class</span>
+    <span class="comment">%that models the manner in which a Robotarium object is created</span>
+    <span class="comment">% This file should never be modified.  Otherwise, your code will not</span>
+    <span class="comment">% execute properly on the Robotarium</span>
 
-    L = zeros(v, v);
-
-    <span class="keyword">for</span> i = 2:v
-
-        edge = randi(i-1, 1, 1);
-
-        <span class="comment">%Update adjancency relations</span>
-        L(i, edge) = -1;
-        L(edge, i) = -1;
-
-        <span class="comment">%Update node degrees</span>
-        L(i, i) = L(i, i) + 1;
-        L(edge, edge) = L(edge, edge) + 1;
+    <span class="keyword">properties</span> (GetAccess = public, SetAccess = protected)
+        available_agents
+        number_of_agents
+        save_data = true
     <span class="keyword">end</span>
 
-    <span class="comment">%This works becuase all nodes have at least 1 degree.  Choose from only</span>
-    <span class="comment">%upper diagonal portion</span>
-    potEdges = find(triu(bsxfun(@xor, L, 1)) == 1);
-    sz = size(L);
-
-    numEdges = min(e, length(potEdges));
-
-    <span class="keyword">if</span> (numEdges &lt;= 0)
-       <span class="keyword">return</span>
+    <span class="keyword">methods</span> (Abstract)
+        <span class="comment">% Builds the Robotarium object.  Definitely backend/sim dependent.</span>
+        get_available_agents(this);
+        build(this);
     <span class="keyword">end</span>
 
-    <span class="comment">%Indices of randomly chosen extra edges</span>
-    edgeIndices = randperm(length(potEdges), numEdges);
+    <span class="keyword">methods</span>
+        <span class="keyword">function</span> this = set_number_of_agents(this, number_of_agents)
 
-    <span class="keyword">for</span> index = edgeIndices
+            assert(number_of_agents &gt; 0, <span class="string">'The provided number of agents (%i) must be &gt; 0'</span>, number_of_agents);
 
-       [i, j] = ind2sub(sz, potEdges(index));
+            this.number_of_agents = number_of_agents;
+        <span class="keyword">end</span>
 
-        <span class="comment">%Update adjacency relation</span>
-        L(i, j) = -1;
-        L(j, i) = -1;
+        <span class="keyword">function</span> this = set_save_data(this, save_data)
 
-        <span class="comment">%Update degree relation</span>
-        L(i, i) = L(i, i) + 1;
-        L(j, j) = L(j, j) + 1;
+            assert(save_data &gt;= 0 || save_data &lt; 0, <span class="string">'Save data must evaluate to true or false in a boolean expression'</span>);
+
+            this.save_data = save_data;
+        <span class="keyword">end</span>
     <span class="keyword">end</span>
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% random_connectedGL: $\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$
-% Returns a random, connected GL with v verticies and (v-1) + e edges 
-%% Example Usage 
-%   L = random_connectedGL(4, 3);
-%% Implementation
-function [ L ] = random_connectedGL(v, e)
-
-    L = zeros(v, v); 
-
-    for i = 2:v
-        
-        edge = randi(i-1, 1, 1);
-
-        %Update adjancency relations
-        L(i, edge) = -1;
-        L(edge, i) = -1;
-        
-        %Update node degrees
-        L(i, i) = L(i, i) + 1; 
-        L(edge, edge) = L(edge, edge) + 1;
+classdef ARobotariumBuilder < handle
+    %ARobotariumBuilder This is an abstract class for the RobotariumBuilder class
+    %that models the manner in which a Robotarium object is created
+    % This file should never be modified.  Otherwise, your code will not
+    % execute properly on the Robotarium
+    
+    properties (GetAccess = public, SetAccess = protected)
+        available_agents
+        number_of_agents
+        save_data = true
     end
     
-    %This works becuase all nodes have at least 1 degree.  Choose from only
-    %upper diagonal portion 
-    potEdges = find(triu(bsxfun(@xor, L, 1)) == 1); 
-    sz = size(L);
-    
-    numEdges = min(e, length(potEdges)); 
-    
-    if (numEdges <= 0)
-       return 
+    methods (Abstract)
+        % Builds the Robotarium object.  Definitely backend/sim dependent.
+        get_available_agents(this);
+        build(this);
     end
     
-    %Indices of randomly chosen extra edges
-    edgeIndices = randperm(length(potEdges), numEdges);
-
-    for index = edgeIndices 
+    methods                         
+        function this = set_number_of_agents(this, number_of_agents)
+            
+            assert(number_of_agents > 0, 'The provided number of agents (%i) must be > 0', number_of_agents);
+            
+            this.number_of_agents = number_of_agents;
+        end
         
-       [i, j] = ind2sub(sz, potEdges(index));
-        
-        %Update adjacency relation
-        L(i, j) = -1;
-        L(j, i) = -1; 
-        
-        %Update degree relation
-        L(i, i) = L(i, i) + 1;
-        L(j, j) = L(j, j) + 1;
-    end
+        function this = set_save_data(this, save_data)
+            
+            assert(save_data >= 0 || save_data < 0, 'Save data must evaluate to true or false in a boolean expression');
+            
+            this.save_data = save_data;
+        end
+    end   
 end
 
 

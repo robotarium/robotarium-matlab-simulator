@@ -15,7 +15,7 @@ N = rb.get_available_agents();
 % build the Robotarium simulator object!
 r = rb.set_number_of_agents(N).set_save_data(false).build();
 
-% This is a totally arbitrary number
+%Run the simulation for a specific number of iterations
 iterations = 1000;
 
 %% Set up constants for experiments
@@ -41,7 +41,7 @@ safety = 0.05;
 [si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', lambda);
 
 % Grab barrier certificates for unicycle dynamics
-uni_barrier_cert = create_uni_barrier_certificate('SafetyRadius', 0.03, 'ProjectionDistance', lambda);
+uni_barrier_cert = create_uni_barrier_certificate('SafetyRadius', safety, 'ProjectionDistance', lambda);
 
 % Grab a position controller for single-integrator systems
 si_pos_controller = create_si_position_controller();
@@ -55,11 +55,12 @@ for t = 1:iterations
     
     %% Algorithm
   
-    % nominal controller, go2goal
+    % Check if we've reached our destination on the ellipse
     if norm(x_goal-x(1:2, :),1)<0.1
          flag = 1-flag;
     end
     
+    % Switch positions on the ellipse
     if flag == 0
         x_goal = p_circ(:,1:N);
     else
