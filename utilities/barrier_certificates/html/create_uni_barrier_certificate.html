@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_uni_barrier_certificate</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="create_uni_barrier_certificate.m"><style type="text/css">
+      --><title>create_uni_barrier_certificate</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="create_uni_barrier_certificate.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_uni_barrier_certificate</h1><!--introduction--><p>Returns a barrier certificate that operates on unicycle algorithms, preventing colisions.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#4">Example usage</a></li><li><a href="#5">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>BarrierGain - affects how quickly the robots can approach each other</li><li>SafetyRadius affects how far apart the robots must be</li><li>ProjectionDistance affects the utilized transformation to single-integrator dynamics</li></ul></div><p>A good rule of thumb is to make the safety radius and projection distance each 1/2 of the desired total distance for the agents to remain apart.</p><h2>Example usage<a name="4"></a></h2><pre class="language-matlab">uni_barrier_cert = CREATE_UNI_BARRIER_CERTIFICATE(<span class="string">'BarrierGain'</span>, 3,
+  </style></head><body><div class="content"><h1>create_uni_barrier_certificate</h1><!--introduction--><p>Returns a barrier certificate (<img src="create_uni_barrier_certificate_eq06303456170493080000.png" alt="$f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$">) that operates on unicycle algorithms, preventing colisions.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#4">Example usage</a></li><li><a href="#5">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>BarrierGain - affects how quickly the robots can approach each other</li><li>SafetyRadius affects how far apart the robots must be</li><li>ProjectionDistance affects the utilized transformation to single-integrator dynamics</li></ul></div><p>A good rule of thumb is to make the safety radius and projection distance each 1/2 of the desired total distance for the agents to remain apart. You'll want their total to be more than the diameter of the GRITSbot (i.e., 0.08 m).</p><h2>Example usage<a name="4"></a></h2><pre class="language-matlab">uni_barrier_cert = CREATE_UNI_BARRIER_CERTIFICATE(<span class="string">'BarrierGain'</span>, 3,
 <span class="string">'SafetyRadius'</span>, 0.05, <span class="string">'ProjectionDistance'</span>, 0.05)
 dxu_safe = uni_barrier_cert(dxu, robot_poses)
 </pre><h2>Implementation<a name="5"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
@@ -77,7 +77,7 @@ dxu_safe = uni_barrier_cert(dxu, robot_poses)
     addOptional(parser, <span class="string">'ProjectionDistance'</span>, 0.05);
     parse(parser, varargin{:})
 
-    opts = optimoptions(<span class="string">'quadprog'</span>,<span class="string">'Display'</span>,<span class="string">'off'</span>);
+    opts = optimoptions(@quadprog,<span class="string">'Display'</span>,<span class="string">'off'</span>);
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
     projection_distance = parser.Results.ProjectionDistance;
@@ -85,7 +85,7 @@ dxu_safe = uni_barrier_cert(dxu, robot_poses)
     [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping(<span class="string">'ProjectionDistance'</span>, projection_distance);
     uni_si_dyn = create_uni_to_si_mapping(<span class="string">'ProjectionDistance'</span>, projection_distance);
 
-    uni_barrier_certificate = @(dxu, x) barrier_unicycle(dxu, x);
+    uni_barrier_certificate = @barrier_unicycle;
 
     <span class="keyword">function</span> [ dxu ] = barrier_unicycle(dxu, x)
         N = size(dxu, 2);
@@ -128,7 +128,7 @@ dxu_safe = uni_barrier_cert(dxu, robot_poses)
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% create_uni_barrier_certificate 
-% Returns a barrier certificate that operates on unicycle algorithms, 
+% Returns a barrier certificate ($f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that operates on unicycle algorithms, 
 % preventing colisions.
 
 %% Detailed Description
@@ -140,6 +140,8 @@ dxu_safe = uni_barrier_cert(dxu, robot_poses)
 %%  
 % A good rule of thumb is to make the safety radius and projection distance 
 % each 1/2 of the desired total distance for the agents to remain apart.
+% You'll want their total to be more than the diameter of the GRITSbot
+% (i.e., 0.08 m).
 
 %% Example usage
 %   uni_barrier_cert = CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', 3,
@@ -155,7 +157,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     addOptional(parser, 'ProjectionDistance', 0.05);
     parse(parser, varargin{:})
     
-    opts = optimoptions('quadprog','Display','off');       
+    opts = optimoptions(@quadprog,'Display','off');       
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
     projection_distance = parser.Results.ProjectionDistance;
@@ -163,7 +165,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping('ProjectionDistance', projection_distance);
     uni_si_dyn = create_uni_to_si_mapping('ProjectionDistance', projection_distance);
     
-    uni_barrier_certificate = @(dxu, x) barrier_unicycle(dxu, x);
+    uni_barrier_certificate = @barrier_unicycle;
 
     function [ dxu ] = barrier_unicycle(dxu, x)      
         N = size(dxu, 2);

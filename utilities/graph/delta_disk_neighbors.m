@@ -1,4 +1,4 @@
-%% delta_disk_neighbors
+%% delta_disk_neighbors $\mathbf{R}^{2 \times N} \times \mathbf{Z}^{+} \times \mathbf{R} \to \mathbf{Z}^{+}$
 % Returns the agents within the 2-norm of the supplied agent
 %% Example Usage 
 %   neighbors = delta_disk_neighbors(robot_poses, 1, 0.5);

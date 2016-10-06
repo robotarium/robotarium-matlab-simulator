@@ -1,4 +1,4 @@
-%% generate_initial_conditions 
+%% generate_initial_conditions: $\mathbf{Z}^{+} \to \mathbf{R}^{3 \times N}$
 % Returns a set of random poses distributed in the Robotarium workspace
 %% Example Usage 
 %   initial_conditions = generate_initial_conditions(4);

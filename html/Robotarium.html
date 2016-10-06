@@ -1,0 +1,242 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Robotarium</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="Robotarium.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Robotarium</h1><!--introduction--><p>A class that models your communications with the GRITSbots!   This class handles retrieving the poses of agents, setting their   velocities, iterating the simulation, and saving data.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Method Description</a></li></ul></div><h2>Method Description<a name="1"></a></h2><div><ul><li>get_poses(): <img src="Robotarium_eq09782105940901600018.png" alt="$\emptyset \to \mathbf{R}^{3 \times N}$"> retrieves the poses of the agents in a 3 x N vector, where each column contains the pose of an agent.</li><li>set_velocities(): <img src="Robotarium_eq14787410990528896327.png" alt="$\mathbf{R}^{2 \times N} \to Robotarium$"> sets the velocities of each agent using a 2 x N vector.  Each column represents the linear and angular velocity of an agent.</li><li>step(): <img src="Robotarium_eq17716958719866043637.png" alt="$\emptyset \to \emptyset$"> iterates the simulation, updating the state of each agent.  This function should be called for each "iteration" of your experiment.  Additionally, it should only be called once per call of get_poses().</li></ul></div><pre class="codeinput"><span class="keyword">classdef</span> Robotarium &lt; ARobotarium
+    <span class="comment">%Robotarium This is the Robotarium simulator object that represents</span>
+    <span class="comment">%your communications with the GRITSbots.</span>
+    <span class="comment">%   This class handles retrieving the poses of agents, setting their</span>
+    <span class="comment">%   velocities, iterating the simulation, and saving data.</span>
+
+    <span class="comment">% THIS CLASS SHOULD NEVER BE MODIFIED</span>
+
+    <span class="keyword">properties</span> (GetAccess = private, SetAccess = private)
+        previous_timestep
+        checked_poses_already = false
+        called_step_already = true
+        x_lin_vel_coef = 0.86;
+        y_lin_vel_coef = 0.81;
+        ang_vel_coef = 0.46;
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> this = Robotarium(number_of_agents, save_data, initial_poses)
+            this = this@ARobotarium(number_of_agents, save_data, initial_poses);
+            this.previous_timestep = tic;
+
+            this.initialize_visualization()
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> poses = get_poses(this)
+
+            assert(~this.checked_poses_already, <span class="string">'Can only call get_poses() once per call of step()!'</span>);
+
+            poses = this.poses;
+
+            <span class="comment">%Include delay to mimic behavior of real system</span>
+            this.previous_timestep = tic;
+
+            <span class="comment">%Make sure it's only called once per iteration</span>
+            this.checked_poses_already = true;
+            this.called_step_already = false;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> step(this)
+
+            assert(~this.called_step_already, <span class="string">'Make sure you call get_poses before calling step!'</span>);
+
+            <span class="comment">%Vectorize update to states</span>
+            i = 1:this.number_of_agents;
+
+            total_time = this.time_step + max(0, toc(this.previous_timestep) - this.time_step);
+
+            <span class="comment">%Update velocities using unicycle dynamics</span>
+            this.poses(1, i) = this.poses(1, i) + this.x_lin_vel_coef*total_time.*this.velocities(1, i).*cos(this.poses(3, i));
+            this.poses(2, i) = this.poses(2, i) + this.y_lin_vel_coef*total_time.*this.velocities(1, i).*sin(this.poses(3, i));
+            this.poses(3, i) = this.poses(3, i) + this.ang_vel_coef*total_time.*this.velocities(2, i);
+
+            <span class="comment">%Ensure that we're in the right range</span>
+            this.poses(3, i) = atan2(sin(this.poses(3, i)), cos(this.poses(3, i)));
+
+            <span class="comment">%Allow getting of poses again</span>
+            this.checked_poses_already = false;
+            this.called_step_already = true;
+
+            <span class="keyword">if</span>(this.save_data)
+                this.save();
+            <span class="keyword">end</span>
+
+            this.draw_robots();
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> call_at_scripts_end(this)
+            <span class="keyword">if</span>(this.save_data)
+                this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Robotarium
+% A class that models your communications with the GRITSbots!
+%   This class handles retrieving the poses of agents, setting their
+%   velocities, iterating the simulation, and saving data.
+%% Method Description
+% * get_poses(): $\emptyset \to \mathbf{R}^{3 \times N}$ retrieves the
+% poses of the agents in a 3 x N vector, where each column contains the
+% pose of an agent.
+% * set_velocities(): $\mathbf{R}^{2 \times N} \to Robotarium$ sets the
+% velocities of each agent using a 2 x N vector.  Each column represents
+% the linear and angular velocity of an agent.
+% * step(): $\emptyset \to \emptyset$ iterates the simulation, updating the
+% state of each agent.  This function should be called for each "iteration"
+% of your experiment.  Additionally, it should only be called once per call
+% of get_poses().
+
+classdef Robotarium < ARobotarium
+    %Robotarium This is the Robotarium simulator object that represents
+    %your communications with the GRITSbots.
+    %   This class handles retrieving the poses of agents, setting their
+    %   velocities, iterating the simulation, and saving data.
+    
+    % THIS CLASS SHOULD NEVER BE MODIFIED
+    
+    properties (GetAccess = private, SetAccess = private)
+        previous_timestep
+        checked_poses_already = false
+        called_step_already = true
+        x_lin_vel_coef = 0.86;
+        y_lin_vel_coef = 0.81;
+        ang_vel_coef = 0.46;
+    end
+    
+    methods
+        
+        function this = Robotarium(number_of_agents, save_data, initial_poses)
+            this = this@ARobotarium(number_of_agents, save_data, initial_poses);
+            this.previous_timestep = tic;
+            
+            this.initialize_visualization()
+        end
+        
+        function poses = get_poses(this)
+            
+            assert(~this.checked_poses_already, 'Can only call get_poses() once per call of step()!');
+            
+            poses = this.poses;
+            
+            %Include delay to mimic behavior of real system
+            this.previous_timestep = tic;
+            
+            %Make sure it's only called once per iteration
+            this.checked_poses_already = true;
+            this.called_step_already = false;
+        end
+        
+        function step(this)
+            
+            assert(~this.called_step_already, 'Make sure you call get_poses before calling step!');
+            
+            %Vectorize update to states
+            i = 1:this.number_of_agents;
+            
+            total_time = this.time_step + max(0, toc(this.previous_timestep) - this.time_step);
+            
+            %Update velocities using unicycle dynamics
+            this.poses(1, i) = this.poses(1, i) + this.x_lin_vel_coef*total_time.*this.velocities(1, i).*cos(this.poses(3, i));
+            this.poses(2, i) = this.poses(2, i) + this.y_lin_vel_coef*total_time.*this.velocities(1, i).*sin(this.poses(3, i));
+            this.poses(3, i) = this.poses(3, i) + this.ang_vel_coef*total_time.*this.velocities(2, i);
+            
+            %Ensure that we're in the right range
+            this.poses(3, i) = atan2(sin(this.poses(3, i)), cos(this.poses(3, i)));
+            
+            %Allow getting of poses again
+            this.checked_poses_already = false;
+            this.called_step_already = true;
+            
+            if(this.save_data)
+                this.save();
+            end
+            
+            this.draw_robots();
+        end
+        
+        function call_at_scripts_end(this)
+            if(this.save_data)
+                this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
+            end
+        end
+    end
+    
+end
+
+
+##### SOURCE END #####
+--></body></html>

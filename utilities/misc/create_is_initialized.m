@@ -1,5 +1,7 @@
 %% create_is_initialized 
-% Creates a function to check for initialization
+% Creates a function to check for initialization.  The function returns
+% whether all the agents have been initialized and those that have already
+% finished.
 %% Detailed Description
 % * PositionError - affects how close the agents are required to get to the
 % desired position 
@@ -8,6 +10,8 @@
 %% Example Usage 
 %   initialization_checker = create_is_initialized('PositionError', 0.l,
 %   'RotationError', 0.01)
+%   [all_initialized, done_idxs] = initialization_checker(robot_poses,
+%   desired_poses)
 %% Implementation
 function [ created_is_initialized ] = create_is_initialized(varargin)
 

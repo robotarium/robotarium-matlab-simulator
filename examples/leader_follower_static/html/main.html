@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Leader-follower with static topology</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="main.m"><style type="text/css">
+      --><title>Leader-follower with static topology</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="main.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,14 +66,18 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Leader-follower with static topology</h1><!--introduction--><p>Paul Glotfelter 3/24/2016</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Experiment Constants</a></li><li><a href="#2">Set up the Robotarium object</a></li><li><a href="#3">Create the desired Laplacian</a></li><li><a href="#4">Grab tools we need to convert from single-integrator to unicycle dynamics</a></li><li><a href="#6">Algorithm</a></li><li><a href="#7">Make the leader travel between waypoints</a></li><li><a href="#8">Use barrier certificate and convert to unicycle dynamics</a></li><li><a href="#9">Send velocities to agents</a></li></ul></div><h2>Experiment Constants<a name="1"></a></h2><pre class="codeinput"><span class="comment">%Run for 300 iterations</span>
+  </style></head><body><div class="content"><h1>Leader-follower with static topology</h1><!--introduction--><p>Paul Glotfelter 3/24/2016</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Experiment Constants</a></li><li><a href="#2">Set up the Robotarium object</a></li><li><a href="#3">Create the desired Laplacian</a></li><li><a href="#4">Grab tools we need to convert from single-integrator to unicycle dynamics</a></li><li><a href="#6">Algorithm</a></li><li><a href="#7">Make the leader travel between waypoints</a></li><li><a href="#8">Use barrier certificate and convert to unicycle dynamics</a></li><li><a href="#9">Send velocities to agents</a></li></ul></div><h2>Experiment Constants<a name="1"></a></h2><pre class="codeinput"><span class="comment">%Run the simulation for a specific number of iterations</span>
 iterations = 2000;
 </pre><h2>Set up the Robotarium object<a name="2"></a></h2><pre class="codeinput"><span class="comment">%Get Robotarium object and set the save parameters</span>
+rb = RobotariumBuilder();
 
-r = Robotarium();
-N = r.getAvailableAgents();
+<span class="comment">% Get the number of available agents from the Robotarium.  We don't need a</span>
+<span class="comment">% specific value for this algorithm</span>
+N = rb.get_available_agents();
 
-r.initialize(N);
+<span class="comment">% Set the number of agents and whether we would like to save data.  Then,</span>
+<span class="comment">% build the Robotarium simulator object!</span>
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 </pre><h2>Create the desired Laplacian<a name="3"></a></h2><pre class="codeinput"><span class="comment">%Graph laplacian</span>
 followers = -completeGL(N-1);
 L = zeros(N, N);
@@ -86,11 +90,11 @@ dxi = zeros(2, N);
 
 <span class="comment">%State for leader</span>
 state = 0;
-</pre><h2>Grab tools we need to convert from single-integrator to unicycle dynamics<a name="4"></a></h2><pre class="codeinput"><span class="comment">%collisionAvoidanceGain = 0.001;</span>
-formationControlGain = 10;
-desiredDistance = 0.09;
 
-<span class="comment">% Single-integrator -&gt; unicycle dynamics mapping</span>
+<span class="comment">% These are gains for our formation control algorithm</span>
+formation_control_gain = 10;
+desired_distance = 0.09;
+</pre><h2>Grab tools we need to convert from single-integrator to unicycle dynamics<a name="4"></a></h2><pre class="codeinput"><span class="comment">% Single-integrator -&gt; unicycle dynamics mapping</span>
 si_to_uni_dyn = create_si_to_uni_mapping2(<span class="string">'LinearVelocityGain'</span>, 1, <span class="string">'AngularVelocityLimit'</span>, 2);
 <span class="comment">% Single-integrator barrier certificates</span>
 si_barrier_cert = create_si_barrier_certificate(<span class="string">'SafetyRadius'</span>, 0.08);
@@ -100,78 +104,86 @@ si_pos_controller = create_si_position_controller();
 <span class="keyword">for</span> t = 1:iterations
 </pre><pre class="codeinput">    <span class="comment">% Retrieve the most recent poses from the Robotarium.  The time delay is</span>
     <span class="comment">% approximately 0.033 seconds</span>
-    x = r.getPoses();
+    x = r.get_poses();
 </pre><h2>Algorithm<a name="6"></a></h2><pre class="codeinput">    <span class="keyword">for</span> i = 2:N
 
         <span class="comment">%Zero velocity and get the topological neighbors of agent i</span>
         dxi(:, i) = [0 ; 0];
 
-        neighbors = r.getTopNeighbors(i, L);
+        neighbors = topological_neighbors(L, i);
 
         <span class="keyword">for</span> j = neighbors
             dxi(:, i) = dxi(:, i) + <span class="keyword">...</span>
-            formationControlGain*(norm(x(1:2, j) - x(1:2, i))^2 -  desiredDistance^2)*(x(1:2, j) - x(1:2, i));
+                formation_control_gain*(norm(x(1:2, j) - x(1:2, i))^2 -  desired_distance^2)*(x(1:2, j) - x(1:2, i));
         <span class="keyword">end</span>
     <span class="keyword">end</span>
 </pre><h2>Make the leader travel between waypoints<a name="7"></a></h2><pre class="codeinput">    <span class="keyword">switch</span> state
 
         <span class="keyword">case</span> 0
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; 0.15]);
-            <span class="keyword">if</span>(norm(x(1:2, 1) - [0.25 ; 0.15]) &lt; 0.05)
-               state = 1;
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; 0.2]);
+            <span class="keyword">if</span>(norm(x(1:2, 1) - [0.3 ; 0.2]) &lt; 0.05)
+                state = 1;
             <span class="keyword">end</span>
         <span class="keyword">case</span> 1
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; 0.15]);
-            <span class="keyword">if</span>(norm(x(1:2, 1) - [-0.25 ; 0.15]) &lt; 0.05)
-               state = 2;
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; 0.2]);
+            <span class="keyword">if</span>(norm(x(1:2, 1) - [-0.3 ; 0.2]) &lt; 0.05)
+                state = 2;
             <span class="keyword">end</span>
         <span class="keyword">case</span> 2
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; -0.15]);
-            <span class="keyword">if</span>(norm(x(1:2, 1) - [-0.25 ; -0.15]) &lt; 0.05)
-               state = 3;
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; -0.2]);
+            <span class="keyword">if</span>(norm(x(1:2, 1) - [-0.3 ; -0.2]) &lt; 0.05)
+                state = 3;
             <span class="keyword">end</span>
         <span class="keyword">case</span> 3
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; -0.15]);
-            <span class="keyword">if</span>(norm(x(1:2, 1) - [0.25 ; -0.15]) &lt; 0.05)
-               state = 0;
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; -0.2]);
+            <span class="keyword">if</span>(norm(x(1:2, 1) - [0.3 ; -0.2]) &lt; 0.05)
+                state = 0;
             <span class="keyword">end</span>
     <span class="keyword">end</span>
 </pre><h2>Use barrier certificate and convert to unicycle dynamics<a name="8"></a></h2><pre class="codeinput">    dxi = si_barrier_cert(dxi, x);
     dxu = si_to_uni_dyn(dxi, x);
 </pre><h2>Send velocities to agents<a name="9"></a></h2><pre class="codeinput">    <span class="comment">%Set velocities</span>
-    r.setVelocities(1:N, dxu);
+    r.set_velocities(1:N, dxu);
 
     <span class="comment">%Iterate experiment</span>
     r.step();
 </pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="comment">% Though we didn't save any data, we still should call r.call_at_scripts_end() after our</span>
+<span class="comment">% experiment is over!</span>
+r.call_at_scripts_end();
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Leader-follower with static topology
-% Paul Glotfelter 
+% Paul Glotfelter
 % 3/24/2016
 
 %% Experiment Constants
 
-%Run for 300 iterations
+%Run the simulation for a specific number of iterations
 iterations = 2000;
 
 %% Set up the Robotarium object
 
 %Get Robotarium object and set the save parameters
+rb = RobotariumBuilder();
 
-r = Robotarium();
-N = r.getAvailableAgents();
+% Get the number of available agents from the Robotarium.  We don't need a
+% specific value for this algorithm
+N = rb.get_available_agents();
 
-r.initialize(N);
+% Set the number of agents and whether we would like to save data.  Then,
+% build the Robotarium simulator object!
+r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 %% Create the desired Laplacian
 
-%Graph laplacian  
-followers = -completeGL(N-1); 
-L = zeros(N, N); 
+%Graph laplacian
+followers = -completeGL(N-1);
+L = zeros(N, N);
 L(2:N, 2:N) = followers;
-L(2, 2) = L(2, 2) + 1; 
-L(2, 1) = -1; 
+L(2, 2) = L(2, 2) + 1;
+L(2, 1) = -1;
 
 %Initialize velocity vector
 dxi = zeros(2, N);
@@ -179,24 +191,24 @@ dxi = zeros(2, N);
 %State for leader
 state = 0;
 
-%% Grab tools we need to convert from single-integrator to unicycle dynamics
+% These are gains for our formation control algorithm
+formation_control_gain = 10;
+desired_distance = 0.09;
 
-%collisionAvoidanceGain = 0.001; 
-formationControlGain = 10;
-desiredDistance = 0.09;
+%% Grab tools we need to convert from single-integrator to unicycle dynamics
 
 % Single-integrator -> unicycle dynamics mapping
 si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 1, 'AngularVelocityLimit', 2);
 % Single-integrator barrier certificates
 si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.08);
-% Single-integrator position controller 
+% Single-integrator position controller
 si_pos_controller = create_si_position_controller();
 
 for t = 1:iterations
-           
+    
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    x = r.getPoses();
+    x = r.get_poses();
     
     %% Algorithm
     
@@ -205,51 +217,55 @@ for t = 1:iterations
         %Zero velocity and get the topological neighbors of agent i
         dxi(:, i) = [0 ; 0];
         
-        neighbors = r.getTopNeighbors(i, L);
+        neighbors = topological_neighbors(L, i);
         
-        for j = neighbors 
+        for j = neighbors
             dxi(:, i) = dxi(:, i) + ...
-            formationControlGain*(norm(x(1:2, j) - x(1:2, i))^2 -  desiredDistance^2)*(x(1:2, j) - x(1:2, i));
-        end      
-    end    
-        
+                formation_control_gain*(norm(x(1:2, j) - x(1:2, i))^2 -  desired_distance^2)*(x(1:2, j) - x(1:2, i));
+        end
+    end
+    
     %% Make the leader travel between waypoints
     
-    switch state 
-
-        case 0             
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; 0.15]);
-            if(norm(x(1:2, 1) - [0.25 ; 0.15]) < 0.05) 
-               state = 1; 
-            end           
+    switch state
+        
+        case 0
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; 0.2]);
+            if(norm(x(1:2, 1) - [0.3 ; 0.2]) < 0.05)
+                state = 1;
+            end
         case 1
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; 0.15]);
-            if(norm(x(1:2, 1) - [-0.25 ; 0.15]) < 0.05) 
-               state = 2; 
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; 0.2]);
+            if(norm(x(1:2, 1) - [-0.3 ; 0.2]) < 0.05)
+                state = 2;
             end
         case 2
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.25 ; -0.15]);
-            if(norm(x(1:2, 1) - [-0.25 ; -0.15]) < 0.05)
-               state = 3; 
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; -0.2]);
+            if(norm(x(1:2, 1) - [-0.3 ; -0.2]) < 0.05)
+                state = 3;
             end
         case 3
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.25 ; -0.15]);
-            if(norm(x(1:2, 1) - [0.25 ; -0.15]) < 0.05)
-               state = 0; 
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; -0.2]);
+            if(norm(x(1:2, 1) - [0.3 ; -0.2]) < 0.05)
+                state = 0;
             end
     end
-
+    
     %% Use barrier certificate and convert to unicycle dynamics
     dxi = si_barrier_cert(dxi, x);
     dxu = si_to_uni_dyn(dxi, x);
     
     %% Send velocities to agents
     
-    %Set velocities 
-    r.setVelocities(1:N, dxu);
+    %Set velocities
+    r.set_velocities(1:N, dxu);
     
     %Iterate experiment
     r.step();
 end
+
+% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
+% experiment is over!
+r.call_at_scripts_end();
 ##### SOURCE END #####
 --></body></html>

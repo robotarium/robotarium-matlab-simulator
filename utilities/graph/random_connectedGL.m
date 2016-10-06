@@ -1,4 +1,4 @@
-%% random_connectedGL 
+%% random_connectedGL: $\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$
 % Returns a random, connected GL with v verticies and (v-1) + e edges 
 %% Example Usage 
 %   L = random_connectedGL(4, 3);

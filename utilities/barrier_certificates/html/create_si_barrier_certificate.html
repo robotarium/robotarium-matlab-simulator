@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_si_barrier_certificate</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="create_si_barrier_certificate.m"><style type="text/css">
+      --><title>create_si_barrier_certificate</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="create_si_barrier_certificate.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,20 +66,20 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_si_barrier_certificate</h1><!--introduction--><p>Returns a single-integrator barrier certificate</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#4">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>BarrierGain - affects how quickly the agents can approach each other</li><li>SafetyRadius - affects the distance the agents maintain</li></ul></div><p>A good rule of thumb is to make SafetyRadius a bit larger than the agent itself.</p><h2>Implementation<a name="4"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
+  </style></head><body><div class="content"><h1>create_si_barrier_certificate</h1><!--introduction--><p>Returns a single-integrator barrier certificate function (<img src="create_si_barrier_certificate_eq05022020685070492965.png" alt="$f : \mathbf{R}^{2 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2 \times N}$">).  This function takes a 2 x N, 2 x N single-integrator velocity and state vector, respectively, and returns a single-integrator velocity vector that does not induce collisions in the agents.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#4">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>BarrierGain - affects how quickly the agents can approach each other</li><li>SafetyRadius - affects the distance the agents maintain</li></ul></div><p>A good rule of thumb is to make SafetyRadius a bit larger than the agent itself (0.08 m for the GRITSbot).</p><h2>Implementation<a name="4"></a></h2><pre class="codeinput"><span class="keyword">function</span> [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
 
     parser = inputParser;
     parser.addParameter(<span class="string">'BarrierGain'</span>, 1e4);
     parser.addParameter(<span class="string">'SafetyRadius'</span>, 0.1);
     parse(parser, varargin{:})
-    opts = optimoptions(<span class="string">'quadprog'</span>,<span class="string">'Display'</span>,<span class="string">'off'</span>);
+    opts = optimoptions(@quadprog,<span class="string">'Display'</span>,<span class="string">'off'</span>);
 
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
 
-    si_barrier_certificate = @(dxi, x) barrier_certificate(dxi, x, safety_radius, gamma);
+    si_barrier_certificate = @barrier_certificate;
 
-    <span class="keyword">function</span> [ dx ] = barrier_certificate(dxi, x, safety_radius, gamma)
+    <span class="keyword">function</span> [ dx ] = barrier_certificate(dxi, x)
         <span class="comment">%BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier</span>
         <span class="comment">%certificates</span>
         <span class="comment">%   This function accepts single-integrator dynamics and wraps them in</span>
@@ -124,15 +124,19 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% create_si_barrier_certificate 
-% Returns a single-integrator barrier certificate 
+%% create_si_barrier_certificate
+% Returns a single-integrator barrier certificate function ($f :
+% \mathbf{R}^{2 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2
+% \times N}$).  This function takes a 2 x N, 2 x N single-integrator
+% velocity and state vector, respectively, and returns a single-integrator
+% velocity vector that does not induce collisions in the agents.
 %% Detailed Description 
 %%
 % * BarrierGain - affects how quickly the agents can approach each other 
 % * SafetyRadius - affects the distance the agents maintain 
 %% 
 % A good rule of thumb is to make SafetyRadius a bit larger than the agent
-% itself.
+% itself (0.08 m for the GRITSbot).
 
 %% Implementation
 function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
@@ -141,14 +145,14 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
     parser.addParameter('BarrierGain', 1e4);
     parser.addParameter('SafetyRadius', 0.1);
     parse(parser, varargin{:})
-    opts = optimoptions('quadprog','Display','off');
+    opts = optimoptions(@quadprog,'Display','off');
 
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
 
-    si_barrier_certificate = @(dxi, x) barrier_certificate(dxi, x, safety_radius, gamma);
+    si_barrier_certificate = @barrier_certificate;
 
-    function [ dx ] = barrier_certificate(dxi, x, safety_radius, gamma)
+    function [ dx ] = barrier_certificate(dxi, x)
         %BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier
         %certificates
         %   This function accepts single-integrator dynamics and wraps them in

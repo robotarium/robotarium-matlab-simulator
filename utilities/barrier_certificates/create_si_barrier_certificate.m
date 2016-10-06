@@ -1,12 +1,16 @@
-%% create_si_barrier_certificate 
-% Returns a single-integrator barrier certificate 
+%% create_si_barrier_certificate
+% Returns a single-integrator barrier certificate function ($f :
+% \mathbf{R}^{2 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2
+% \times N}$).  This function takes a 2 x N, 2 x N single-integrator
+% velocity and state vector, respectively, and returns a single-integrator
+% velocity vector that does not induce collisions in the agents.
 %% Detailed Description 
 %%
 % * BarrierGain - affects how quickly the agents can approach each other 
 % * SafetyRadius - affects the distance the agents maintain 
 %% 
 % A good rule of thumb is to make SafetyRadius a bit larger than the agent
-% itself.
+% itself (0.08 m for the GRITSbot).
 
 %% Implementation
 function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
@@ -15,14 +19,14 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
     parser.addParameter('BarrierGain', 1e4);
     parser.addParameter('SafetyRadius', 0.1);
     parse(parser, varargin{:})
-    opts = optimoptions('quadprog','Display','off');
+    opts = optimoptions(@quadprog,'Display','off');
 
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
 
-    si_barrier_certificate = @(dxi, x) barrier_certificate(dxi, x, safety_radius, gamma);
+    si_barrier_certificate = @barrier_certificate;
 
-    function [ dx ] = barrier_certificate(dxi, x, safety_radius, gamma)
+    function [ dx ] = barrier_certificate(dxi, x)
         %BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier
         %certificates
         %   This function accepts single-integrator dynamics and wraps them in

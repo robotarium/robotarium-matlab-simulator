@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_si_to_uni_Mapping</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="create_si_to_uni_mapping.m"><style type="text/css">
+      --><title>create_si_to_uni_Mapping</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="create_si_to_uni_mapping.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_si_to_uni_Mapping</h1><!--introduction--><p>Returns a mapping from single-integrator to unicycle dynamics and a mapping between their states.  Using this particular method, the single-integrator dynamics must be computed in the single-integrator domain.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#2">Example Usage</a></li><li><a href="#3">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>ProjectionDistance - affects how far the single-integrator is projected in front of the unicycle system.</li></ul></div><h2>Example Usage<a name="2"></a></h2><pre class="language-matlab"><span class="comment">% si === single integrator</span>
+  </style></head><body><div class="content"><h1>create_si_to_uni_Mapping</h1><!--introduction--><p>Returns a mapping from single-integrator to unicycle dynamics <img src="create_si_to_uni_mapping_eq12450574036302976132.png" alt="$\left( f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N} \right)$"> and a mapping between their states <img src="create_si_to_uni_mapping_eq13491430810795123718.png" alt="$\left(f: \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N} \right)$"> Using this particular method, the single-integrator dynamics must be computed in the single-integrator domain.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#2">Example Usage</a></li><li><a href="#3">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>ProjectionDistance - affects how far the single-integrator is projected in front of the unicycle system.</li></ul></div><h2>Example Usage<a name="2"></a></h2><pre class="language-matlab"><span class="comment">% si === single integrator</span>
 [si_to_uni_dynamics, uni_to_si_states] = create_si_to_uni_mapping(<span class="string">'ProjectionDistance'</span>,
 0.05)
 si_states = uni_to_si_states(robot_poses)
@@ -81,7 +81,7 @@ dx_uni = si_to_uni_dynamics(dx_si, states)
     projection_distance = parser.Results.ProjectionDistance;
 
     si_to_uni_dyn = @si_to_uni;
-    uni_to_si_states = @(states) uni_to_si_states_(states);
+    uni_to_si_states = @uni_to_si_states_;
 
     T = [1 0; 0 1/projection_distance];
     <span class="comment">% First mapping from SI -&gt; unicycle.  Keeps the projected SI system at</span>
@@ -104,7 +104,11 @@ dx_uni = si_to_uni_dynamics(dx_si, states)
 ##### SOURCE BEGIN #####
 %% create_si_to_uni_Mapping
 % Returns a mapping from single-integrator to
-% unicycle dynamics and a mapping between their states.  Using this
+% unicycle dynamics $\left( f: \mathbf{R}^{2 \times N} \times 
+% \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N} \right)$ 
+% and a mapping between their states $\left(f: \mathbf{R}^{3 \times N} \to
+% \mathbf{R}^{2 \times N} \right)$
+% Using this
 % particular method, the single-integrator dynamics must be computed in the
 % single-integrator domain.
 %% Detailed Description 
@@ -127,7 +131,7 @@ function [si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping(varargin)
     projection_distance = parser.Results.ProjectionDistance;
     
     si_to_uni_dyn = @si_to_uni;
-    uni_to_si_states = @(states) uni_to_si_states_(states);
+    uni_to_si_states = @uni_to_si_states_;
     
     T = [1 0; 0 1/projection_distance];
     % First mapping from SI -> unicycle.  Keeps the projected SI system at

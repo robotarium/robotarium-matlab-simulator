@@ -71,7 +71,7 @@ for t = 0:iterations
     % approximately 0.033 seconds
     x = r.get_poses();
     
-    %% ALGORITHM
+    %% Algorithm
     
     %This section contains the actual algorithm for formation control!
     

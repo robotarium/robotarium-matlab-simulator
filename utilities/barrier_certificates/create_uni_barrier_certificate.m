@@ -1,5 +1,5 @@
 %% create_uni_barrier_certificate 
-% Returns a barrier certificate that operates on unicycle algorithms, 
+% Returns a barrier certificate ($f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that operates on unicycle algorithms, 
 % preventing colisions.
 
 %% Detailed Description
@@ -11,6 +11,8 @@
 %%  
 % A good rule of thumb is to make the safety radius and projection distance 
 % each 1/2 of the desired total distance for the agents to remain apart.
+% You'll want their total to be more than the diameter of the GRITSbot
+% (i.e., 0.08 m).
 
 %% Example usage
 %   uni_barrier_cert = CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', 3,
@@ -26,7 +28,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     addOptional(parser, 'ProjectionDistance', 0.05);
     parse(parser, varargin{:})
     
-    opts = optimoptions('quadprog','Display','off');       
+    opts = optimoptions(@quadprog,'Display','off');       
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
     projection_distance = parser.Results.ProjectionDistance;
@@ -34,7 +36,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping('ProjectionDistance', projection_distance);
     uni_si_dyn = create_uni_to_si_mapping('ProjectionDistance', projection_distance);
     
-    uni_barrier_certificate = @(dxu, x) barrier_unicycle(dxu, x);
+    uni_barrier_certificate = @barrier_unicycle;
 
     function [ dxu ] = barrier_unicycle(dxu, x)      
         N = size(dxu, 2);

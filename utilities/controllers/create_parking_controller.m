@@ -1,5 +1,5 @@
 %% create_parking_controller 
-% Returns a controller that will drive a unicycle-modeled agent to a pose
+% Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that will drive a unicycle-modeled agent to a pose
 % (i.e., position & orientation).
 %% Detailed Description 
 %% 
@@ -24,7 +24,7 @@ function [ parking_controller ] = create_parking_controller(varargin)
     k = p.Results.DesiredAngleGain; 
     h = p.Results.RotationErrorGain;    
     
-    parking_controller = @(states, poses) park(states, poses);
+    parking_controller = @park;
 
     function [ dxu ] = park(states, poses)
     %PARK Drives a unicycle-based system to a desired pose

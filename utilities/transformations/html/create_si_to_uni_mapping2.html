@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>create_si_to_uni_mapping2</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-28"><meta name="DC.source" content="create_si_to_uni_mapping2.m"><style type="text/css">
+      --><title>create_si_to_uni_mapping2</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-04"><meta name="DC.source" content="create_si_to_uni_mapping2.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>create_si_to_uni_mapping2</h1><!--introduction--><p>Returns a mapping from single-integrator to unicycle dynamics</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#2">Example Usage</a></li><li><a href="#3">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>LinearVelocityGain - affects the linear velocity for the unicycle</li><li>AngularVelocityLimit - affects the upper (lower) bound for the unicycle's angular velocity</li></ul></div><h2>Example Usage<a name="2"></a></h2><pre class="language-matlab"><span class="comment">% si === single integrator</span>
+  </style></head><body><div class="content"><h1>create_si_to_uni_mapping2</h1><!--introduction--><p>Returns a mapping <img src="create_si_to_uni_mapping2_eq12450574036302976132.png" alt="$\left( f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N} \right)$"> from single-integrator to unicycle dynamics</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Detailed Description</a></li><li><a href="#2">Example Usage</a></li><li><a href="#3">Implementation</a></li></ul></div><h2>Detailed Description<a name="1"></a></h2><div><ul><li>LinearVelocityGain - affects the linear velocity for the unicycle</li><li>AngularVelocityLimit - affects the upper (lower) bound for the unicycle's angular velocity</li></ul></div><h2>Example Usage<a name="2"></a></h2><pre class="language-matlab"><span class="comment">% si === single integrator</span>
 si_to_uni_dynamics = create_si_to_uni_mapping2(<span class="string">'LinearVelocityGain'</span>,
 1, <span class="string">'AngularVelocityLimit'</span>, pi)
 dx_si = si_algorithm(si_states)
@@ -85,13 +85,13 @@ dx_uni = si_to_uni_dynamics(dx_si, states)
     <span class="comment">% A mapping from si -&gt; uni dynamics.  THis is more of a</span>
     <span class="comment">% projection-based method.  Though, it's definitely similar to the</span>
     <span class="comment">% NIDs.</span>
-    <span class="keyword">function</span> dxi = si_to_uni(dxi, states)
+    <span class="keyword">function</span> dxu = si_to_uni(dxi, states)
         N = size(dxi, 2);
-        dx = zeros(2, N);
+        dxu = zeros(2, N);
         <span class="keyword">for</span> i = 1:N
-            dx(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
+            dxu(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
             <span class="comment">%Normalizing the output of atan2 to between -kw and kw</span>
-            dx(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), <span class="keyword">...</span>
+            dxu(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), <span class="keyword">...</span>
                                   [cos(states(3, i)) sin(states(3, i))]*dxi(:, i))/(pi/2);
         <span class="keyword">end</span>
     <span class="keyword">end</span>
@@ -99,7 +99,9 @@ dx_uni = si_to_uni_dynamics(dx_si, states)
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% create_si_to_uni_mapping2 
-% Returns a mapping from single-integrator to unicycle dynamics
+% Returns a mapping $\left( f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3
+% \times N} \to \mathbf{R}^{2 \times N} \right)$
+% from single-integrator to unicycle dynamics
 %% Detailed Description 
 % * LinearVelocityGain - affects the linear velocity for the unicycle
 % * AngularVelocityLimit - affects the upper (lower) bound for the
@@ -125,13 +127,13 @@ function [si_to_uni_dyn] = create_si_to_uni_mapping2(varargin)
     % A mapping from si -> uni dynamics.  THis is more of a
     % projection-based method.  Though, it's definitely similar to the
     % NIDs.
-    function dxi = si_to_uni(dxi, states)
+    function dxu = si_to_uni(dxi, states)
         N = size(dxi, 2); 
-        dx = zeros(2, N);
+        dxu = zeros(2, N);
         for i = 1:N
-            dx(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
+            dxu(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
             %Normalizing the output of atan2 to between -kw and kw
-            dx(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), ...
+            dxu(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), ...
                                   [cos(states(3, i)) sin(states(3, i))]*dxi(:, i))/(pi/2);
         end
     end

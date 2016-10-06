@@ -1,5 +1,5 @@
 %% Vanilla consensus with a static, undirected topology
-%Paul Glotfelter 
+%Paul Glotfelter
 %3/24/2016
 
 %% Get Robotarium object used to communicate with the robots/simulator
@@ -7,7 +7,7 @@ rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = rb.get_available_agents(); 
+N = rb.get_available_agents();
 
 % Set the number of agents and whether we would like to save data.  Then,
 % build the Robotarium simulator object!
@@ -17,7 +17,7 @@ r = rb.set_number_of_agents(N).set_save_data(true).build();
 
 % Generate a cyclic graph Laplacian from our handy utilities.  For this
 % algorithm, any connected graph will yield consensus
-L = cycleGL(N); 
+L = cycleGL(N);
 
 %% Grab tools we need to convert from single-integrator to unicycle dynamics
 
@@ -44,9 +44,9 @@ for t = 1:iterations
     % approximately 0.033 seconds
     x = r.get_poses();
     
-    % Convert to SI states 
+    % Convert to SI states
     xi = uni_to_si_states(x);
-
+    
     %% Algorithm
     
     for i = 1:N
@@ -65,11 +65,11 @@ for t = 1:iterations
             % For each neighbor, calculate appropriate consensus term and
             %add it to the total velocity
             dxi(:, i) = dxi(:, i) + (xi(:, j) - xi(:, i));
-        end      
-    end        
+        end
+    end
     
     %% Utilize barrier certificates
-   
+    
     dxi = si_barrier_cert(dxi, xi);
     
     % Transform the single-integrator to unicycle dynamics using the the
@@ -77,10 +77,10 @@ for t = 1:iterations
     dxu = si_to_uni_dyn(dxi, x);
     
     %% Send velocities to agents
-           
+    
     % Set velocities of agents 1,...,N
     r.set_velocities(1:N, dxu);
-
+    
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();
     

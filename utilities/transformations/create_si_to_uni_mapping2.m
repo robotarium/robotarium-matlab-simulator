@@ -1,5 +1,7 @@
 %% create_si_to_uni_mapping2 
-% Returns a mapping from single-integrator to unicycle dynamics
+% Returns a mapping $\left( f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3
+% \times N} \to \mathbf{R}^{2 \times N} \right)$
+% from single-integrator to unicycle dynamics
 %% Detailed Description 
 % * LinearVelocityGain - affects the linear velocity for the unicycle
 % * AngularVelocityLimit - affects the upper (lower) bound for the
@@ -26,7 +28,14 @@ function [si_to_uni_dyn] = create_si_to_uni_mapping2(varargin)
     % projection-based method.  Though, it's definitely similar to the
     % NIDs.
     function dxu = si_to_uni(dxi, states)
-        N = size(dxi, 2); 
+                
+        [M, N] = size(dxi); 
+        [M_states, N_states] = size(states);
+        
+        assert(M==2, 'Column size of given SI velocities (%i) must be 2', M);
+        assert(M_states==3, 'Column size of given poses (%i) must be 3', M_states);        
+        assert(N==N_states, 'Row sizes of SI velocities (%i) and poses (%i) must be the same', N, N_states);
+        
         dxu = zeros(2, N);
         for i = 1:N
             dxu(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);

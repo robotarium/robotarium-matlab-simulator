@@ -1,5 +1,6 @@
 %% create_si_position_controller 
-% Returns a controller for a single-integrator system.
+% Returns a controller ($u: \mathbf{R}^{2 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2 \times N}$) 
+% for a single-integrator system.
 %% Detailed Description 
 % * XVelocityGain - affects the horizontal velocity of the
 % single integrator
@@ -20,7 +21,7 @@ function [si_position_controller] = create_si_position_controller(varargin)
     y_vel_gain = parser.Results.YVelocityGain;
     gains = diag([x_vel_gain ; y_vel_gain]);
     
-    si_position_controller = @(states, poses) position_si(states, poses);
+    si_position_controller = @position_si;
     
 
     function [ dx ] = position_si(states, poses)
