@@ -20,13 +20,15 @@ for i = 1:length(paths)
 end
 
 % If robot patches haven't been created already... 
-if(warned==0 && ~exist(strcat(path_local_sim_init, '/', 'patch_generation/patches.mat')))
-   % Create GRITSbot patches 
-   display('First time executing this script, generating patches!')
-   patches = gritsbot_patch(100);
-   save('patch_generation/patches.mat', 'patches')
-   display('Finished generating patches!')
-end
+% if(warned==0 && ~exist(strcat(path_local_sim_init, '/', 'patch_generation/patches.mat')))
+%    % Create GRITSbot patches 
+%    display('First time executing this script, generating patches!')
+%    tic
+%    patches = gritsbot_patch(100);
+%    toc
+%    save('patch_generation/patches.mat', 'patches')
+%    display('Finished generating patches!')
+% end
 
 if(warned == 0) 
    addpath(pwd);

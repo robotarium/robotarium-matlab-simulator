@@ -66,6 +66,8 @@ classdef Robotarium < APIAbstract
            if(this.save_data)
               this.mat_file_path.robotarium_data = this.mat_file_path.robotarium_data(:, 1:(this.current_saved_iterations-1));
            end
+
+		   close all;
         end
     end
     

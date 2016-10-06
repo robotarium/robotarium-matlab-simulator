@@ -151,7 +151,8 @@ classdef APIAbstract < handle
             assert(numRobots <= 100, 'Number of robots (%i) must be <= 100', numRobots);
 
             this.robot_handle = cell(1, numRobots);
-            load('patches.mat');
+            %load('patches.mat');
+			patches = gritsbot_patch(100);
             num_patches = numel(patches);
             chosen_patches = randsample(1:num_patches, numRobots);
             patch_data = patches(chosen_patches);

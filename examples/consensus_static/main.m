@@ -11,7 +11,7 @@ N = rb.get_available_agents();
 
 % Set the number of agents and whether we would like to save data.  Then,
 % build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_save_data(false).build();
+r = rb.set_number_of_agents(N).set_save_data(true).build();
 
 %% Experiment constants
 
