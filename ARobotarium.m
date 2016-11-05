@@ -184,9 +184,6 @@ classdef ARobotarium < handle
         end 
         
         function draw_robots(this)
-%             gcf_ = gcf;
-%             previousFigureNumber = gcf_.Number;            
-%             figure(this.figure_handle.Number)
             for ii = 1:this.number_of_agents
                 x  = this.poses(1, ii);
                 y  = this.poses(2, ii);
@@ -198,8 +195,12 @@ classdef ARobotarium < handle
                 robotBodyTransformed = this.robot_body*poseTransformationMatrix';
                 set(this.robot_handle{ii},'Vertices', robotBodyTransformed);
             end
-            drawnow
-%             figure(previousFigureNumber)
+            
+            if(this.number_of_agents <= 6)
+                drawnow
+            else
+                drawnow limitrate
+            end
         end
         
         function save(this)                              
