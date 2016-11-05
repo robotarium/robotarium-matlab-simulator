@@ -23,7 +23,7 @@ L = cycleGL(N);
 
 % Gain for the diffeomorphism transformation between single-integrator and
 % unicycle dynamics
-transformation_gain = 0.05;
+transformation_gain = 0.06;
 [si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', transformation_gain);
 
 safety_radius = 0.09;

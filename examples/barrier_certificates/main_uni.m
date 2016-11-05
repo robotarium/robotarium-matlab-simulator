@@ -16,7 +16,7 @@ N = rb.get_available_agents();
 r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 %Run the simulation for a specific number of iterations
-iterations = 1000;
+iterations = 2000;
 
 %% Set up constants for experiments
 

@@ -40,6 +40,12 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
         %   safetyRadius:  Size of the agents (or desired separation distance)       
         
         N = size(dxi, 2);
+        
+        if(N < 2)
+           dx = dxi;
+           return 
+        end
+        
         x = x(1:2, :);
         
         %Generate constraints for barrier certificates based on the size of

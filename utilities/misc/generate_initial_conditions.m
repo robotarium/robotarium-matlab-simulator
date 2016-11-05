@@ -9,7 +9,7 @@ function [ poses ] = generate_initial_conditions(N)
     
     safetyRadius = 0.2;
     width = 1.15;
-    height = 0.65;
+    height = 0.55;
 
     numX = floor(width / safetyRadius);
     numY = floor(height / safetyRadius);

@@ -84,7 +84,7 @@ classdef ARobotarium < handle
         function this = set_velocities(this, ids, vs)
             N = size(vs, 2);
             
-            assert(N==this.number_of_agents, 'Column size of vs (%i) must be the same as number of agents (%i)', ... 
+            assert(N<=this.number_of_agents, 'Column size of vs (%i) must be <= to number of agents (%i)', ... 
                 N, this.number_of_agents);
                      
             % Threshold velocities
@@ -184,9 +184,9 @@ classdef ARobotarium < handle
         end 
         
         function draw_robots(this)
-            gcf_ = gcf;
-            previousFigureNumber = gcf_.Number;            
-            figure(this.figure_handle.Number)
+%             gcf_ = gcf;
+%             previousFigureNumber = gcf_.Number;            
+%             figure(this.figure_handle.Number)
             for ii = 1:this.number_of_agents
                 x  = this.poses(1, ii);
                 y  = this.poses(2, ii);
@@ -198,24 +198,24 @@ classdef ARobotarium < handle
                 robotBodyTransformed = this.robot_body*poseTransformationMatrix';
                 set(this.robot_handle{ii},'Vertices', robotBodyTransformed);
             end
-            drawnow limitrate
-            figure(previousFigureNumber)
+            drawnow
+%             figure(previousFigureNumber)
         end
         
         function save(this)                              
             this.mat_file_path.robotarium_data(:, this.current_saved_iterations) = ...
                 reshape([this.poses ; this.velocities], [], 1);
             
-            % Use array list expansion criterion to amortize file
-            % expansions
-            if(this.current_saved_iterations > (this.current_file_size / 2))
-                new_robotarium_data = zeros(5*this.number_of_agents, this.current_file_size * 2);
-                new_robotarium_data(:, 1:this.current_saved_iterations) = ...
-                    this.mat_file_path.robotarium_data(:, 1:this.current_saved_iterations);
-                
-                % Set file to new data
-                this.mat_file_path.robotarium_data = new_robotarium_data; 
-            end
+%             % Use array list expansion criterion to amortize file
+%             % expansions
+%             if(this.current_saved_iterations > (this.current_file_size / 2))
+%                 new_robotarium_data = zeros(5*this.number_of_agents, this.current_file_size * 2);
+%                 new_robotarium_data(:, 1:this.current_saved_iterations) = ...
+%                     this.mat_file_path.robotarium_data(:, 1:this.current_saved_iterations);
+%                 
+%                 % Set file to new data
+%                 this.mat_file_path.robotarium_data = new_robotarium_data; 
+%             end
                         
             this.current_saved_iterations = this.current_saved_iterations + 1;
         end

@@ -41,6 +41,10 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     function [ dxu ] = barrier_unicycle(dxu, x)      
         N = size(dxu, 2);
         
+        if(N < 2)
+           return 
+        end
+        
         %Shift to single integrator domain
         xi = uni_si_states(x);
         dxi = uni_si_dyn(dxu, x);

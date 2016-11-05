@@ -18,7 +18,7 @@ N = rb.get_available_agents();
 r = rb.set_number_of_agents(N).set_save_data(false).build();
 
 % This is a totally arbitrary number
-iterations = 20000;
+iterations = 2000;
 
 %% Experiment constants 
 % Next, we set up some experiment constants
