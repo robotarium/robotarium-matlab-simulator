@@ -31,6 +31,7 @@ classdef ARobotarium < handle
         
         % Figure handle for simulator
         figure_handle
+        show_figure
         
         % Arena parameters
         boundaries = [-0.6, 0.6, -0.35, 0.35];    
@@ -52,9 +53,10 @@ classdef ARobotarium < handle
     end 
     
     methods         
-        function this = ARobotarium(number_of_agents, save_data, initial_poses)
+        function this = ARobotarium(number_of_agents, save_data, show_figure, initial_poses)
             this.number_of_agents = number_of_agents;
             this.save_data = save_data;
+            this.show_figure = show_figure;
             
             this.velocities = zeros(2, number_of_agents);
             this.poses = initial_poses;
@@ -74,6 +76,10 @@ classdef ARobotarium < handle
                 save(this.file_path, 'robotarium_data', '-v7.3')
             
                 this.mat_file_path = matfile(this.file_path, 'Writable', true);            
+            end
+            
+            if(show_figure)               
+                this.initialize_visualization() 
             end
         end
         
@@ -203,7 +209,8 @@ classdef ARobotarium < handle
             end
         end
         
-        function save(this)                              
+        function save(this)       
+            
             this.mat_file_path.robotarium_data(:, this.current_saved_iterations) = ...
                 reshape([this.poses ; this.velocities], [], 1);
             

@@ -23,7 +23,7 @@
 function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
 
     parser = inputParser;
-    addOptional(parser, 'BarrierGain', 3);
+    addOptional(parser, 'BarrierGain', 2);
     addOptional(parser, 'SafetyRadius', 0.05);
     addOptional(parser, 'ProjectionDistance', 0.05);
     parse(parser, varargin{:})

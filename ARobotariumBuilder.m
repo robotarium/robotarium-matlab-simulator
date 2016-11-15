@@ -8,6 +8,7 @@ classdef ARobotariumBuilder < handle
         available_agents
         number_of_agents
         save_data = true
+        show_figure = true
     end
     
     methods (Abstract)
@@ -24,8 +25,13 @@ classdef ARobotariumBuilder < handle
             this.number_of_agents = number_of_agents;
         end
         
-        function this = set_save_data(this, save_data)
-            
+        function this = set_show_figure(this, show_figure)
+           assert(show_figure >= 0 || show_figure < 0, 'Save data must evaluate to true or false in a boolean expression');
+           
+           this.show_figure = show_figure;
+        end
+        
+        function this = set_save_data(this, save_data)            
             assert(save_data >= 0 || save_data < 0, 'Save data must evaluate to true or false in a boolean expression');
             
             this.save_data = save_data;

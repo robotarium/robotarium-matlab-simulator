@@ -82,8 +82,8 @@ for t = 1:iterations
     r.set_velocities(1:N, dxu);
     
     % Send the previously set velocities to the agents.  This function must be called!
-    r.step();
     
+    r.step();
 end
 
 % Though we didn't save any data, we still should call r.call_at_scripts_end() after our

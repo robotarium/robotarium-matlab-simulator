@@ -33,11 +33,9 @@ classdef Robotarium < ARobotarium
 
     methods
 
-        function this = Robotarium(number_of_agents, save_data, initial_poses)
-            this = this@ARobotarium(number_of_agents, save_data, initial_poses);
+        function this = Robotarium(number_of_agents, save_data, show_figure, initial_poses)
+            this = this@ARobotarium(number_of_agents, save_data, show_figure, initial_poses);
             this.previous_timestep = tic;
-
-            this.initialize_visualization()
         end
 
         function poses = get_poses(this)
@@ -79,7 +77,9 @@ classdef Robotarium < ARobotarium
                 this.save();
             end
 
-            this.draw_robots();
+            if(this.show_figure)
+                this.draw_robots();
+            end
         end
 
         function call_at_scripts_end(this)

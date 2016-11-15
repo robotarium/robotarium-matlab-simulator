@@ -7,18 +7,18 @@ function [ poses ] = generate_initial_conditions(N)
 
     poses = zeros(3, N);
     
-    safetyRadius = 0.2;
+    robot_radius = 0.09;
     width = 1.15;
     height = 0.55;
 
-    numX = floor(width / safetyRadius);
-    numY = floor(height / safetyRadius);
+    numX = floor(width / robot_radius);
+    numY = floor(height / robot_radius);
     values = randperm(numX * numY, N);
 
     for i = 1:N
        [x, y] = ind2sub([numX numY], values(i));
-       x = x*safetyRadius - (width/2); 
-       y = y*safetyRadius - (height/2);
+       x = x*robot_radius - (width/2); 
+       y = y*robot_radius - (height/2);
        poses(1:2, i) = [x ; y];
     end
     
