@@ -26,7 +26,7 @@ L = cycleGL(N);
 transformation_gain = 0.06;
 [si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', transformation_gain);
 
-safety_radius = 0.09;
+safety_radius = 0.15;
 si_barrier_cert = create_si_barrier_certificate('SafetyRadius', safety_radius);
 
 % Select the number of iterations for the experiment.  This value is

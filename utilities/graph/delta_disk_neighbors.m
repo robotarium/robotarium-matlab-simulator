@@ -12,6 +12,6 @@ function [ neighbors ] = delta_disk_neighbors(poses, agent, delta)
     assert(agent<=N && agent>=1, 'Supplied agent (%i) must be between 1 and %i', agent, N);
 
     within_distance = arrayfun(@(x) norm(poses(1:2, x) - poses(1:2, agent)) <= delta, agents);
-    neighbors = agents(find(within_distance));
+    neighbors = agents(within_distance);
 end
 

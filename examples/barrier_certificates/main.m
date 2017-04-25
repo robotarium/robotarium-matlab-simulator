@@ -15,10 +15,10 @@ N = rb.get_available_agents();
 
 % Set the number of agents and whether we would like to save data.  Then,
 % build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_save_data(false).build();
+r = rb.set_number_of_agents(N).set_show_figure(false).set_save_data(false).build();
 
 % This is a totally arbitrary number
-iterations = 2000;
+iterations = 20000;
 
 %% Experiment constants 
 % Next, we set up some experiment constants
@@ -29,10 +29,12 @@ dx = zeros(2, N);
 
 % This code ensures that the agents are initially distributed around an
 % ellipse.  
-xybound = [-0.5, 0.5, -0.3, 0.3];
+xybound = [-.4, .4, -0.7, 0.7];
 p_theta = (1:2:2*N)/(2*N)*2*pi;
 p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
+
 x_goal = p_circ(:,1:N);
+
 flag = 0; %flag of task completion
 
 %% Retrieve tools for single-integrator -> unicycle mapping
@@ -40,7 +42,7 @@ flag = 0; %flag of task completion
 % Let's retrieve some of the tools we'll need.  We would like a
 % single-integrator position controller, a single-integrator barrier
 % function, and a mapping from single-integrator to unicycle dynamics
-position_int = create_si_position_controller('XVelocityGain', 1, 'YVelocityGain', 1);
+position_int = create_si_position_controller('XVelocityGain', 2, 'YVelocityGain', 2);
 si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 0.1);
 si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.75, 'AngularVelocityLimit', pi);
 
@@ -50,11 +52,11 @@ si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.75, 'AngularVe
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
-
+    
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
     x = r.get_poses();
-
+    
     x_temp = x(1:2,:);
     
     %% Algorithm
@@ -70,6 +72,8 @@ for t = 1:iterations
     else
         x_goal = p_circ(:,N+1:2*N);
     end
+    
+%     x_goal = zeros(2, N);
         
     % Use a single-integrator position controller to drive the agents to
     % the circular formation
@@ -96,14 +100,15 @@ for t = 1:iterations
     % Transform the single-integrator dynamics to unicycle dynamics using a
     % diffeomorphism, which can be found in the utilities
     dx = si_to_uni_dyn(dx, x);    
-    
-    %% Set the velocities of the agents
-    
+
+    %% Set the velocities of the agents    
+
     % Set velocities of agents 1,...,N
     r.set_velocities(1:N, dx);
     
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();    
+    
 end
 
 % Though we didn't save any data, we still should call r.call_at_scripts_end() after our

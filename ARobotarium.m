@@ -8,6 +8,7 @@ classdef ARobotarium < handle
         robot_handle
         robot_body
         
+        
         % Stuff for saving data 
         file_path 
         current_file_size 
@@ -34,7 +35,7 @@ classdef ARobotarium < handle
         show_figure
         
         % Arena parameters
-        boundaries = [-0.6, 0.6, -0.35, 0.35];    
+        boundaries = [-0.7, 0.7, -0.4, 0.4];    
         boundary_points = {[-0.6, 0.6, 0.6, -0.6], [-0.35, -0.35, 0.35, 0.35]};
     end
     
@@ -121,11 +122,11 @@ classdef ARobotarium < handle
             offset = 0.05;
                     
             % Scale factor (max. value of single Gaussian)
-            scaleFactor = 0.5;  
+            scaleFactor = 50;  
             figPhi = figure;
             this.figure_handle = figPhi;
             
-            % Plot Robotarium boundaries
+            % Plot Robotarium boundaries %Maria
             patch('XData', this.boundary_points{1}, 'YData', this.boundary_points{2}, ...
             'FaceColor', 'none', ...
             'LineWidth', 3, ... 
@@ -138,9 +139,10 @@ classdef ARobotarium < handle
             robotPlaneAxes = gca;
             
             % Limit view to xMin/xMax/yMin/yMax
-            axis(robotPlaneAxes,[this.boundaries(1) - offset,this.boundaries(2)+offset,this.boundaries(3)-offset,this.boundaries(4)+offset])
+            axis(robotPlaneAxes, [this.boundaries(1) - offset,this.boundaries(2)+offset,this.boundaries(3)-offset,this.boundaries(4)+offset])
             caxis([0,1.5*scaleFactor])
-            set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[1 1 1])
+            %set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[1 1 1]) %Maria
+            set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[0.96 1 1])
             
             % Store axes
             axis(robotPlaneAxes,'off')
@@ -154,10 +156,11 @@ classdef ARobotarium < handle
             set(robotPlaneAxes, 'Units', 'Points');
             set(robotPlaneAxes, 'Units', curUnits);
             
-            xlim([-0.65, 0.65]); ylim([-0.35, 0.35]);  % static limits
+            %xlim([-0.65, 0.65]); ylim([-0.35, 0.35]);  % static limits
+            xlim([-0.7, 0.7]); ylim([-0.43, 0.43]);
  
             % Static legend
-            %set(gca,'LegendColorbarListeners',[]); 
+%             set(gca,'LegendColorbarListeners',[]); 
             setappdata(gca,'LegendColorbarManualSpace',1);
             setappdata(gca,'LegendColorbarReclaimSpace',1);
             

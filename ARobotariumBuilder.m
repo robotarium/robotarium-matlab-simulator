@@ -18,8 +18,7 @@ classdef ARobotariumBuilder < handle
     end
     
     methods                         
-        function this = set_number_of_agents(this, number_of_agents)
-            
+        function this = set_number_of_agents(this, number_of_agents)            
             assert(number_of_agents > 0, 'The provided number of agents (%i) must be > 0', number_of_agents);
             
             this.number_of_agents = number_of_agents;

@@ -34,9 +34,9 @@ function [ created_position_controller ] = create_unicycle_position_controller(v
         assert(M_poses == 2, 'Row size of desired poses (%i) must be 2!', M_poses);
         assert(N_states == N_poses, 'Row size of states vector (%i) must be row size of desired poses (%i)', N_states, N_poses);
 
-        dxu = zeros(2, N);
+        dxu = zeros(2, N_poses);
 
-        for i = 1:N
+        for i = 1:N_poses
             pos_error = poses(:, i) - states(1:2, i);
             rot_error = atan2(pos_error(2), pos_error(1));
             dist = norm(pos_error);            
