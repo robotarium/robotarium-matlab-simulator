@@ -1,4 +1,4 @@
-%% create_automatic_parking_controller
+%% create_automatic_parking_controller2
 % Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that automatically parks agents at desired poses,
 % zeroing out their velocities when the point (within a tolerance) is
 % reached.
@@ -14,14 +14,14 @@
 % errors
 %% Example Usage 
 %   parking_controller =
-%   CREATE_AUTOMATIC_PARKING_CONTROLLER('ApproachAngleGain', 1,
+%   CREATE_AUTOMATIC_PARKING_CONTROLLER2('ApproachAngleGain', 1,
 %   'DesiredAngleGain', 1, 'RotationErrorGain', 1)
 %% Implementation
 function [ automatic_parking_controller ] = create_automatic_parking_controller2(varargin)
 
     p = inputParser;
-    addOptional(p, 'LinearVelocityGain', 1);
-    addOptional(p, 'AngularVelocityLimit', pi);
+    addOptional(p, 'LinearVelocityGain', 0.75);
+    addOptional(p, 'AngularVelocityLimit', pi/2);
     addOptional(p, 'PositionError', 0.01); 
     addOptional(p, 'RotationError', 0.25);
     parse(p, varargin{:});
@@ -44,11 +44,9 @@ function [ automatic_parking_controller ] = create_automatic_parking_controller2
         for i = 1:N
             
             wrapped = poses(3, i) - states(3, i);
-            wrapped = atan2(sin(wrapped), cos(wrapped))
+            wrapped = atan2(sin(wrapped), cos(wrapped));
             
             dxi = poses(1:2, i) - states(1:2, i);
-            
-            norm(states(1:2, i) - poses(1:2, i))
             
             if(norm(dxi) > pos_err)
                 dxu(:, i) = position_controller(dxi, states(:, i));
@@ -59,8 +57,6 @@ function [ automatic_parking_controller ] = create_automatic_parking_controller2
                 dxu(:, i) = zeros(2, 1);
             end            
         end       
-        
-        dxu
     end    
 end
 
