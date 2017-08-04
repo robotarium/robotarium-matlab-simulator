@@ -72,6 +72,21 @@ classdef Robotarium < ARobotarium
             %Allow getting of poses again
             this.checked_poses_already = false;
             this.called_step_already = true;
+            
+            % Set LEDs
+            this.led_commands(1:3, :) = this.led_commands(1:3, :)/255;            
+            
+            for i = 1:this.number_of_agents
+               if(this.led_commands(4, i) == 0)
+                   to_set = 7;
+               else
+                   to_set = 19;
+               end
+               this.robot_handle{i}.FaceVertexCData(to_set, :) = this.led_commands(1:3, i)';
+            end
+            
+%             data.robot_color(7, :) = [0 0 0]; % LED 1
+%             data.robot_color(19, :) = [0 0 0]; % LED 2
 
             if(this.save_data)
                 this.save();

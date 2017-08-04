@@ -8,7 +8,6 @@ classdef ARobotarium < handle
         robot_handle
         robot_body
 
-
         % Stuff for saving data
         file_path
         current_file_size
@@ -27,7 +26,8 @@ classdef ARobotarium < handle
         number_of_agents
         velocities
         poses
-
+        led_commands
+        
         %Saving parameters
         save_data
 
@@ -61,6 +61,7 @@ classdef ARobotarium < handle
             this.show_figure = show_figure;
 
             this.velocities = zeros(2, number_of_agents);
+            this.led_commands = zeros(4, number_of_agents);
             this.poses = initial_poses;
 
             % If save data, set up the file saving variables
@@ -107,6 +108,20 @@ classdef ARobotarium < handle
             end
 
             this.velocities(:, ids) = vs;
+        end
+        
+        % Commands is [r g b index] x N
+        function this = set_leds(this, ids, commands)
+            N = size(commands, 2);
+
+            assert(N<=this.number_of_agents, 'Column size of vs (%i) must be <= to number of agents (%i)', ...
+                N, this.number_of_agents);
+            
+            assert(all(all(commands(1:3, :) <= 255)) && all(all(commands(1:3, :) >= 0)), 'RGB commands must be between 0 and 255');
+            assert(all(commands(4, :) >= 0) && all(commands(4, :) <= 1), 'LED index must be 0 or 1');                              
+            
+            % Only set LED commands for the selected robots
+            this.led_commands(:, ids) = commands;
         end
 
         function iters = time2iters(this, time)
@@ -184,11 +199,13 @@ classdef ARobotarium < handle
                     sin(th)  cos(th) y;
                     0 0 1];
                 robot_bodyTransformed = data.robot_body*poseTransformationMatrix';
+                data.robot_color(7, :) = [0 0 0]; % LED 1
+                data.robot_color(19, :) = [0 0 0]; % LED 2
                 this.robot_handle{ii} = patch(...
                           'Vertices', robot_bodyTransformed, ...
                           'Faces',data.robot_face, ...
                           'FaceColor', 'flat', ...
-                          'FaceVertexCData',data.robot_color, ...
+                          'FaceVertexCData', data.robot_color, ...
                           'EdgeColor','none');
             end
         end
@@ -217,18 +234,7 @@ classdef ARobotarium < handle
 
             this.mat_file_path.robotarium_data(:, this.current_saved_iterations) = ...
                 reshape([this.poses ; this.velocities], [], 1);
-
-%             % Use array list expansion criterion to amortize file
-%             % expansions
-%             if(this.current_saved_iterations > (this.current_file_size / 2))
-%                 new_robotarium_data = zeros(5*this.number_of_agents, this.current_file_size * 2);
-%                 new_robotarium_data(:, 1:this.current_saved_iterations) = ...
-%                     this.mat_file_path.robotarium_data(:, 1:this.current_saved_iterations);
-%
-%                 % Set file to new data
-%                 this.mat_file_path.robotarium_data = new_robotarium_data;
-%             end
-
+            
             this.current_saved_iterations = this.current_saved_iterations + 1;
         end
     end

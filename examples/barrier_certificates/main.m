@@ -15,7 +15,7 @@ N = rb.get_available_agents();
 
 % Set the number of agents and whether we would like to save data.  Then,
 % build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_show_figure(false).set_save_data(false).build();
+r = rb.set_number_of_agents(N).set_show_figure(true).set_save_data(false).build();
 
 % This is a totally arbitrary number
 iterations = 20000;
