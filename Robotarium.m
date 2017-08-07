@@ -74,15 +74,15 @@ classdef Robotarium < ARobotarium
             this.called_step_already = true;
             
             % Set LEDs
-            this.led_commands(1:3, :) = this.led_commands(1:3, :)/255;            
+            led_commands(1:3, :) = this.led_commands(1:3, :)/255;            
             
             for i = 1:this.number_of_agents
                if(this.led_commands(4, i) == 0)
-                   to_set = 7;
+                   to_set = [19,20,16,15]; % 18 
                else
-                   to_set = 19;
+                   to_set = [7,8,11,12];
                end
-               this.robot_handle{i}.FaceVertexCData(to_set, :) = this.led_commands(1:3, i)';
+               this.robot_handle{i}.FaceVertexCData(to_set, :) = repmat(led_commands(1:3, i)', numel(to_set), 1);
             end
             
 %             data.robot_color(7, :) = [0 0 0]; % LED 1
