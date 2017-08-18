@@ -48,6 +48,12 @@ function [ automatic_parking_controller ] = create_automatic_parking_controller2
             
             dxi = poses(1:2, i) - states(1:2, i);
             
+            % Normalize 
+            norm_ = norm(dxi);
+            if(norm_ > 0.07)
+               dxi = 0.07*dxi/norm_; 
+            end
+            
             if(norm(dxi) > pos_err)
                 dxu(:, i) = position_controller(dxi, states(:, i));
             elseif(abs(wrapped) > rot_err) 
