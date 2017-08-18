@@ -218,7 +218,8 @@ classdef ARobotarium < handle
                 poseTransformationMatrix = [...
                     cos(th) -sin(th) x;
                     sin(th)  cos(th) y;
-                    0                    0                   1   ];
+                    0 0 1
+                ];
                 robotBodyTransformed = this.robot_body*poseTransformationMatrix';
                 set(this.robot_handle{ii},'Vertices', robotBodyTransformed);
             end
