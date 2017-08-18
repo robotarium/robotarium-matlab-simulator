@@ -11,7 +11,7 @@ rb = RobotariumBuilder();
 
 % Get the number of available agents from the Robotarium.  We don't need a
 % specific value for this algorithm
-N = rb.get_available_agents(); 
+N = rb.get_available_agents();
 
 % Set the number of agents and whether we would like to save data.  Then,
 % build the Robotarium simulator object!
@@ -29,7 +29,7 @@ dx = zeros(2, N);
 
 % This code ensures that the agents are initially distributed around an
 % ellipse.  
-xybound = [-.4, .4, -0.7, 0.7];
+xybound = 2*[-.4, .4, -0.7, 0.7];
 p_theta = (1:2:2*N)/(2*N)*2*pi;
 p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
 
@@ -99,7 +99,7 @@ for t = 1:iterations
     
     % Transform the single-integrator dynamics to unicycle dynamics using a
     % diffeomorphism, which can be found in the utilities
-    dx = si_to_uni_dyn(dx, x);    
+    dx = si_to_uni_dyn(dx, x);        
 
     %% Set the velocities of the agents    
 
@@ -108,7 +108,6 @@ for t = 1:iterations
     
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();    
-    
 end
 
 % Though we didn't save any data, we still should call r.call_at_scripts_end() after our
