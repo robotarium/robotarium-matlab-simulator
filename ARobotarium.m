@@ -186,8 +186,8 @@ classdef ARobotarium < handle
             %load('patches.mat');
 			patches = gritsbot_patch(100);
             num_patches = numel(patches);
-            chosen_patches = randsample(1:num_patches, numRobots);
-            patch_data = patches(chosen_patches);
+%             chosen_patches = randsample(1:num_patches, numRobots);
+            patch_data = patches(randi(numRobots));
             for ii = 1:numRobots
                 data = patch_data{ii};
                 this.robot_body = data.robot_body;
