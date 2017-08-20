@@ -69,7 +69,7 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
         H = 2*eye(2*N);
         f = -2*vhat;
         
-        vnew = quadprog(H, double(f), A, b, [],[], [], [], [], opts);
+        vnew = quadprog(sparse(H), double(f), A, b, [],[], [], [], [], opts);
         
         %Set robot velocities to new velocities
         dx = reshape(vnew, 2, N);
