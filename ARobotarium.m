@@ -15,6 +15,7 @@ classdef ARobotarium < handle
         % Path to mat file to keep this in memory
         mat_file_path
         boundary_patch
+        boundary_points = {[-1.5, 1.5, 1.5, -1.5], [-1.5, -1.5, 1.5, 1.5]};
     end
 
     properties (GetAccess = public, SetAccess = protected)
@@ -36,8 +37,7 @@ classdef ARobotarium < handle
         show_figure
 
         % Arena parameters
-        boundaries = [-0.7, 0.7, -0.4, 0.4];
-        boundary_points = {[-0.6, 0.6, 0.6, -0.6], [-0.35, -0.35, 0.35, 0.35]};
+        boundaries = [-1.5, 1.5, -1.5, 1.5];
     end
 
     methods (Abstract)
@@ -162,7 +162,6 @@ classdef ARobotarium < handle
 
             % Store axes
             axis(robotPlaneAxes,'off')
-
             set(robotPlaneAxes,'position',[0 0 1 1],'units','normalized','YDir','normal')
 
             hold on % "This ride's about to get bumpy!"
@@ -172,11 +171,10 @@ classdef ARobotarium < handle
             set(robotPlaneAxes, 'Units', 'Points');
             set(robotPlaneAxes, 'Units', curUnits);
 
-            %xlim([-0.65, 0.65]); ylim([-0.35, 0.35]);  % static limits
-            xlim([-0.7, 0.7]); ylim([-0.43, 0.43]);
+            offset = [-0.1 0.1];
+            xlim(this.boundaries(1:2)+offset); ylim(this.boundaries(3:4)+offset);
 
             % Static legend
-%             set(gca,'LegendColorbarListeners',[]);
             setappdata(gca,'LegendColorbarManualSpace',1);
             setappdata(gca,'LegendColorbarReclaimSpace',1);
 
@@ -186,7 +184,6 @@ classdef ARobotarium < handle
             %load('patches.mat');
 			patches = gritsbot_patch(100);
             num_patches = numel(patches);
-%             chosen_patches = randsample(1:num_patches, numRobots);
             patch_data = patches(randi(num_patches, 1, numRobots));
             for ii = 1:numRobots
                 data = patch_data{ii};
