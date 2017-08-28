@@ -1,5 +1,8 @@
 % This script initializes the Robotarium simulator, adding the required
-% paths to the MATLAB instance.
+% paths to the MATLAB instance.  You need to run this before doing anything
+% in the simulator.  Also, DO NOT SUBMIT THIS FILE WITH YOUR EXPERIMENT OR
+% CALL IT IN YOUR SCRIPTS.  All of these utilities will be automatically
+% included in your experiment!
 
 %Get path to simulator
 display('Initializing MATLAB simulator')
