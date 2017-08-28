@@ -145,8 +145,9 @@ classdef ARobotarium < handle
             % Plot Robotarium boundaries %Maria
             this.boundary_patch = patch('XData', this.boundary_points{1}, 'YData', this.boundary_points{2}, ...
             'FaceColor', 'none', ...
-            'LineWidth', 3, ...
-            'EdgeColor', [0, 0.74, 0.95]);
+            'LineWidth', 3, ...,
+            'EdgeAlpha', 0.5, ...
+            'EdgeColor', [0, 0, 0]);
 
             %plot(im)
             set(figPhi,'color','white','menubar','none');
@@ -157,7 +158,6 @@ classdef ARobotarium < handle
             % Limit view to xMin/xMax/yMin/yMax
             axis(robotPlaneAxes, [this.boundaries(1) - offset,this.boundaries(2)+offset,this.boundaries(3)-offset,this.boundaries(4)+offset])
             caxis([0,1.5*scaleFactor])
-            %set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[1 1 1]) %Maria
             set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[0.96 1 1])
 
             % Store axes
@@ -181,28 +181,23 @@ classdef ARobotarium < handle
             assert(numRobots <= 100, 'Number of robots (%i) must be <= 100', numRobots);
 
             this.robot_handle = cell(1, numRobots);
-            %load('patches.mat');
-			patches = gritsbot_patch(100);
-            num_patches = numel(patches);
-            patch_data = patches(randi(num_patches, 1, numRobots));
             for ii = 1:numRobots
-                data = patch_data{ii};
-                this.robot_body = data.robot_body;
+                data = gritsbot_patch;
+                this.robot_body = data.vertices;
                 x  = this.poses(1, ii);
                 y  = this.poses(2, ii);
-                th = this.poses(3, ii);
-                poseTransformationMatrix = [...
+                th = this.poses(3, ii) - pi/2;
+                rotation_matrix = [...
                     cos(th) -sin(th) x;
                     sin(th)  cos(th) y;
                     0 0 1];
-                robot_bodyTransformed = data.robot_body*poseTransformationMatrix';
-                data.robot_color(7, :) = [0 0 0]; % LED 1
-                data.robot_color(19, :) = [0 0 0]; % LED 2
+                transformed = this.robot_body*rotation_matrix';
                 this.robot_handle{ii} = patch(...
-                          'Vertices', robot_bodyTransformed, ...
-                          'Faces',data.robot_face, ...
+                          'Vertices', transformed(:, 1:2), ...
+                          'Faces', data.faces, ...
+                          'FaceAlpha', 0.6, ...
                           'FaceColor', 'flat', ...
-                          'FaceVertexCData', data.robot_color, ...
+                          'FaceVertexCData', data.colors, ...
                           'EdgeColor','none');
             end
         end
@@ -211,14 +206,14 @@ classdef ARobotarium < handle
             for ii = 1:this.number_of_agents
                 x  = this.poses(1, ii);
                 y  = this.poses(2, ii);
-                th = this.poses(3, ii);
-                poseTransformationMatrix = [...
+                th = this.poses(3, ii) - pi/2;
+                rotation_matrix = [...
                     cos(th) -sin(th) x;
                     sin(th)  cos(th) y;
                     0 0 1
                 ];
-                robotBodyTransformed = this.robot_body*poseTransformationMatrix';
-                set(this.robot_handle{ii},'Vertices', robotBodyTransformed);
+                transformed = this.robot_body*rotation_matrix';
+                set(this.robot_handle{ii},'Vertices', transformed(:, 1:2));
             end
 
             if(this.number_of_agents <= 6)

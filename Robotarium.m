@@ -78,15 +78,12 @@ classdef Robotarium < ARobotarium
             
             for i = 1:this.number_of_agents
                if(this.led_commands(4, i) == 0)
-                   to_set = [19,20,16,15]; % 18 
+                   to_set = [4]; % 18 
                else
-                   to_set = [7,8,11,12];
+                   to_set = [5];
                end
                this.robot_handle{i}.FaceVertexCData(to_set, :) = repmat(led_commands(1:3, i)', numel(to_set), 1);
             end
-            
-%             data.robot_color(7, :) = [0 0 0]; % LED 1
-%             data.robot_color(19, :) = [0 0 0]; % LED 2
 
             if(this.save_data)
                 this.save();
