@@ -25,7 +25,7 @@ si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 0.06);
 si_to_uni_dynamics = create_si_to_uni_mapping2();
         
 %Get randomized initial conditions in the robotarium arena
-initial_conditions = generate_initial_conditions(N, 'Width', r.boundaries(2)-r.boundaries(1), 'Height', r.boundaries(4)-r.boundaries(3), 'Spacing', 0.2);
+initial_conditions = generate_initial_conditions(N, 'Width', r.boundaries(2)-r.boundaries(1)-0.1, 'Height', r.boundaries(4)-r.boundaries(3)-0.1, 'Spacing', 0.2);
 
 % We'll make the rotation error huge so that the initialization checker
 % doesn't care about it
@@ -40,7 +40,6 @@ while(~init_checker(x, initial_conditions))
     dxi = si_barrier_certificate(dxi, x(1:2, :));      
     dxu = si_to_uni_dynamics(dxi, x);
 
-    r.set_leds(1:N, repmat([255 0 0 0]', 1, N));
     r.set_velocities(1:N, dxu);
     r.step();   
 end

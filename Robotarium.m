@@ -87,8 +87,8 @@ classdef Robotarium < ARobotarium
 
             if(this.save_data)
                 this.save();
-            end
-
+            end            
+            
             if(this.show_figure)
                 this.draw_robots();
             end

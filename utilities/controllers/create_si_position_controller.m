@@ -46,7 +46,9 @@ function [si_position_controller] = create_si_position_controller(varargin)
         % Normalize velocities to magnitude
         norms = arrayfun(@(idx) norm(dx(:, idx)), 1:N);
         to_normalize = norms > velocity_magnitude_limit;
-        dx(:, to_normalize) = velocity_magnitude_limit*dx(:, to_normalize)./norms(to_normalize);    
+        if(~isempty(norms(to_normalize)))                        
+            dx(:, to_normalize) = velocity_magnitude_limit*dx(:, to_normalize)./norms(to_normalize);
+        end
     end
 end
 
