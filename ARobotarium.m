@@ -150,7 +150,7 @@ classdef ARobotarium < handle
             'EdgeColor', [0, 0, 0]);
 
             %plot(im)
-            set(figPhi,'color','white','menubar','none');
+            set(figPhi,'color','white');
 
             % Set axis
             robotPlaneAxes = gca;

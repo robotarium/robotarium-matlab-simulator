@@ -26,9 +26,9 @@ classdef Robotarium < ARobotarium
         previous_timestep
         checked_poses_already = false
         called_step_already = true
-        x_lin_vel_coef = 0.86;
-        y_lin_vel_coef = 0.81;
-        ang_vel_coef = 0.46;
+        x_lin_vel_coef = 1;
+        y_lin_vel_coef = 1;
+        ang_vel_coef = 1;
     end
 
     methods
@@ -59,7 +59,7 @@ classdef Robotarium < ARobotarium
             %Vectorize update to states
             i = 1:this.number_of_agents;
 
-            total_time = this.time_step + max(0, toc(this.previous_timestep) - this.time_step);
+            total_time = this.time_step;
 
             %Update velocities using unicycle dynamics
             this.poses(1, i) = this.poses(1, i) + this.x_lin_vel_coef*total_time.*this.velocities(1, i).*cos(this.poses(3, i));
