@@ -54,7 +54,9 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
         % Normalize velocities
         norms = arrayfun(@(idx) norm(dxi(:, idx)), 1:N);
         to_normalize = norms > velocity_magnitude_limit;
-        dxi(:, to_normalize) = velocity_magnitude_limit*dxi(:, to_normalize)./norms(to_normalize);        
+        if(size(to_normalize, 2) > 0)
+            dxi(:, to_normalize) = velocity_magnitude_limit*dxi(:, to_normalize)./norms(to_normalize);
+        end
         
         %Generate constraints for barrier certificates based on the size of
         %the safety radius
