@@ -26,9 +26,9 @@ classdef Robotarium < ARobotarium
         previous_timestep
         checked_poses_already = false
         called_step_already = true
-        x_lin_vel_coef = 0.86;
-        y_lin_vel_coef = 0.81;
-        ang_vel_coef = 0.46;
+        x_lin_vel_coef = 1;
+        y_lin_vel_coef = 1;
+        ang_vel_coef = 1;
     end
 
     methods
@@ -59,7 +59,7 @@ classdef Robotarium < ARobotarium
             %Vectorize update to states
             i = 1:this.number_of_agents;
 
-            total_time = this.time_step + max(0, toc(this.previous_timestep) - this.time_step);
+            total_time = this.time_step;
 
             %Update velocities using unicycle dynamics
             this.poses(1, i) = this.poses(1, i) + this.x_lin_vel_coef*total_time.*this.velocities(1, i).*cos(this.poses(3, i));
@@ -78,20 +78,17 @@ classdef Robotarium < ARobotarium
             
             for i = 1:this.number_of_agents
                if(this.led_commands(4, i) == 0)
-                   to_set = [19,20,16,15]; % 18 
+                   to_set = [4]; % 18 
                else
-                   to_set = [7,8,11,12];
+                   to_set = [5];
                end
                this.robot_handle{i}.FaceVertexCData(to_set, :) = repmat(led_commands(1:3, i)', numel(to_set), 1);
             end
-            
-%             data.robot_color(7, :) = [0 0 0]; % LED 1
-%             data.robot_color(19, :) = [0 0 0]; % LED 2
 
             if(this.save_data)
                 this.save();
-            end
-
+            end            
+            
             if(this.show_figure)
                 this.draw_robots();
             end

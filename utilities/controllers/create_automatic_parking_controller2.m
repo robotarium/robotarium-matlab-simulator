@@ -24,10 +24,12 @@ function [ automatic_parking_controller ] = create_automatic_parking_controller2
     addOptional(p, 'AngularVelocityLimit', pi/2);
     addOptional(p, 'PositionError', 0.01); 
     addOptional(p, 'RotationError', 0.25);
+    addOptional(p, 'VelocityMagnitudeLimit', 0.08)
     parse(p, varargin{:});
     
     lin_vel_gain = p.Results.LinearVelocityGain; 
     ang_vel_gain = p.Results.AngularVelocityLimit;
+    vel_mag_limit = p.Results.VelocityMagnitudeLimit;
     pos_err = p.Results.PositionError;
     rot_err = p.Results.RotationError;
     
@@ -50,8 +52,8 @@ function [ automatic_parking_controller ] = create_automatic_parking_controller2
             
             % Normalize 
             norm_ = norm(dxi);
-            if(norm_ > 0.07)
-               dxi = 0.07*dxi/norm_; 
+            if(norm_ > vel_mag_limit)
+               dxi = vel_mag_limit*dxi/norm_; 
             end
             
             if(norm(dxi) > pos_err)

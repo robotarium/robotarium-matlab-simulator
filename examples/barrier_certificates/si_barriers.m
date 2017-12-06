@@ -72,8 +72,6 @@ for t = 1:iterations
     else
         x_goal = p_circ(:,N+1:2*N);
     end
-    
-%     x_goal = zeros(2, N);
         
     % Use a single-integrator position controller to drive the agents to
     % the circular formation

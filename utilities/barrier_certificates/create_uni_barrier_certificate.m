@@ -26,14 +26,14 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     addOptional(parser, 'BarrierGain', 8e3);
     addOptional(parser, 'SafetyRadius', 0.05);
     addOptional(parser, 'ProjectionDistance', 0.05);
-    addOptional(parser, 'VelocityMagnitude', 0.075);
+    addOptional(parser, 'VelocityMagnitudeLimit', 0.075);
     parse(parser, varargin{:})
     
     opts = optimoptions(@quadprog,'Display','off');       
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
     projection_distance = parser.Results.ProjectionDistance;
-    velocity_magnitude = parser.Results.VelocityMagnitude;
+    velocity_magnitude_limit = parser.Results.VelocityMagnitudeLimit;
     
     [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping('ProjectionDistance', projection_distance);
     uni_si_dyn = create_uni_to_si_mapping('ProjectionDistance', projection_distance);
@@ -53,8 +53,10 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
                
         % Normalize velocities
         norms = arrayfun(@(idx) norm(dxi(:, idx)), 1:N);
-        to_normalize = norms > velocity_magnitude;
-        dxi(:, to_normalize) = velocity_magnitude*dxi(:, to_normalize)./norms(to_normalize);        
+        to_normalize = norms > velocity_magnitude_limit;
+        if(size(to_normalize, 2) > 0)
+            dxi(:, to_normalize) = velocity_magnitude_limit*dxi(:, to_normalize)./norms(to_normalize);
+        end
         
         %Generate constraints for barrier certificates based on the size of
         %the safety radius

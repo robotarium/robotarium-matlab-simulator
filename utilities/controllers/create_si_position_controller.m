@@ -14,11 +14,13 @@ function [si_position_controller] = create_si_position_controller(varargin)
     parser = inputParser;
     addOptional(parser, 'XVelocityGain', 1);
     addOptional(parser, 'YVelocityGain', 1);
+    addOptional(parser, 'VelocityMagnitudeLimit', 0.08);
     
     parse(parser, varargin{:});
     
     x_vel_gain = parser.Results.XVelocityGain;
     y_vel_gain = parser.Results.YVelocityGain;
+    velocity_magnitude_limit = parser.Results.VelocityMagnitudeLimit;
     gains = diag([x_vel_gain ; y_vel_gain]);
     
     si_position_controller = @position_si;
@@ -40,6 +42,13 @@ function [si_position_controller] = create_si_position_controller(varargin)
         for i = 1:N   
            dx(:, i) = gains*(poses(:, i) - states(:, i));
         end   
+        
+        % Normalize velocities to magnitude
+        norms = arrayfun(@(idx) norm(dx(:, idx)), 1:N);
+        to_normalize = norms > velocity_magnitude_limit;
+        if(~isempty(norms(to_normalize)))                        
+            dx(:, to_normalize) = velocity_magnitude_limit*dx(:, to_normalize)./norms(to_normalize);
+        end
     end
 end
 
