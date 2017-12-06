@@ -31,7 +31,7 @@ function [ automatic_parking_controller ] = create_automatic_parking_controller2
     pos_err = p.Results.PositionError;
     rot_err = p.Results.RotationError;
     
-    position_controller = create_si_to_uni_mapping2('LinearVelocityGain', lin_vel_gain, ...
+    position_controller = create_si_to_uni_mapping3('LinearVelocityGain', lin_vel_gain, ...
     'AngularVelocityLimit', ang_vel_gain);
 
     automatic_parking_controller = @automatic_parking_controller_;

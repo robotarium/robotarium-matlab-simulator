@@ -15,7 +15,7 @@ N = rb.get_available_agents();
 
 % Set the number of agents and whether we would like to save data.  Then,
 % build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_show_figure(true).set_save_data(false).build();
+r = rb.set_number_of_agents(N).set_show_figure(false).set_save_data(false).build();
 
 % This is a totally arbitrary number
 iterations = 20000;
@@ -29,7 +29,7 @@ dx = zeros(2, N);
 
 % This code ensures that the agents are initially distributed around an
 % ellipse.  
-xybound = 2*[-.4, .4, -0.7, 0.7];
+xybound = [-.2, .2, -0.2, 0.2];
 p_theta = (1:2:2*N)/(2*N)*2*pi;
 p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
 
@@ -52,7 +52,7 @@ si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.75, 'AngularVe
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
-    
+
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
     x = r.get_poses();
@@ -105,7 +105,7 @@ for t = 1:iterations
 
     % Set velocities of agents 1,...,N
     r.set_velocities(1:N, dx);
-    
+
     % Send the previously set velocities to the agents.  This function must be called!
     r.step();    
 end
