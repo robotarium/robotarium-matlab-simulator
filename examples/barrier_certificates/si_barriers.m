@@ -29,7 +29,7 @@ dx = zeros(2, N);
 
 % This code ensures that the agents are initially distributed around an
 % ellipse.  
-xybound = [-.2, .2, -0.2, 0.2];
+xybound = [-1, 1, -1, 1];
 p_theta = (1:2:2*N)/(2*N)*2*pi;
 p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
 

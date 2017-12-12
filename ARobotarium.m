@@ -134,7 +134,7 @@ classdef ARobotarium < handle
         % Initializes visualization of GRITSbots
         function initialize_visualization(this)
             % Initialize variables
-            numRobots = this.number_of_agents;
+            N = this.number_of_agents;
             offset = 0.05;
 
             % Scale factor (max. value of single Gaussian)
@@ -178,10 +178,10 @@ classdef ARobotarium < handle
             setappdata(gca,'LegendColorbarManualSpace',1);
             setappdata(gca,'LegendColorbarReclaimSpace',1);
 
-            assert(numRobots <= 100, 'Number of robots (%i) must be <= 100', numRobots);
+            assert(N <= 100, 'Number of robots (%i) must be <= 100', N);
 
-            this.robot_handle = cell(1, numRobots);
-            for ii = 1:numRobots
+            this.robot_handle = cell(1, N);
+            for ii = 1:N
                 data = gritsbot_patch;
                 this.robot_body = data.vertices;
                 x  = this.poses(1, ii);
