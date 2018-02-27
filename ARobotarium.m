@@ -75,7 +75,8 @@ classdef ARobotarium < handle
                 this.current_file_size = 100;
                 this.current_saved_iterations = 1;
 
-                robotarium_data = zeros(5*number_of_agents, this.current_file_size);
+                % Plus one for timestamp
+                robotarium_data = zeros(5*number_of_agents+1, this.current_file_size);
                 save(this.file_path, 'robotarium_data', '-v7.3')
 
                 this.mat_file_path = matfile(this.file_path, 'Writable', true);
