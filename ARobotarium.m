@@ -226,7 +226,7 @@ classdef ARobotarium < handle
         function save(this)
 
             this.mat_file_path.robotarium_data(:, this.current_saved_iterations) = ...
-                reshape([this.poses ; this.velocities], [], 1);
+                reshape([this.poses ; this.velocities ; tic()], [], 1);
             
             this.current_saved_iterations = this.current_saved_iterations + 1;
         end
