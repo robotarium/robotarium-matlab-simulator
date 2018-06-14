@@ -38,7 +38,7 @@ classdef RobotariumBuilder < ARobotariumBuilder
     
     % Gets properties from abstract class as well.
     properties
-        boundaries = [-0.6, 0.6, -0.35, 0.35]; 
+        boundaries = [-1.6, 1.6, -1, 1];
         robot_diameter = 0.08
     end
     

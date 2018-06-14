@@ -15,7 +15,7 @@ classdef ARobotarium < handle
         % Path to mat file to keep this in memory
         mat_file_path
         boundary_patch
-        boundary_points = {[-1.5, 1.5, 1.5, -1.5], [-1.5, -1.5, 1.5, 1.5]};
+        boundary_points = []
     end
 
     properties (GetAccess = public, SetAccess = protected)
@@ -37,7 +37,7 @@ classdef ARobotarium < handle
         show_figure
 
         % Arena parameters
-        boundaries = [-1.5, 1.5, -1.5, 1.5];
+        boundaries = [-1.6, 1.6, -1, 1];
     end
 
     methods (Abstract)
@@ -56,6 +56,11 @@ classdef ARobotarium < handle
 
     methods
         function this = ARobotarium(number_of_agents, save_data, show_figure, initial_poses)
+           
+            b = this.boundaries;
+            this.boundary_points = {[b(1) b(2) b(2) b(1)], [b(3) b(3) b(4) b(4)]};
+            
+            
             this.number_of_agents = number_of_agents;
             this.save_data = save_data;
             this.show_figure = show_figure;
@@ -214,7 +219,7 @@ classdef ARobotarium < handle
                     0 0 1
                 ];
                 transformed = this.robot_body*rotation_matrix';
-                set(this.robot_handle{ii},'Vertices', transformed(:, 1:2));
+                set(this.robot_handle{ii}, 'Vertices', transformed(:, 1:2));
             end
 
             if(this.number_of_agents <= 6)

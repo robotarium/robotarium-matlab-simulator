@@ -4,10 +4,10 @@ function [ patch_data ] = gritsbot_patch()
 
     % Make it facing 0 rads
 
-    robot_width = 0.03;
-    robot_height = 0.03; 
-    wheel_width = 0.005; 
-    wheel_height = 0.01; 
+    robot_width = 0.06;
+    robot_height = 0.06; 
+    wheel_width = 0.01; 
+    wheel_height = 0.02; 
     led_size = 0.005; 
     
     rectangle = @(w, h) [w/2 h/2 1; -w/2 h/2 1; -w/2 -h/2 1; w/2 -h/2 1];
@@ -31,7 +31,7 @@ function [ patch_data ] = gritsbot_patch()
     ];
 
     colors = [
-     0.5*randn(1, 3) + [238, 138, 17]/255; 
+     [238, 138, 17]/255; 
      0 0 0;
      0 0 0;
      0 0 0;
