@@ -4,8 +4,8 @@ function [ patch_data ] = gritsbot_patch()
 
     % Make it facing 0 rads
 
-    robot_width = 0.06;
-    robot_height = 0.06; 
+    robot_width = 0.05;
+    robot_height = 0.05; 
     wheel_width = 0.01; 
     wheel_height = 0.02; 
     led_size = 0.005; 
@@ -38,8 +38,8 @@ function [ patch_data ] = gritsbot_patch()
      0 0 0
     ];
 
-    colors = min(colors, 0.9);
-    colors = max(colors, 0);
+%     colors = min(colors, 0.9);
+%     colors = max(colors, 0);
     
     faces = repmat([1 2 3 4 1], 5, 1);
     
