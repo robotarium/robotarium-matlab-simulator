@@ -28,6 +28,7 @@ classdef ARobotarium < handle
         *(ARobotarium.max_linear_velocity/ARobotarium.wheel_radius);
     
         number_of_robots
+        figure_handle
     end
     
     properties (GetAccess = protected, SetAccess = protected)
@@ -36,10 +37,9 @@ classdef ARobotarium < handle
         velocities
         poses
         left_leds
-        right_leds        
-        
+        right_leds                
         % Figure handle for simulator
-        figure_handle
+        
         show_figure
     end   
     
