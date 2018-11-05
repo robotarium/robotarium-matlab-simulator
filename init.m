@@ -11,10 +11,10 @@ else
     addpath(path)
 end
 
-path = genpath('utilities');
+path = genpath('path_generation');
 if(isempty(path))
     disp('WARNING: Cannot find patch_generation directory.  This script should be run from the base directory.')
     
 else
-    addpath(genpath('patch_generation'))
+    addpath(path)
 end

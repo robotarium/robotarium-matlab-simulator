@@ -3,12 +3,7 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
 % certificate function to avoid collisions.
 %
 %   Args:
-%       BarrierGain, optional: Positive double 
-%       SafetyRadius, optional: Positive double
-%   
-%   Returns:
-%       A barrier certificate function (2xN, 2xN) -> 2xN representing the
-%       barrier certificate
+%       BarrierGain, optional: posi
 %
 %   CREATE_SI_BARRIER_CERTIFICATE('SafetyRadius', 0.2) creates a function
 %   from (2xN, 2xN) -> 2xN to keep robots at least 0.2 meters apart 
@@ -44,7 +39,7 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
         % This function accepts single-integrator dynamics and wraps them in
         % barrier certificates to ensure that collisions do not occur.  Note that
         % this algorithm bounds the magnitude of the generated output to 0.1.
-        %        
+        %
         %   BARRIER_CERTIFICATE(dxi, x) modifies dxi to become collision
         %   free.
         %

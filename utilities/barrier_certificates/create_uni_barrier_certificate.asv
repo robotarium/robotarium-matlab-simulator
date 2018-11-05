@@ -8,18 +8,18 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
 %       remain
 %       ProjectionDistance, optional: How far ahead to project a virtual
 %       single integrator
-%       VelocityMagnitudeLimit, optional: The maximum velocity for the
-%       virtual single integrator
 %   
 %   Returns:
-%       A barrier certificate function (2xN, 3xN) -> 2xN representing the
+%       A barrier certificate function (2xN, 2xN) -> 2xN representing the
 %       barrier certificate
 %
-%   CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', 10e4)
+%   CREATE_SI_BARRIER_CERTIFICATE('SafetyRadius', 0.2) creates a function
+%   from (2xN, 2xN) -> 2xN to keep robots at least 0.2 meters apart 
+%   (measured from their centers).
 %
-%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', 0.2)
-%
-%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', 0.2, 'BarrierGain', 10e4)
+%   CREATE_SI_BARRIER_CERTIFICATE('BarrierGain', 10e4) creates a
+%   barrier certificate with a particular gain.  The higher the gain, 
+%   the more quickly the robots can approach each other.  
 %
 %   Example:
 %       bc = create_si_barrier_certificate('SafetyRadius', 0.2)
