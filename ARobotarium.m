@@ -19,18 +19,20 @@ classdef ARobotarium < handle
         boundaries = [-1.6, 1.6, -1, 1];      
     end
     
-    properties (GetAccess = public)
+    properties (GetAccess = public, SetAccess = protected)
         % Maximum wheel velocitry of the robots
         max_wheel_velocity = ARobotarium.max_linear_velocity/ARobotarium.wheel_radius;
         
         max_angular_velocity = ...
         2*(ARobotarium.wheel_radius/ARobotarium.robot_diameter) ...
-        *(ARobotarium.max_linear_velocity/ARobotarium.wheel_radius) 
+        *(ARobotarium.max_linear_velocity/ARobotarium.wheel_radius);
+    
+        number_of_robots
     end
     
     properties (GetAccess = protected, SetAccess = protected)
         
-        number_of_robots
+        
         velocities
         poses
         left_leds

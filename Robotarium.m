@@ -52,9 +52,9 @@ classdef Robotarium < ARobotarium
                     'Spacing', 1.5*this.robot_diameter, ...
                     'Width', this.boundaries(2)-this.boundaries(1)-this.robot_diameter, ...
                     'Height', this.boundaries(4)-this.boundaries(3))-this.robot_diameter;
-            else
-                assert(all(size(initial_conditions) == [3, N]), 'Initial conditions must be 3 x %i', N);            
             end
+            
+            assert(all(size(initial_conditions) == [3, this.number_of_robots]), 'Initial conditions must be 3 x %i', this.number_of_robots);            
             
             % Call initialize during initialization
             this.initialize(initial_conditions);
