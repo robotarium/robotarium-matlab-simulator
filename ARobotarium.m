@@ -45,30 +45,23 @@ classdef ARobotarium < handle
         % Getters
         get_poses(this)
         
+        % Initialization
+        initialize(this, initial_conditions)
+        
         %Update functions
         step(this);
         debug(this);
     end
     
     methods
-        function this = ARobotarium(number_of_robots, show_figure, initial_conditions)
+        function this = ARobotarium(number_of_robots, show_figure)
             
             assert(number_of_robots >= 0 && number_of_robots <= 50, ...
             'Number of robots (%i) must be >= 0 and <= 50', number_of_robots);
             this.number_of_robots = number_of_robots;
-            N = number_of_robots;
+            N = number_of_robots;            
             
-            if(isempty(initial_conditions))
-                initial_conditions = generate_initial_conditions(N, ...
-                    'Spacing', 2*this.robot_diameter, ...
-                    'Width', this.boundaries(2)-this.boundaries(1)-this.robot_diameter, ...
-                    'Height', this.boundaries(4)-this.boundaries(3))-this.robot_diameter;
-            else
-                assert(all(size(initial_conditions) == [3, N]), 'Initial conditions must be 3 x %i', N);            
-            end
-            
-            this.poses = initial_conditions;
-            
+            this.poses = zeros(3, N);
             this.show_figure = show_figure;
             this.velocities = zeros(2, N);
             this.left_leds = zeros(3, N);
@@ -168,11 +161,11 @@ classdef ARobotarium < handle
                end
            end
            
-           for i = 1:N
-              for j = i+1:N
-                 if(norm(p(:, i) - p(:, j)) <= 2*this.robot_diameter)
-                    errors{end+1} = RobotariumError.RobotsTooClose; 
-                 end
+           for i = 1:(N-1)
+              for j = i+1:N     
+                  if(norm(p(1:2, i) - p(1:2, j)) <= ARobotarium.robot_diameter)
+                      errors{end+1} = RobotariumError.RobotsTooClose;
+                  end
               end
            end
            

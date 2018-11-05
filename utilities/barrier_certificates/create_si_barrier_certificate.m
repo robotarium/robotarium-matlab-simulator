@@ -29,7 +29,7 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
         
     parser = inputParser;
     parser.addParameter('BarrierGain', 100);
-    parser.addParameter('SafetyRadius', 0.22);
+    parser.addParameter('SafetyRadius', 0.15);
     parse(parser, varargin{:})
     opts = optimoptions(@quadprog,'Display','off');
 

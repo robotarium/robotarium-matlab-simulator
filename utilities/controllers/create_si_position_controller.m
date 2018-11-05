@@ -14,7 +14,7 @@ function [si_position_controller] = create_si_position_controller(varargin)
     parser = inputParser;
     addOptional(parser, 'XVelocityGain', 1);
     addOptional(parser, 'YVelocityGain', 1);
-    addOptional(parser, 'VelocityMagnitudeLimit', 0.08);
+    addOptional(parser, 'VelocityMagnitudeLimit', 0.4);
     
     parse(parser, varargin{:});
     

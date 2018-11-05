@@ -39,11 +39,25 @@ classdef Robotarium < ARobotarium
             parser.addParameter('ShowFigure', true);
             parser.addParameter('InitialConditions', []);
                         
-            parse(parser, varargin{:})              
+            parse(parser, varargin{:}) 
             
             % The input will be validated by ARobotarium
             this = this@ARobotarium(parser.Results.NumberOfRobots, ...
-            parser.Results.ShowFigure, parser.Results.InitialConditions);
+                parser.Results.ShowFigure);
+            
+            initial_conditions = parser.Results.InitialConditions;
+            
+            if(isempty(initial_conditions))
+                initial_conditions = generate_initial_conditions(this.number_of_robots, ...
+                    'Spacing', 1.5*this.robot_diameter, ...
+                    'Width', this.boundaries(2)-this.boundaries(1)-this.robot_diameter, ...
+                    'Height', this.boundaries(4)-this.boundaries(3))-this.robot_diameter;
+            else
+                assert(all(size(initial_conditions) == [3, N]), 'Initial conditions must be 3 x %i', N);            
+            end
+            
+            % Call initialize during initialization
+            this.initialize(initial_conditions);
         end
 
         function poses = get_poses(this)
@@ -65,6 +79,10 @@ classdef Robotarium < ARobotarium
             %Make sure it's only called once per iteration
             this.checked_poses_already = true;
             this.called_step_already = false;
+        end
+        
+        function initialize(this, initial_conditions)
+            this.poses = initial_conditions;
         end
 
         function step(this)

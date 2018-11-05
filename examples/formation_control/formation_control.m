@@ -11,10 +11,7 @@ r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 %% Set up constants for experiment
 
 %Gains for the transformation from single-integrator to unicycle dynamics
-linear_velocity_gain = 0.5; 
-angular_velocity_limit = r.max_angular_velocity;
 formation_control_gain = 4;
-safety_radius = 0.22;
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
@@ -30,7 +27,7 @@ L = [3 -1 0 -1 0 -1 ; ...
    -1 0 -1 0 -1 3];
 
 % The desired inter-agent distance for the formation
-d = 0.2; 
+d = 0.4; 
 
 % Pre-compute diagonal values for the rectangular formation
 ddiag = sqrt((2*d)^2 + d^2);
@@ -50,9 +47,9 @@ dx = zeros(2, N);
 
 %% Grab tools for converting to single-integrator dynamics and ensuring safety 
 
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', safety_radius);
-si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', linear_velocity_gain, ... 
-    'AngularVelocityLimit', angular_velocity_limit);
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 1.5*r.robot_diameter);
+si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.5, ... 
+    'AngularVelocityLimit', 0.75*r.max_angular_velocity);
 
 % Iterate for the previously specified number of iterations
 for t = 0:iterations

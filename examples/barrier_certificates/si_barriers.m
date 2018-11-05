@@ -10,7 +10,7 @@ N = 12;
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 % This is a totally arbitrary number
-iterations = 1000;
+iterations = 2000;
 
 %% Experiment constants 
 % Next, we set up some experiment constants
@@ -35,7 +35,7 @@ flag = 0; %flag of task completion
 % single-integrator position controller, a single-integrator barrier
 % function, and a mapping from single-integrator to unicycle dynamics
 position_int = create_si_position_controller('XVelocityGain', 1, 'YVelocityGain', 1);
-si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 0.22);
+si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 1.5*r.robot_diameter);
 si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.75, 'AngularVelocityLimit', pi);
 
 %% Begin the experiment

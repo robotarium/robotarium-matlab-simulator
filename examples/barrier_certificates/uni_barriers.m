@@ -27,7 +27,7 @@ x_goal = p_circ(:,1:N);
 flag = 0; %flag of task completion
 
 lambda = 0.05;
-safety = 0.15;
+safety = 1.5*r.robot_diameter;
 
 %% Tools to map single-integrator -> unicycle
 
