@@ -31,10 +31,10 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
 %       size of the robots.
 
     parser = inputParser;
-    addOptional(parser, 'BarrierGain', 8e3);
-    addOptional(parser, 'SafetyRadius', 0.05);
-    addOptional(parser, 'ProjectionDistance', 0.05);
-    addOptional(parser, 'VelocityMagnitudeLimit', 0.075);
+    addOptional(parser, 'BarrierGain', 100);
+    addOptional(parser, 'SafetyRadius', 0.15);
+    addOptional(parser, 'ProjectionDistance', 0.07);
+    addOptional(parser, 'VelocityMagnitudeLimit', 0.4);
     parse(parser, varargin{:})
     
     opts = optimoptions(@quadprog,'Display','off');       

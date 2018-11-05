@@ -3,10 +3,9 @@ classdef RobotariumError < double
     %   Detailed explanation goes here
     
    enumeration
-      ExceededLinearVelocity (1)
-      ExceededAngularVelocity (2)
-      RobotsTooClose (3)
-      RobotsOutsideBoundaries (4)
+      ExceededActuatorLimits (1)
+      RobotsTooClose (2)
+      RobotsOutsideBoundaries (3)
    end     
 end
 

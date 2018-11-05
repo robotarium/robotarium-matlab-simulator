@@ -28,8 +28,8 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate(varargin)
 %       size of the robots.
         
     parser = inputParser;
-    parser.addParameter('BarrierGain', 1e4);
-    parser.addParameter('SafetyRadius', 0.1);
+    parser.addParameter('BarrierGain', 100);
+    parser.addParameter('SafetyRadius', 0.22);
     parse(parser, varargin{:})
     opts = optimoptions(@quadprog,'Display','off');
 

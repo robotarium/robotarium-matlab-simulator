@@ -10,12 +10,25 @@ classdef ARobotarium < handle
         boundary_patch % Path to denote the Robotarium's boundary
     end
     
-    properties (GetAccess = public, SetAccess = protected)
-        % Time step for the Robotarium
+    properties (Constant)
         time_step = 0.033
-        maxLinearVelocity = 0.5
-        maxAngularVelocity = 4*pi
+        max_linear_velocity = 0.5  
         robot_diameter = 0.1
+        wheel_radius = 0.01;
+        base_length = 0.05;          
+        boundaries = [-1.6, 1.6, -1, 1];      
+    end
+    
+    properties (GetAccess = public)
+        % Maximum wheel velocitry of the robots
+        max_wheel_velocity = ARobotarium.max_linear_velocity/ARobotarium.wheel_radius;
+        
+        max_angular_velocity = ...
+        2*(ARobotarium.wheel_radius/ARobotarium.robot_diameter) ...
+        *(ARobotarium.max_linear_velocity/ARobotarium.wheel_radius) 
+    end
+    
+    properties (GetAccess = protected, SetAccess = protected)
         
         number_of_robots
         velocities
@@ -26,10 +39,7 @@ classdef ARobotarium < handle
         % Figure handle for simulator
         figure_handle
         show_figure
-        
-        % Arena parameters
-        boundaries = [-1.6, 1.6, -1, 1];
-    end
+    end   
     
     methods (Abstract)                
         % Getters
@@ -77,22 +87,7 @@ classdef ARobotarium < handle
             N = size(vs, 2);
             
             assert(N<=this.number_of_robots, 'Row size of velocities (%i) must be <= to number of agents (%i)', ...
-                N, this.number_of_robots);
-            
-            % Threshold velocities
-            to_thresh = abs(vs(1, :)) > this.maxLinearVelocity;
-            vs(1, to_thresh) = this.maxLinearVelocity*sign(vs(1, to_thresh));
-            to_thresh = abs(vs(2, :)) > this.maxAngularVelocity;
-            vs(2, to_thresh) = this.maxAngularVelocity*sign(vs(2, to_thresh));
-            for i = 1:N
-                if(abs(vs(1, i)) > this.maxLinearVelocity)
-                    vs(1, i) = this.maxLinearVelocity*sign(vs(1,i));
-                end
-                
-                if(abs(vs(2, i)) > this.maxAngularVelocity)
-                    vs(2, i) = this.maxAngularVelocity*sign(vs(2, i));
-                end
-            end
+                N, this.number_of_robots);           
             
             this.velocities(:, ids) = vs;
         end
@@ -126,7 +121,34 @@ classdef ARobotarium < handle
         end
     end
     
-    methods (Access = protected)       
+    methods (Access = protected)    
+        
+        function dxu = threshold(this, dxu)
+            dxdd = this.uni_to_diff(dxu);
+            
+            to_thresh = abs(dxdd) > this.max_wheel_velocity;
+            dxdd(to_thresh) = this.max_wheel_velocity*sign(dxdd(to_thresh));
+
+            dxu = this.diff_to_uni(dxdd);
+        end
+        
+        function dxdd = uni_to_diff(this, dxu)
+            r = this.wheel_radius;
+            l = this.base_length;
+            dxdd = [
+                (1/(2*r))*(2*dxu(1, :) - l*dxu(2, :)) ; ...
+                (1/(2*r))*(2*dxu(1, :) + l*dxu(2, :))
+                ];
+        end
+        
+        function dxu = diff_to_uni(this, dxdd)
+            r = this.wheel_radius;
+            l = this.base_length;
+            dxu = [
+                r/2*(dxdd(1, :) + dxdd(2, :));
+                r/l*(dxdd(2, :) - dxdd(1, :))
+                ];
+        end
         
         function errors = validate(this)
            % VALIDATE meant to be called on each iteration of STEP. 
@@ -152,6 +174,12 @@ classdef ARobotarium < handle
                     errors{end+1} = RobotariumError.RobotsTooClose; 
                  end
               end
+           end
+           
+           dxdd = this.uni_to_diff(this.velocities);
+           exceeding = abs(dxdd) > this.max_wheel_velocity;
+           if(any(any(exceeding)))
+               errors{end+1} = RobotariumError.ExceededActuatorLimits;
            end
         end
     end
@@ -200,7 +228,7 @@ classdef ARobotarium < handle
                 x  = this.poses(1, i);
                 y  = this.poses(2, i);
                 th = this.poses(3, i) - pi/2;
-                rotation_matrix = [...
+                rotation_matrix = [
                     cos(th) -sin(th) x;
                     sin(th)  cos(th) y;
                     0 0 1];
@@ -228,11 +256,11 @@ classdef ARobotarium < handle
                 set(this.robot_handle{i}, 'Vertices', transformed(:, 1:2));
                 
                 % Set LEDs
-                l = this.left_leds/255;
-                r = this.right_leds/255;
+                left = this.left_leds/255;
+                right = this.right_leds/255;
             
-                this.robot_handle{i}.FaceVertexCData(4, :) = l(:, i);
-                this.robot_handle{i}.FaceVertexCData(5, :) = r(:, i);
+                this.robot_handle{i}.FaceVertexCData(4, :) = left(:, i);
+                this.robot_handle{i}.FaceVertexCData(5, :) = right(:, i);
             end
             
             drawnow limitrate

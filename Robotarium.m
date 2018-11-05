@@ -71,10 +71,10 @@ classdef Robotarium < ARobotarium
             % STEP Steps the simulation, updating poses of robots and
             % checking for errors
             %
-            %   STEP() returns nothing
+            %   STEP()
             %
             %   Example:
-            %       ROBOTARIUM.step()
+            %       object.step()
             %
             %   Notes:
             %       Should be called everytime GET_POSES is called
@@ -83,10 +83,18 @@ classdef Robotarium < ARobotarium
 
             %Vectorize update to states
             i = 1:this.number_of_robots;
+                        
+            % Validate before thresholding velocities
+            es = this.validate();
+            this.errors = [this.errors, es];
+            this.iteration = this.iteration + 1;
+            
+            this.velocities = this.threshold(this.velocities);
 
             %Update velocities using unicycle dynamics
-            this.poses(1, i) = this.poses(1, i) + this.time_step.*this.velocities(1, i).*cos(this.poses(3, i));
-            this.poses(2, i) = this.poses(2, i) + this.time_step.*this.velocities(1, i).*sin(this.poses(3, i));
+            temp = this.time_step.*this.velocities(1, i);
+            this.poses(1, i) = this.poses(1, i) + temp.*cos(this.poses(3, i));
+            this.poses(2, i) = this.poses(2, i) + temp.*sin(this.poses(3, i));
             this.poses(3, i) = this.poses(3, i) + this.time_step.*this.velocities(2, i);
 
             %Ensure that the orientations are in the right range
@@ -98,29 +106,28 @@ classdef Robotarium < ARobotarium
             
             if(this.show_figure)
                 this.draw_robots();
-            end
-            
-            es = this.validate();
-            this.errors = [this.errors, es];
-            this.iteration = this.iteration + 1;
+            end            
         end
         
         function debug(this)
-            count = zeros(1, 4);
+            num_errors = 3;
+            count = zeros(1, num_errors);
             for i = 1:numel(this.errors)
               count(this.errors{i}) = count(this.errors{i}) + 1;                 
             end
             
-            fprintf('Your simulation took approximately %f real seconds.\n', this.iteration*this.time_step);
+            fprintf('Your simulation took approximately %.2f real seconds.\n', this.iteration*this.time_step);
             
-            error_strings = cell(1, 4);
+            error_strings = cell(1, num_errors);
             error_strings{RobotariumError.RobotsTooClose} = 'robots were too close';
             error_strings{RobotariumError.RobotsOutsideBoundaries} = 'robots were outside boundaries'; 
+            error_strings{RobotariumError.ExceededActuatorLimits} = 'robots exceeded actuator limits';            
             
             fprintf('Error count for current simulation:\n');
-            print_error = @(x) fprintf('\t Simulation had %i counts of %s errors.\n', count(x), error_strings{x});            
+            print_error = @(x) fprintf('\t Simulation had %i %s errors.\n', count(x), error_strings{x});            
             print_error(RobotariumError.RobotsTooClose)
             print_error(RobotariumError.RobotsOutsideBoundaries);
+            print_error(RobotariumError.ExceededActuatorLimits);
             
             if(isempty(this.errors))
                 fprintf('No errors in your simulation!  Acceptance of experiment likely.\n')               

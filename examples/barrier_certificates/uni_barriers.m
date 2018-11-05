@@ -2,18 +2,10 @@
 %Paul Glotfelter 
 %3/24/2016
 
-%% Setup Robotarium object
+%% Set up Robotarium object
 
-% Get Robotarium object used to communicate with the robots/simulator
-rb = RobotariumBuilder();
-
-% Get the number of available agents from the Robotarium.  We don't need a
-% specific value for this algorithm
-N = rb.get_available_agents(); 
-
-% Set the number of agents and whether we would like to save data.  Then,
-% build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_save_data(false).build();
+N = 12;
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 %Run the simulation for a specific number of iterations
 iterations = 2000;
@@ -24,16 +16,18 @@ iterations = 2000;
 % velocity vector containing the linear and angular velocity, respectively.
 dx = zeros(2, N);
 
-% Distribute the agents into a circle that fits into the Robotarium
-% boundaries
-xybound = [-0.5, 0.5, -0.3, 0.3];
+% This code ensures that the agents are initially distributed around an
+% ellipse.  
+xybound = 0.8*[-1, 1, -1, 1];
 p_theta = (1:2:2*N)/(2*N)*2*pi;
 p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
+
 x_goal = p_circ(:,1:N);
+
 flag = 0; %flag of task completion
 
 lambda = 0.05;
-safety = 0.05;
+safety = 0.15;
 
 %% Tools to map single-integrator -> unicycle
 
@@ -95,6 +89,7 @@ for t = 1:iterations
     
 end
 
-% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
-% experiment is over!
-r.call_at_scripts_end();
+% We can call this function to debug our experiment!  Fix all the errors
+% before submitting to maximize the chance that your experiment runs
+% successfully.
+r.debug();

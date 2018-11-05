@@ -5,7 +5,7 @@
 % such as velocity thresholding, which you probably need to utilize.  
 
 N = 12;
-r = Robotarium('NumberOfRobots', 12, 'ShowFigure', true);
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 %% Experiment constants
 
