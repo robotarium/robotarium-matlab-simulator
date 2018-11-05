@@ -15,11 +15,11 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
 %       A barrier certificate function (2xN, 3xN) -> 2xN representing the
 %       barrier certificate
 %
-%   CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', 10e4)
+%   CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', bg)
 %
-%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', 0.2)
+%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', sr)
 %
-%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', 0.2, 'BarrierGain', 10e4)
+%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', sr, 'BarrierGain', bg)
 %
 %   Example:
 %       bc = create_si_barrier_certificate('SafetyRadius', 0.2)
