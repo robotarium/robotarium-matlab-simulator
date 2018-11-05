@@ -74,7 +74,7 @@ classdef RobotariumBuilder < ARobotariumBuilder
             end
                                                         
             initial_poses(3, :) = rand(1, this.number_of_agents)*2*pi;
-            robotarium_obj = Robotarium(this.number_of_agents, this.save_data, this.show_figure, initial_poses);            
+            robotarium_obj = Robotarium(this.number_of_agents, this.show_figure, initial_poses);            
         end
     end  
 end
