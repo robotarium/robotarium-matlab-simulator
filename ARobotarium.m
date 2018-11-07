@@ -210,11 +210,15 @@ classdef ARobotarium < handle
             set(ax, 'PlotBoxAspectRatio', [1 1 1], 'DataAspectRatio', [1 1 1])
             
             % Store axes
-            axis(ax, 'off')
+            axis(ax, 'off')            
             
             % Static legend
-            setappdata(gca, 'LegendColorbarManualSpace', 1);
-            setappdata(gca, 'LegendColorbarReclaimSpace', 1);           
+            setappdata(ax, 'LegendColorbarManualSpace', 1);
+            setappdata(ax, 'LegendColorbarReclaimSpace', 1);           
+            
+            % Apparently, this statement is necessary to avoid issues with
+            % axes reappearing.
+            hold on
             
             this.robot_handle = cell(1, N);
             for i = 1:N
