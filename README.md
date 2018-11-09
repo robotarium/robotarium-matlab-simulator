@@ -1,3 +1,7 @@
+# NEW VERSION
+
+The simulator has been updated to work with the brand new GRITSBot X!  Gains accross the utilities have changes.  **Please check out the examples to update your own code.**
+
 # MATLAB Version 
 
 Currently, we know that the simulator works with MATLAB 2014b and higher.  The backwards compatibility issues are mostly due to changes in the way MATLAB handles figures in newer releases.
