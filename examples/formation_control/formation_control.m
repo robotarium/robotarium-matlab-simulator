@@ -3,26 +3,15 @@
 %Paul Glotfelter 
 %3/24/2016
 
-%% Setup Robotarium object
+%% Set up Robotarium object
 
-% Get Robotarium object used to communicate with the robots/simulator
-% Get Robotarium object used to communicate with the robots/simulator
-rb = RobotariumBuilder();
-
-% Get the number of available agents from the Robotarium.  We don't need a
-% specific value for this algorithm
-N = 6; 
-
-% Set the number of agents and whether we would like to save data.  Then,
-% build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_save_data(false).build();
+N = 6;
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 %% Set up constants for experiment
 
 %Gains for the transformation from single-integrator to unicycle dynamics
-linearVelocityGain = 1; 
-angularVelocityGain = pi/2;
-formationControlGain = 4;
+formation_control_gain = 4;
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
@@ -38,7 +27,7 @@ L = [3 -1 0 -1 0 -1 ; ...
    -1 0 -1 0 -1 3];
 
 % The desired inter-agent distance for the formation
-d = 0.2; 
+d = 0.4; 
 
 % Pre-compute diagonal values for the rectangular formation
 ddiag = sqrt((2*d)^2 + d^2);
@@ -58,10 +47,9 @@ dx = zeros(2, N);
 
 %% Grab tools for converting to single-integrator dynamics and ensuring safety 
 
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.08);
-si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', linearVelocityGain, ... 
-    'AngularVelocityLimit', angularVelocityGain);
-
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 1.5*r.robot_diameter);
+si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.5, ... 
+    'AngularVelocityLimit', 0.75*r.max_angular_velocity);
 
 % Iterate for the previously specified number of iterations
 for t = 0:iterations
@@ -90,7 +78,7 @@ for t = 0:iterations
             % add it to the total velocity
 
             dx(:, i) = dx(:, i) + ...
-            formationControlGain*(norm(x(1:2, i) - x(1:2, j))^2 - weights(i, j)^2) ... 
+            formation_control_gain*(norm(x(1:2, i) - x(1:2, j))^2 - weights(i, j)^2) ... 
             *(x(1:2, j) - x(1:2, i));
         end 
     end
@@ -106,6 +94,7 @@ for t = 0:iterations
     r.step();   
 end
 
-% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
-% experiment is over!
-r.call_at_scripts_end();
+% We can call this function to debug our experiment!  Fix all the errors
+% before submitting to maximize the chance that your experiment runs
+% successfully.
+r.debug();

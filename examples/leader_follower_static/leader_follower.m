@@ -5,20 +5,12 @@
 %% Experiment Constants
 
 %Run the simulation for a specific number of iterations
-iterations = 2000;
+iterations = 5000;
 
 %% Set up the Robotarium object
 
-%Get Robotarium object and set the save parameters
-rb = RobotariumBuilder();
-
-% Get the number of available agents from the Robotarium.  We don't need a
-% specific value for this algorithm
-N = rb.get_available_agents();
-
-% Set the number of agents and whether we would like to save data.  Then,
-% build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_save_data(false).build();
+N = 4;
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 %% Create the desired Laplacian
 
@@ -33,20 +25,23 @@ L(2, 1) = -1;
 dxi = zeros(2, N);
 
 %State for leader
-state = 0;
+state = 1;
 
 % These are gains for our formation control algorithm
 formation_control_gain = 10;
-desired_distance = 0.09;
+desired_distance = 0.3;
 
 %% Grab tools we need to convert from single-integrator to unicycle dynamics
 
 % Single-integrator -> unicycle dynamics mapping
-si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 1, 'AngularVelocityLimit', 2);
+si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.5, 'AngularVelocityLimit', 15);
 % Single-integrator barrier certificates
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.08);
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.22);
 % Single-integrator position controller
 si_pos_controller = create_si_position_controller();
+
+waypoints = 0.85*[1 1; -1 1; -1 -1; 1 -1]';
+close_enough = 0.05;
 
 for t = 1:iterations
     
@@ -71,27 +66,28 @@ for t = 1:iterations
     
     %% Make the leader travel between waypoints
     
-    switch state
-        
-        case 0
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; 0.2]);
-            if(norm(x(1:2, 1) - [0.3 ; 0.2]) < 0.05)
-                state = 1;
-            end
+    waypoint = waypoints(:, state);
+    
+    switch state        
         case 1
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; 0.2]);
-            if(norm(x(1:2, 1) - [-0.3 ; 0.2]) < 0.05)
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            if(norm(x(1:2, 1) - waypoint) < close_enough)
                 state = 2;
             end
         case 2
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [-0.3 ; -0.2]);
-            if(norm(x(1:2, 1) - [-0.3 ; -0.2]) < 0.05)
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            if(norm(x(1:2, 1) - waypoint) < close_enough)
                 state = 3;
             end
         case 3
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), [0.3 ; -0.2]);
-            if(norm(x(1:2, 1) - [0.3 ; -0.2]) < 0.05)
-                state = 0;
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            if(norm(x(1:2, 1) - waypoint) < close_enough)
+                state = 4;
+            end
+        case 4
+            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            if(norm(x(1:2, 1) - waypoint) < close_enough)
+                state = 1;
             end
     end
     
@@ -108,6 +104,7 @@ for t = 1:iterations
     r.step();
 end
 
-% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
-% experiment is over!
-r.call_at_scripts_end();
+% We can call this function to debug our experiment!  Fix all the errors
+% before submitting to maximize the chance that your experiment runs
+% successfully.
+r.debug();

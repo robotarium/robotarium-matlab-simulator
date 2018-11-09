@@ -6,19 +6,11 @@
 % Before starting the algorithm, we need to initialize the Robotarium
 % object so that we can communicate with the agents
 
-% Get Robotarium object used to communicate with the robots/simulator
-rb = RobotariumBuilder();
-
-% Get the number of available agents from the Robotarium.  We don't need a
-% specific value for this algorithm
-N = rb.get_available_agents();
-
-% Set the number of agents and whether we would like to save data.  Then,
-% build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_show_figure(false).set_save_data(false).build();
+N = 12;
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 % This is a totally arbitrary number
-iterations = 20000;
+iterations = 2000;
 
 %% Experiment constants 
 % Next, we set up some experiment constants
@@ -29,7 +21,7 @@ dx = zeros(2, N);
 
 % This code ensures that the agents are initially distributed around an
 % ellipse.  
-xybound = [-1, 1, -1, 1];
+xybound = 0.8*[-1, 1, -1, 1];
 p_theta = (1:2:2*N)/(2*N)*2*pi;
 p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
 
@@ -42,8 +34,8 @@ flag = 0; %flag of task completion
 % Let's retrieve some of the tools we'll need.  We would like a
 % single-integrator position controller, a single-integrator barrier
 % function, and a mapping from single-integrator to unicycle dynamics
-position_int = create_si_position_controller('XVelocityGain', 2, 'YVelocityGain', 2);
-si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 0.1);
+position_int = create_si_position_controller('XVelocityGain', 1, 'YVelocityGain', 1);
+si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 1.5*r.robot_diameter);
 si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.75, 'AngularVelocityLimit', pi);
 
 %% Begin the experiment
@@ -83,7 +75,7 @@ for t = 1:iterations
     % $$
     %   \|dxu\| \leq dmax
     % $$
-    dxmax = 0.1;
+    dxmax = 0.75*r.max_linear_velocity;
     for i = 1:N
         if norm(dx(:,i)) > dxmax
             dx(:,i) = dx(:,i)/norm(dx(:,i))*dxmax;
@@ -108,7 +100,8 @@ for t = 1:iterations
     r.step();    
 end
 
-% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
-% experiment is over!
-r.call_at_scripts_end();
+% We can call this function to debug our experiment!  Fix all the errors
+% before submitting to maximize the chance that your experiment runs
+% successfully.
+r.debug();
 

@@ -1,32 +1,40 @@
-%% create_uni_barrier_certificate 
-% Returns a barrier certificate ($f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that operates on unicycle algorithms, 
-% preventing colisions.
-
-%% Detailed Description
-%% 
-% * BarrierGain - affects how quickly the robots can approach each other 
-% * SafetyRadius affects how far apart the robots must be 
-% * ProjectionDistance affects the utilized transformation to
-% single-integrator dynamics
-%%  
-% A good rule of thumb is to make the safety radius and projection distance 
-% each 1/2 of the desired total distance for the agents to remain apart.
-% You'll want their total to be more than the diameter of the GRITSbot
-% (i.e., 0.08 m).
-
-%% Example usage
-%   uni_barrier_cert = CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', 3,
-%   'SafetyRadius', 0.05, 'ProjectionDistance', 0.05)
-%   dxu_safe = uni_barrier_cert(dxu, robot_poses)
-
-%% Implementation 
 function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
+% CREATE_SI_BARRIER_CERTIFICATE Creates a unicycle barrier
+% certificate function to avoid collisions.
+%
+%   Args:
+%       BarrierGain, optional: How quickly robots can approach eachother
+%       SafetyRadius, optional: How far apart centers of robots should
+%       remain
+%       ProjectionDistance, optional: How far ahead to project a virtual
+%       single integrator
+%       VelocityMagnitudeLimit, optional: The maximum velocity for the
+%       virtual single integrator
+%   
+%   Returns:
+%       A barrier certificate function (2xN, 3xN) -> 2xN representing the
+%       barrier certificate
+%
+%   CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', bg)
+%
+%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', sr)
+%
+%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', sr, 'BarrierGain', bg)
+%
+%   Example:
+%       bc = create_si_barrier_certificate('SafetyRadius', 0.2)
+%   
+%   Notes:
+%       SafetyRadius should be a positive double
+%       BarrierGain should be a positive double
+%       In practice, the value for SafetyRadius should be a little more than double the
+%       size of the robots.
 
     parser = inputParser;
-    addOptional(parser, 'BarrierGain', 8e3);
-    addOptional(parser, 'SafetyRadius', 0.05);
-    addOptional(parser, 'ProjectionDistance', 0.05);
-    addOptional(parser, 'VelocityMagnitudeLimit', 0.075);
+    addOptional(parser, 'BarrierGain', 100);
+    addOptional(parser, 'SafetyRadius', 0.15);
+    addOptional(parser, 'ProjectionDistance', 0.07);
+    addOptional(parser, 'VelocityMagnitudeLimit', 0.4);
     parse(parser, varargin{:})
     
     opts = optimoptions(@quadprog,'Display','off');       

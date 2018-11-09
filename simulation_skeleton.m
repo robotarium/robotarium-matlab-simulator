@@ -41,6 +41,5 @@ for t = 1:iterations
     r.step();
 end
 
-% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
-% experiment is over!
+% We should call r.call_at_scripts_end() after our experiment is over!
 r.call_at_scripts_end();

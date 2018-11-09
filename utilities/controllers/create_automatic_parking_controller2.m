@@ -20,11 +20,11 @@
 function [ automatic_parking_controller ] = create_automatic_parking_controller2(varargin)
 
     p = inputParser;
-    addOptional(p, 'LinearVelocityGain', 0.75);
-    addOptional(p, 'AngularVelocityLimit', pi/2);
+    addOptional(p, 'LinearVelocityGain', 0.5);
+    addOptional(p, 'AngularVelocityLimit', 15);
     addOptional(p, 'PositionError', 0.01); 
     addOptional(p, 'RotationError', 0.25);
-    addOptional(p, 'VelocityMagnitudeLimit', 0.08)
+    addOptional(p, 'VelocityMagnitudeLimit', 0.4)
     parse(p, varargin{:});
     
     lin_vel_gain = p.Results.LinearVelocityGain; 

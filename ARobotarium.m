@@ -1,240 +1,268 @@
 classdef ARobotarium < handle
-    %APIAbstract This is an interface for the Robotarium class that
-    %ensures the simulator and the robots match up properly.  You should
-    %definitely NOT MODIFY this file.  Also, don't submit this file with
-    %your algorithm.
-
+    % AROBOTARIUM This is an interface for the Robotarium class that
+    % ensures the simulator and the robots match up properly.  You should
+    % definitely NOT MODIFY this file.  Also, don't submit this file.
+    
     properties (GetAccess = protected, SetAccess = protected)
-        robot_handle
-        robot_body
-
-        % Stuff for saving data
-        file_path
-        current_file_size
-        current_saved_iterations
-        % Path to mat file to keep this in memory
-        mat_file_path
-        boundary_patch
-        boundary_points = []
+        robot_handle % Handle for the robots patch objects
+        robot_body  % Base robot body position used for rendering
+        
+        boundary_patch % Path to denote the Robotarium's boundary
     end
-
-    properties (GetAccess = public, SetAccess = protected)
-        % Time step for the Robotarium
+    
+    properties (Constant)
         time_step = 0.033
-        maxLinearVelocity = 0.1
-        maxAngularVelocity = 2*pi
-        robot_diameter = 0.08
-        number_of_agents
+        max_linear_velocity = 0.5  
+        robot_diameter = 0.1
+        wheel_radius = 0.01;
+        base_length = 0.05;          
+        boundaries = [-1.6, 1.6, -1, 1];      
+    end
+    
+    properties (GetAccess = public, SetAccess = protected)
+        % Maximum wheel velocitry of the robots
+        max_wheel_velocity = ARobotarium.max_linear_velocity/ARobotarium.wheel_radius;
+        
+        max_angular_velocity = ...
+        2*(ARobotarium.wheel_radius/ARobotarium.robot_diameter) ...
+        *(ARobotarium.max_linear_velocity/ARobotarium.wheel_radius);
+    
+        number_of_robots
+        figure_handle
+    end
+    
+    properties (GetAccess = protected, SetAccess = protected)
+        
+        
         velocities
         poses
-        led_commands
-        
-        %Saving parameters
-        save_data
-
+        left_leds
+        right_leds                
         % Figure handle for simulator
-        figure_handle
+        
         show_figure
-
-        % Arena parameters
-        boundaries = [-1.6, 1.6, -1, 1];
-    end
-
-    methods (Abstract)
-
-        %Try this one out...
-        % We can use this to finish saving / clean up after MQTT
-        call_at_scripts_end(this)
-
+    end   
+    
+    methods (Abstract)                
         % Getters
-        % Get poses must be implemented independently
         get_poses(this)
-
+        
+        % Initialization
+        initialize(this, initial_conditions)
+        
         %Update functions
         step(this);
+        debug(this);
     end
-
+    
     methods
-        function this = ARobotarium(number_of_agents, save_data, show_figure, initial_poses)
-           
-            b = this.boundaries;
-            this.boundary_points = {[b(1) b(2) b(2) b(1)], [b(3) b(3) b(4) b(4)]};
+        function this = ARobotarium(number_of_robots, show_figure)
             
+            assert(number_of_robots >= 0 && number_of_robots <= 50, ...
+            'Number of robots (%i) must be >= 0 and <= 50', number_of_robots);
+            this.number_of_robots = number_of_robots;
+            N = number_of_robots;            
             
-            this.number_of_agents = number_of_agents;
-            this.save_data = save_data;
+            this.poses = zeros(3, N);
             this.show_figure = show_figure;
-
-            this.velocities = zeros(2, number_of_agents);
-            this.led_commands = zeros(4, number_of_agents);
-            this.poses = initial_poses;
-
-            % If save data, set up the file saving variables
-            if(save_data)
-                date = datetime('now');
-                this.file_path = 'robotarium_data';
-                this.file_path = strcat(this.file_path, '_', num2str(date.Month), '_', num2str(date.Day), '_', ...
-                num2str(date.Year), '_', num2str(date.Hour), '_', ...
-                num2str(date.Minute), '_', num2str(round(date.Second)), '.mat');
-
-                this.current_file_size = 100;
-                this.current_saved_iterations = 1;
-
-                % Plus one for timestamp
-                robotarium_data = zeros(5*number_of_agents+1, this.current_file_size);
-                save(this.file_path, 'robotarium_data', '-v7.3')
-
-                this.mat_file_path = matfile(this.file_path, 'Writable', true);
-            end
-
+            this.velocities = zeros(2, N);
+            this.left_leds = zeros(3, N);
+            this.right_leds = zeros(3, N);
+            
             if(show_figure)
                 this.initialize_visualization()
             end
         end
-
-        function agents = get_number_of_agents(this)
-           agents = this.number_of_agents;
+        
+        function agents = get_number_of_robots(this)
+            agents = this.number_of_robots;
         end
-
+        
         function this = set_velocities(this, ids, vs)
             N = size(vs, 2);
-
-            assert(N<=this.number_of_agents, 'Column size of vs (%i) must be <= to number of agents (%i)', ...
-                N, this.number_of_agents);
-
-            % Threshold velocities
-            for i = 1:N
-                if(abs(vs(1, i)) > this.maxLinearVelocity)
-                   vs(1, i) = this.maxLinearVelocity*sign(vs(1,i));
-                end
-
-                if(abs(vs(2, i)) > this.maxAngularVelocity)
-                   vs(2, i) = this.maxAngularVelocity*sign(vs(2, i));
-                end
-            end
-
+            
+            assert(N<=this.number_of_robots, 'Row size of velocities (%i) must be <= to number of agents (%i)', ...
+                N, this.number_of_robots);           
+            
             this.velocities(:, ids) = vs;
         end
         
-        % Commands is [r g b index] x N
-        function this = set_leds(this, ids, commands)
-            N = size(commands, 2);
-
-            assert(N<=this.number_of_agents, 'Column size of vs (%i) must be <= to number of agents (%i)', ...
-                N, this.number_of_agents);
+        function this = set_left_leds(this, ids, rgbs)
+            N = size(rgbs, 2);
             
-            assert(all(all(commands(1:3, :) <= 255)) && all(all(commands(1:3, :) >= 0)), 'RGB commands must be between 0 and 255');
-            assert(all(commands(4, :) >= 0) && all(commands(4, :) <= 1), 'LED index must be 0 or 1');                              
+            assert(N<=this.number_of_robots, 'Row size of rgb values (%i) must be <= to number of agents (%i)', ...
+                N, this.number_of_robots);
+            
+            assert(all(all(rgbs(1:3, :) <= 255)) && all(all(rgbs(1:3, :) >= 0)), 'RGB commands must be between 0 and 255');
             
             % Only set LED commands for the selected robots
-            this.led_commands(:, ids) = commands;
+            this.left_leds(:, ids) = rgbs;
         end
-
+        
+        function this = set_right_leds(this, ids, rgbs)
+            N = size(rgbs, 2);
+            
+            assert(N<=this.number_of_robots, 'Row size of rgb values (%i) must be <= to number of agents (%i)', ...
+                N, this.number_of_robots);
+            
+            assert(all(all(rgbs(1:3, :) <= 255)) && all(all(rgbs(1:3, :) >= 0)), 'RGB commands must be between 0 and 255');
+            
+            % Only set LED commands for the selected robots
+            this.right_leds(:, ids) = rgbs;
+        end
+        
         function iters = time2iters(this, time)
-           iters = time / this.time_step;
+            iters = time / this.time_step;
         end
     end
+    
+    methods (Access = protected)    
+        
+        function dxu = threshold(this, dxu)
+            dxdd = this.uni_to_diff(dxu);
+            
+            to_thresh = abs(dxdd) > this.max_wheel_velocity;
+            dxdd(to_thresh) = this.max_wheel_velocity*sign(dxdd(to_thresh));
 
+            dxu = this.diff_to_uni(dxdd);
+        end
+        
+        function dxdd = uni_to_diff(this, dxu)
+            r = this.wheel_radius;
+            l = this.base_length;
+            dxdd = [
+                (1/(2*r))*(2*dxu(1, :) - l*dxu(2, :)) ; ...
+                (1/(2*r))*(2*dxu(1, :) + l*dxu(2, :))
+                ];
+        end
+        
+        function dxu = diff_to_uni(this, dxdd)
+            r = this.wheel_radius;
+            l = this.base_length;
+            dxu = [
+                r/2*(dxdd(1, :) + dxdd(2, :));
+                r/l*(dxdd(2, :) - dxdd(1, :))
+                ];
+        end
+        
+        function errors = validate(this)
+           % VALIDATE meant to be called on each iteration of STEP. 
+           % Checks that robots are operating normally.
+           
+           p = this.poses;
+           b = this.boundaries;
+           N = this.number_of_robots;
+           errors = {};
+           
+           for i = 1:N
+               x = p(1, i);
+               y = p(2, i);
+               
+               if(x < b(1) || x > b(2) || y < b(3) || y > b(4))                   
+                   errors{end+1} = RobotariumError.RobotsOutsideBoundaries;
+               end
+           end
+           
+           for i = 1:(N-1)
+              for j = i+1:N     
+                  if(norm(p(1:2, i) - p(1:2, j)) <= ARobotarium.robot_diameter)
+                      errors{end+1} = RobotariumError.RobotsTooClose;
+                  end
+              end
+           end
+           
+           dxdd = this.uni_to_diff(this.velocities);
+           exceeding = abs(dxdd) > this.max_wheel_velocity;
+           if(any(any(exceeding)))
+               errors{end+1} = RobotariumError.ExceededActuatorLimits;
+           end
+        end
+    end
+    
+    % Visualization methods
     methods (Access = protected)
-
+               
         % Initializes visualization of GRITSbots
         function initialize_visualization(this)
             % Initialize variables
-            N = this.number_of_agents;
+            N = this.number_of_robots;
             offset = 0.05;
-
-            % Scale factor (max. value of single Gaussian)
-            scaleFactor = 50;
-            figPhi = figure;
-            this.figure_handle = figPhi;
-
-            % Plot Robotarium boundaries %Maria
-            this.boundary_patch = patch('XData', this.boundary_points{1}, 'YData', this.boundary_points{2}, ...
-            'FaceColor', 'none', ...
-            'LineWidth', 3, ...,
-            'EdgeAlpha', 0.5, ...
-            'EdgeColor', [0, 0, 0]);
-
-            %plot(im)
-            set(figPhi,'color','white');
-
+            
+            fig = figure;
+            this.figure_handle = fig;
+            
+            % Plot Robotarium boundaries
+            b = this.boundaries;
+            boundary_points = {[b(1) b(2) b(2) b(1)], [b(3) b(3) b(4) b(4)]};
+            this.boundary_patch = patch('XData', boundary_points{1}, ...
+                'YData', boundary_points{2}, ...
+                'FaceColor', 'none', ...
+                'LineWidth', 3, ...,
+                'EdgeColor', [0, 0, 0]);
+            
+            set(fig, 'color', 'white');
+            
             % Set axis
-            robotPlaneAxes = gca;
-
+            ax = fig.CurrentAxes;
+            
             % Limit view to xMin/xMax/yMin/yMax
-            axis(robotPlaneAxes, [this.boundaries(1) - offset,this.boundaries(2)+offset,this.boundaries(3)-offset,this.boundaries(4)+offset])
-            caxis([0,1.5*scaleFactor])
-            set(robotPlaneAxes,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatio',[0.96 1 1])
-
+            axis(ax, [this.boundaries(1)-offset, this.boundaries(2)+offset, this.boundaries(3)-offset, this.boundaries(4)+offset])
+            set(ax, 'PlotBoxAspectRatio', [1 1 1], 'DataAspectRatio', [1 1 1])
+            
             % Store axes
-            axis(robotPlaneAxes,'off')
-            set(robotPlaneAxes,'position',[0 0 1 1],'units','normalized','YDir','normal')
-
-            hold on % "This ride's about to get bumpy!"
-
-            % Let's jump through hoops to make the robot diameter look to data scale
-            curUnits = get(robotPlaneAxes, 'Units');
-            set(robotPlaneAxes, 'Units', 'Points');
-            set(robotPlaneAxes, 'Units', curUnits);
-
-            offset = [-0.1 0.1];
-            xlim(this.boundaries(1:2)+offset); ylim(this.boundaries(3:4)+offset);
-
+            axis(ax, 'off')            
+            
             % Static legend
-            setappdata(gca,'LegendColorbarManualSpace',1);
-            setappdata(gca,'LegendColorbarReclaimSpace',1);
-
-            assert(N <= 100, 'Number of robots (%i) must be <= 100', N);
-
+            setappdata(ax, 'LegendColorbarManualSpace', 1);
+            setappdata(ax, 'LegendColorbarReclaimSpace', 1);           
+            
+            % Apparently, this statement is necessary to avoid issues with
+            % axes reappearing.
+            hold on
+            
             this.robot_handle = cell(1, N);
-            for ii = 1:N
+            for i = 1:N
                 data = gritsbot_patch;
                 this.robot_body = data.vertices;
-                x  = this.poses(1, ii);
-                y  = this.poses(2, ii);
-                th = this.poses(3, ii) - pi/2;
-                rotation_matrix = [...
+                x  = this.poses(1, i);
+                y  = this.poses(2, i);
+                th = this.poses(3, i) - pi/2;
+                rotation_matrix = [
                     cos(th) -sin(th) x;
                     sin(th)  cos(th) y;
                     0 0 1];
-                %'FaceAlpha', 0.6, ...
                 transformed = this.robot_body*rotation_matrix';
-                this.robot_handle{ii} = patch(...
-                          'Vertices', transformed(:, 1:2), ...
-                          'Faces', data.faces, ...
-                          'FaceColor', 'flat', ...
-                          'FaceVertexCData', data.colors, ...
-                          'EdgeColor','none');
+                this.robot_handle{i} = patch(...
+                    'Vertices', transformed(:, 1:2), ...
+                    'Faces', data.faces, ...
+                    'FaceColor', 'flat', ...
+                    'FaceVertexCData', data.colors, ...
+                    'EdgeColor','none');
             end
         end
-
+        
         function draw_robots(this)
-            for ii = 1:this.number_of_agents
-                x  = this.poses(1, ii);
-                y  = this.poses(2, ii);
-                th = this.poses(3, ii) - pi/2;
+            for i = 1:this.number_of_robots
+                x  = this.poses(1, i);
+                y  = this.poses(2, i);
+                th = this.poses(3, i) - pi/2;
                 rotation_matrix = [...
                     cos(th) -sin(th) x;
                     sin(th)  cos(th) y;
                     0 0 1
-                ];
+                    ];
                 transformed = this.robot_body*rotation_matrix';
-                set(this.robot_handle{ii}, 'Vertices', transformed(:, 1:2));
-            end
-
-            if(this.number_of_agents <= 6)
-                drawnow
-            else
-                drawnow limitrate
-            end
-        end
-
-        function save(this)
+                set(this.robot_handle{i}, 'Vertices', transformed(:, 1:2));
+                
+                % Set LEDs
+                left = this.left_leds/255;
+                right = this.right_leds/255;
             
-            this.mat_file_path.robotarium_data(:, this.current_saved_iterations) = ...
-                [reshape([this.poses ; this.velocities], [], 1) ; double(tic())];
+                this.robot_handle{i}.FaceVertexCData(4, :) = left(:, i);
+                this.robot_handle{i}.FaceVertexCData(5, :) = right(:, i);
+            end
             
-            this.current_saved_iterations = this.current_saved_iterations + 1;
-        end
+            drawnow limitrate
+        end 
     end
 end

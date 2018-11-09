@@ -1,20 +1,30 @@
-%% generate_initial_conditions: $\mathbf{Z}^{+} \to \mathbf{R}^{3 \times N}$
-% Returns a set of random poses distributed in the Robotarium workspace
-%% Example Usage 
-%   initial_conditions = generate_initial_conditions(4);
-%% Implementation
 function [ poses ] = generate_initial_conditions(N, varargin)
-
+% GENERATE_INITIAL_CONDITIONS generate random poses in a circle
+% The default parameter values are correctly sized for the Robotarium's
+% physical testbed.
+%
+%   GENERATE_INITIAL_CONDITIONS(5) generates 3 x 5 matrix of
+%   random poses
+%
+%   GENERATE_INITIAL_CONDITIONS(5, 'Spacing', 0.2, 'Width',
+%   3.2, 'Height', 2) generates 3 x 5 matrix of random poses with
+%   spacing 0.2 m in a rectangle of 3.2 m width and 2 m height.
+%
+%   Example:
+%      poses = generate_initial_conditions(5);
+%   
+%   Notes:
+%       N should be a positive integer.
+    
     poses = zeros(3, N);
     
     parser = inputParser;
-    parser.addParameter('Spacing', 0.1);
-    parser.addParameter('Width', 1.15);
-    parser.addParameter('Height', 0.55);
+    parser.addParameter('Spacing', 0.2);
+    parser.addParameter('Width', 3.2);
+    parser.addParameter('Height', 2);
     parse(parser, varargin{:});
     
     spacing = parser.Results.Spacing;
-    rotation_error = parser.Results.Spacing;
     width = parser.Results.Width;
     height = parser.Results.Height;
 

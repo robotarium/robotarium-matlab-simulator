@@ -4,16 +4,8 @@
 %Paul Glotfelter 
 %3/24/2016
 
-% Get Robotarium object used to communicate with the robots/simulator
-rb = RobotariumBuilder();
-
-% Get the number of available agents from the Robotarium.  We don't need a
-% specific value for this algorithm
-N = rb.get_available_agents(); 
-
-% Set the number of agents and whether we would like to save data.  Then,
-% build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_save_data(false).build();
+N = 6;
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 % Initialize x so that we don't run into problems later.  This isn't always
 % necessary
@@ -21,7 +13,7 @@ x = r.get_poses();
 r.step();
 
 % Create a barrier certificate so that the robots don't collide
-si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 0.06);
+si_barrier_certificate = create_si_barrier_certificate('SafetyRadius', 0.22);
 si_to_uni_dynamics = create_si_to_uni_mapping2();
         
 %Get randomized initial conditions in the robotarium arena
@@ -44,7 +36,8 @@ while(~init_checker(x, initial_conditions))
     r.step();   
 end
 
-% Though we didn't save any data, we still should call r.call_at_scripts_end() after our
-% experiment is over!
-r.call_at_scripts_end();
+% We can call this function to debug our experiment!  Fix all the errors
+% before submitting to maximize the chance that your experiment runs
+% successfully.
+r.debug();
 
