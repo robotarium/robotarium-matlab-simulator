@@ -1,6 +1,5 @@
 classdef RobotariumError < double
-    %ERRORS Summary of this class goes here
-    %   Detailed explanation goes here
+    %ERRORS Used to contain Robotarium error enumeration.
     
    enumeration
       ExceededActuatorLimits (1)

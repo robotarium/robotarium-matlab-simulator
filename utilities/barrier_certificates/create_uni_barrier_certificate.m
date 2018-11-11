@@ -48,7 +48,18 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate(varargin)
     
     uni_barrier_certificate = @barrier_unicycle;
 
-    function [ dxu ] = barrier_unicycle(dxu, x)      
+    function [ dxu ] = barrier_unicycle(dxu, x)   
+        % BARRIER_UNICYCLE The parameterized barrier function
+        %
+        %   Args:
+        %       dxu: 2xN vector of unicycle control inputs
+        %       x: 3xN vector of unicycle states
+        %
+        %   Returns:
+        %       A 2xN matrix of safe unicycle control inputs
+        %
+        %   BARRIER_UNICYCLE(dxu, x)
+        
         N = size(dxu, 2);
         
         if(N < 2)

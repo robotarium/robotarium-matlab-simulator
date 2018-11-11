@@ -1,23 +1,10 @@
-%% create_automatic_parking_controller
-% Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that automatically parks agents at desired poses,
-% zeroing out their velocities when the point (within a tolerance) is
-% reached.
-%% Detailed Description
-% This function returns a controller that allows for agents to be parked at
-% a desired position and orientation.  When the agents are within the error
-% bounds, this function will automatically stop their movement.
-%% 
-% * ApproachAngleGain - affects how the unicycle approaches the desired
-% position
-% * DesiredAngleGain - affects how the unicycle approaches th desired angle
-% * RotataionErrorGain - affects how quickly the unicycle corrects rotation
-% errors
-%% Example Usage 
-%   parking_controller =
-%   CREATE_AUTOMATIC_PARKING_CONTROLLER('ApproachAngleGain', 1,
-%   'DesiredAngleGain', 1, 'RotationErrorGain', 1)
-%% Implementation
 function [ automatic_parking_controller ] = create_automatic_parking_controller(varargin)
+% CREATE_AUTOMATIC_PARKING_CONTROLLER Creates a controller that drive a
+% unicycle-modeled sytsem to a particular point and stops it (within
+% tolerances)
+%
+%   
+% See also CREATE_PARKING_CONTROLLER, CREATE_IS_INITIALIZED
 
     p = inputParser;
     addOptional(p, 'ApproachAngleGain', 1);

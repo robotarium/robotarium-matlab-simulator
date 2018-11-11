@@ -1,28 +1,24 @@
-%% create_automatic_parking_controller2
-% Returns a controller ($u: \mathbf{R}^{3 \times N} \times \mathbf{R}^{3 \times N} \to \mathbf{R}^{2 \times N}$) that automatically parks agents at desired poses,
-% zeroing out their velocities when the point (within a tolerance) is
-% reached.
-%% Detailed Description
-% This function returns a controller that allows for agents to be parked at
-% a desired position and orientation.  When the agents are within the error
-% bounds, this function will automatically stop their movement.
-%% 
-% * ApproachAngleGain - affects how the unicycle approaches the desired
-% position
-% * DesiredAngleGain - affects how the unicycle approaches th desired angle
-% * RotataionErrorGain - affects how quickly the unicycle corrects rotation
-% errors
-%% Example Usage 
-%   parking_controller =
-%   CREATE_AUTOMATIC_PARKING_CONTROLLER2('ApproachAngleGain', 1,
-%   'DesiredAngleGain', 1, 'RotationErrorGain', 1)
-%% Implementation
 function [ automatic_parking_controller ] = create_automatic_parking_controller2(varargin)
+% CREATE_AUTOMATIC_PARKING_CONTROLLER Creates a controller that drive a
+% unicycle-modeled sytsem to a particular point and stops it (within
+% tolerances)
+% Works by driving the unicycle to within PositionError of the point then
+% rotating it to within RotationError of the desired rotation
+%
+%   Args:
+%       LinearVelocityGain, optional: see also
+%       AngularVelocityLimit, optional: see also
+%       PositionError, optional: Error tolerance for position
+%       RotationError, optional: Error tolerance for rotation
+%       VelocityMagnitudeLimit, optional: Limit for velocity while driving
+%       to position
+%
+% See also CREATE_SI_TO_UNI_MAPPING3
 
     p = inputParser;
     addOptional(p, 'LinearVelocityGain', 0.5);
     addOptional(p, 'AngularVelocityLimit', 15);
-    addOptional(p, 'PositionError', 0.01); 
+    addOptional(p, 'PositionError', 0.03); 
     addOptional(p, 'RotationError', 0.25);
     addOptional(p, 'VelocityMagnitudeLimit', 0.4)
     parse(p, varargin{:});
