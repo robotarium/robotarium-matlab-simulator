@@ -7,15 +7,8 @@
 % out the 'examples' folder.
 
 %% Get Robotarium object used to communicate with the robots/simulator
-rb = RobotariumBuilder();
-
-% Get the number of available agents from the Robotarium.  We don't need a
-% specific value for this algorithm
-N = rb.get_available_agents();
-
-% Set the number of agents and whether we would like to save data.  Then,
-% build the Robotarium simulator object!
-r = rb.set_number_of_agents(N).set_save_data(false).build();
+N = 12;
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
@@ -42,4 +35,4 @@ for t = 1:iterations
 end
 
 % We should call r.call_at_scripts_end() after our experiment is over!
-r.call_at_scripts_end();
+r.debug();
