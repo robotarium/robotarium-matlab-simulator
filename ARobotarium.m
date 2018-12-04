@@ -75,8 +75,6 @@ classdef ARobotarium < handle
                 this.figure_handle = figure_handle;
             end
             
-            this.figure_handle
-            
             if(show_figure)  
                 this.initialize_visualization();
             end
