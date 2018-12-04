@@ -56,7 +56,7 @@ classdef ARobotarium < handle
     end
     
     methods
-        function this = ARobotarium(number_of_robots, show_figure)
+        function this = ARobotarium(number_of_robots, show_figure, figure_handle)
             
             assert(number_of_robots >= 0 && number_of_robots <= 50, ...
             'Number of robots (%i) must be >= 0 and <= 50', number_of_robots);
@@ -67,10 +67,18 @@ classdef ARobotarium < handle
             this.show_figure = show_figure;
             this.velocities = zeros(2, N);
             this.left_leds = zeros(3, N);
-            this.right_leds = zeros(3, N);
+            this.right_leds = zeros(3, N);    
             
-            if(show_figure)
-                this.initialize_visualization()
+            if(isempty(figure_handle))              
+                this.figure_handle = figure();
+            else
+                this.figure_handle = figure_handle;
+            end
+            
+            this.figure_handle
+            
+            if(show_figure)  
+                this.initialize_visualization();
             end
         end
         
@@ -188,8 +196,7 @@ classdef ARobotarium < handle
             N = this.number_of_robots;
             offset = 0.05;
             
-            fig = figure;
-            this.figure_handle = fig;
+            fig = this.figure_handle;
             
             % Plot Robotarium boundaries
             b = this.boundaries;

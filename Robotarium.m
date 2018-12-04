@@ -37,13 +37,14 @@ classdef Robotarium < ARobotarium
             
             parser.addParameter('NumberOfRobots', -1);
             parser.addParameter('ShowFigure', true);
+            parser.addParameter('FigureHandle', []);
             parser.addParameter('InitialConditions', []);
                         
-            parse(parser, varargin{:}) 
+            parse(parser, varargin{:})
             
             % The input will be validated by ARobotarium
             this = this@ARobotarium(parser.Results.NumberOfRobots, ...
-                parser.Results.ShowFigure);
+                parser.Results.ShowFigure, parser.Results.FigureHandle);
             
             initial_conditions = parser.Results.InitialConditions;
             
