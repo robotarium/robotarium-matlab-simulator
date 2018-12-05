@@ -12,11 +12,11 @@ classdef ARobotarium < handle
     
     properties (Constant)
         time_step = 0.033
-        max_linear_velocity = 0.5  
+        max_linear_velocity = 0.5
         robot_diameter = 0.1
         wheel_radius = 0.01;
-        base_length = 0.05;          
-        boundaries = [-1.6, 1.6, -1, 1];      
+        base_length = 0.05;
+        boundaries = [-1.6, 1.6, -1, 1];
     end
     
     properties (GetAccess = public, SetAccess = protected)
@@ -24,9 +24,9 @@ classdef ARobotarium < handle
         max_wheel_velocity = ARobotarium.max_linear_velocity/ARobotarium.wheel_radius;
         
         max_angular_velocity = ...
-        2*(ARobotarium.wheel_radius/ARobotarium.robot_diameter) ...
-        *(ARobotarium.max_linear_velocity/ARobotarium.wheel_radius);
-    
+            2*(ARobotarium.wheel_radius/ARobotarium.robot_diameter) ...
+            *(ARobotarium.max_linear_velocity/ARobotarium.wheel_radius);
+        
         number_of_robots
         figure_handle
     end
@@ -37,13 +37,13 @@ classdef ARobotarium < handle
         velocities
         poses
         left_leds
-        right_leds                
+        right_leds
         % Figure handle for simulator
         
         show_figure
-    end   
+    end
     
-    methods (Abstract)                
+    methods (Abstract)
         % Getters
         get_poses(this)
         
@@ -59,23 +59,23 @@ classdef ARobotarium < handle
         function this = ARobotarium(number_of_robots, show_figure, figure_handle)
             
             assert(number_of_robots >= 0 && number_of_robots <= 50, ...
-            'Number of robots (%i) must be >= 0 and <= 50', number_of_robots);
+                'Number of robots (%i) must be >= 0 and <= 50', number_of_robots);
             this.number_of_robots = number_of_robots;
-            N = number_of_robots;            
+            N = number_of_robots;
             
             this.poses = zeros(3, N);
             this.show_figure = show_figure;
             this.velocities = zeros(2, N);
             this.left_leds = zeros(3, N);
-            this.right_leds = zeros(3, N);    
+            this.right_leds = zeros(3, N);
             
-            if(isempty(figure_handle))              
-                this.figure_handle = figure();
-            else
-                this.figure_handle = figure_handle;
-            end
-            
-            if(show_figure)  
+            if(show_figure)
+                if(isempty(figure_handle))
+                    this.figure_handle = figure();
+                else
+                    this.figure_handle = figure_handle;
+                end
+                
                 this.initialize_visualization();
             end
         end
@@ -88,7 +88,7 @@ classdef ARobotarium < handle
             N = size(vs, 2);
             
             assert(N<=this.number_of_robots, 'Row size of velocities (%i) must be <= to number of agents (%i)', ...
-                N, this.number_of_robots);           
+                N, this.number_of_robots);
             
             this.velocities(:, ids) = vs;
         end
@@ -122,14 +122,14 @@ classdef ARobotarium < handle
         end
     end
     
-    methods (Access = protected)    
+    methods (Access = protected)
         
         function dxu = threshold(this, dxu)
             dxdd = this.uni_to_diff(dxu);
             
             to_thresh = abs(dxdd) > this.max_wheel_velocity;
             dxdd(to_thresh) = this.max_wheel_velocity*sign(dxdd(to_thresh));
-
+            
             dxu = this.diff_to_uni(dxdd);
         end
         
@@ -152,42 +152,42 @@ classdef ARobotarium < handle
         end
         
         function errors = validate(this)
-           % VALIDATE meant to be called on each iteration of STEP. 
-           % Checks that robots are operating normally.
-           
-           p = this.poses;
-           b = this.boundaries;
-           N = this.number_of_robots;
-           errors = {};
-           
-           for i = 1:N
-               x = p(1, i);
-               y = p(2, i);
-               
-               if(x < b(1) || x > b(2) || y < b(3) || y > b(4))                   
-                   errors{end+1} = RobotariumError.RobotsOutsideBoundaries;
-               end
-           end
-           
-           for i = 1:(N-1)
-              for j = i+1:N     
-                  if(norm(p(1:2, i) - p(1:2, j)) <= ARobotarium.robot_diameter)
-                      errors{end+1} = RobotariumError.RobotsTooClose;
-                  end
-              end
-           end
-           
-           dxdd = this.uni_to_diff(this.velocities);
-           exceeding = abs(dxdd) > this.max_wheel_velocity;
-           if(any(any(exceeding)))
-               errors{end+1} = RobotariumError.ExceededActuatorLimits;
-           end
+            % VALIDATE meant to be called on each iteration of STEP.
+            % Checks that robots are operating normally.
+            
+            p = this.poses;
+            b = this.boundaries;
+            N = this.number_of_robots;
+            errors = {};
+            
+            for i = 1:N
+                x = p(1, i);
+                y = p(2, i);
+                
+                if(x < b(1) || x > b(2) || y < b(3) || y > b(4))
+                    errors{end+1} = RobotariumError.RobotsOutsideBoundaries;
+                end
+            end
+            
+            for i = 1:(N-1)
+                for j = i+1:N
+                    if(norm(p(1:2, i) - p(1:2, j)) <= ARobotarium.robot_diameter)
+                        errors{end+1} = RobotariumError.RobotsTooClose;
+                    end
+                end
+            end
+            
+            dxdd = this.uni_to_diff(this.velocities);
+            exceeding = abs(dxdd) > this.max_wheel_velocity;
+            if(any(any(exceeding)))
+                errors{end+1} = RobotariumError.ExceededActuatorLimits;
+            end
         end
     end
     
     % Visualization methods
     methods (Access = protected)
-               
+        
         % Initializes visualization of GRITSbots
         function initialize_visualization(this)
             % Initialize variables
@@ -215,11 +215,11 @@ classdef ARobotarium < handle
             set(ax, 'PlotBoxAspectRatio', [1 1 1], 'DataAspectRatio', [1 1 1])
             
             % Store axes
-            axis(ax, 'off')            
+            axis(ax, 'off')
             
             % Static legend
             setappdata(ax, 'LegendColorbarManualSpace', 1);
-            setappdata(ax, 'LegendColorbarReclaimSpace', 1);           
+            setappdata(ax, 'LegendColorbarReclaimSpace', 1);
             
             % Apparently, this statement is necessary to avoid issues with
             % axes reappearing.
@@ -262,12 +262,12 @@ classdef ARobotarium < handle
                 % Set LEDs
                 left = this.left_leds/255;
                 right = this.right_leds/255;
-            
+                
                 this.robot_handle{i}.FaceVertexCData(4, :) = left(:, i);
                 this.robot_handle{i}.FaceVertexCData(5, :) = right(:, i);
             end
             
             drawnow limitrate
-        end 
+        end
     end
 end
