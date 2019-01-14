@@ -67,10 +67,16 @@ classdef ARobotarium < handle
             this.show_figure = show_figure;
             this.velocities = zeros(2, N);
             this.left_leds = zeros(3, N);
-            this.right_leds = zeros(3, N);
+            this.right_leds = zeros(3, N);    
             
-            if(show_figure)
-                this.initialize_visualization()
+            if(isempty(figure_handle))              
+                this.figure_handle = figure();
+            else
+                this.figure_handle = figure_handle;
+            end
+            
+            if(show_figure)  
+                this.initialize_visualization();
             end
         end
         
