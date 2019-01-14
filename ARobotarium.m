@@ -13,9 +13,9 @@ classdef ARobotarium < handle
     properties (Constant)
         time_step = 0.033
         max_linear_velocity = 0.5  
-        robot_diameter = 0.1
-        wheel_radius = 0.01;
-        base_length = 0.05;          
+        robot_diameter = 0.11
+        wheel_radius = 0.016;
+        base_length = 0.105;          
         boundaries = [-1.6, 1.6, -1, 1];      
     end
     
