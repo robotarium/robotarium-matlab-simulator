@@ -86,7 +86,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate_with_obsta
         % Do obstacles
         for i = 1:N
             for j = 1:size(obstacles, 2)
-                h = norm(xi(:,i)-obstacles(:,j))^2-(safety_radius + 2*projection_distance)^2;
+                h = norm(xi(:,i)-obstacles(:,j))^2-(safety_radius + projection_distance)^2;
                 A(count, (2*i-1):(2*i)) = 2*(xi(:,i)-obstacles(:,j))';
                 b(count) = -gamma*h^3;
                 count = count + 1;
