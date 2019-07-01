@@ -17,7 +17,7 @@ function [ parking_controller ] = create_parking_controller(varargin)
     p = inputParser;
     addOptional(p, 'ApproachAngleGain', 1);
     addOptional(p, 'DesiredAngleGain', 2.7); 
-    addOptional(p, 'RotationErrorGain', 2);
+    addOptional(p, 'RotationErrorGain', 1);
     parse(p, varargin{:});
     
     gamma = p.Results.ApproachAngleGain; 

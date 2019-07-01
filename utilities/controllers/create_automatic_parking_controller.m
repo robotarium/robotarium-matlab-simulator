@@ -9,7 +9,7 @@ function [ automatic_parking_controller ] = create_automatic_parking_controller(
     p = inputParser;
     addOptional(p, 'ApproachAngleGain', 1);
     addOptional(p, 'DesiredAngleGain', 2.7); 
-    addOptional(p, 'RotationErrorGain', 2);
+    addOptional(p, 'RotationErrorGain', 1);
     addOptional(p, 'PositionError', 0.01); 
     addOptional(p, 'RotationError', 0.25);
     parse(p, varargin{:});
