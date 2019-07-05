@@ -21,7 +21,7 @@
 function [si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping(varargin)
 
     parser = inputParser;
-    addOptional(parser, 'ProjectionDistance', 0.07);
+    addOptional(parser, 'ProjectionDistance', 0.05);
     parse(parser, varargin{:});
     
     projection_distance = parser.Results.ProjectionDistance;
