@@ -29,18 +29,18 @@ state = 1;
 
 % These are gains for our formation control algorithm
 formation_control_gain = 10;
-desired_distance = 0.3;
+desired_distance = 0.25;
 
 %% Grab tools we need to convert from single-integrator to unicycle dynamics
 
 % Single-integrator -> unicycle dynamics mapping
-si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.5, 'AngularVelocityLimit', 15);
+si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.5, 'AngularVelocityLimit', pi);
 % Single-integrator barrier certificates
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.22);
+si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.2);
 % Single-integrator position controller
 si_pos_controller = create_si_position_controller();
 
-waypoints = 0.85*[1 1; -1 1; -1 -1; 1 -1]';
+waypoints = [1 0.75; -1 0.75; -1 -0.75; 1 -0.75]';
 close_enough = 0.05;
 
 for t = 1:iterations
