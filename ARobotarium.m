@@ -268,7 +268,7 @@ classdef ARobotarium < handle
                 this.robot_handle{i}.FaceVertexCData(4, :) = left(:, i);
                 this.robot_handle{i}.FaceVertexCData(5, :) = right(:, i);
             end
-            
+
             drawnow limitrate
         end 
     end

@@ -1,17 +1,18 @@
 %% Formation control utilizing edge tension energy with a static, undirected
-%communication topology
-%Paul Glotfelter 
-%3/24/2016
+% communication topology
+% Paul Glotfelter updated by Sean Wilson
+% 07/2019
 
 %% Set up Robotarium object
 
 N = 6;
-r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
+initial_conditions = generate_initial_conditions(N, 'Width', 2, 'Height', 1);
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_conditions);
 
 %% Set up constants for experiment
 
 %Gains for the transformation from single-integrator to unicycle dynamics
-formation_control_gain = 4;
+formation_control_gain = 10;
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
@@ -47,9 +48,8 @@ dx = zeros(2, N);
 
 %% Grab tools for converting to single-integrator dynamics and ensuring safety 
 
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 1.5*r.robot_diameter);
-si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.5, ... 
-    'AngularVelocityLimit', 0.75*r.max_angular_velocity);
+uni_barrier_cert = create_uni_barrier_certificate_with_boundary();
+si_to_uni_dyn = create_si_to_uni_dynamics('LinearVelocityGain', 0.5, 'AngularVelocityLimit', pi/2);
 
 % Iterate for the previously specified number of iterations
 for t = 0:iterations
@@ -83,9 +83,17 @@ for t = 0:iterations
         end 
     end
     
+    %% Avoid actuator errors
+    
+    % To avoid errors, we need to threshold dx
+    norms = arrayfun(@(x) norm(dx(:, x)), 1:N);
+    threshold = 3/4*r.max_linear_velocity;
+    to_thresh = norms > threshold;
+    dx(:, to_thresh) = threshold*dx(:, to_thresh)./norms(to_thresh);
+    
     % Transform the single-integrator dynamics to unicycle dynamics using a provided utility function
-    dx = si_barrier_cert(dx, x);
     dx = si_to_uni_dyn(dx, x);  
+    dx = uni_barrier_cert(dx, x);
     
     % Set velocities of agents 1:N
     r.set_velocities(1:N, dx);

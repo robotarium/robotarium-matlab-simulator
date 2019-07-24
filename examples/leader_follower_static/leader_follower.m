@@ -1,6 +1,6 @@
 %% Leader-follower with static topology
-% Paul Glotfelter
-% 3/24/2016
+% Paul Glotfelter edited by Sean Wilson
+% 07/2019
 
 %% Experiment Constants
 
@@ -10,7 +10,8 @@ iterations = 5000;
 %% Set up the Robotarium object
 
 N = 4;
-r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
+initial_positions = generate_initial_conditions(N, 'Width', 1, 'Height', 1, 'Spacing', 0.2);
+r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_positions);
 
 %% Create the desired Laplacian
 
@@ -29,16 +30,16 @@ state = 1;
 
 % These are gains for our formation control algorithm
 formation_control_gain = 10;
-desired_distance = 0.25;
+desired_distance = 0.2;
 
 %% Grab tools we need to convert from single-integrator to unicycle dynamics
 
 % Single-integrator -> unicycle dynamics mapping
-si_to_uni_dyn = create_si_to_uni_mapping2('LinearVelocityGain', 0.5, 'AngularVelocityLimit', pi);
+si_to_uni_dyn = create_si_to_uni_dynamics('LinearVelocityGain', 0.8);
 % Single-integrator barrier certificates
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 0.2);
+uni_barrier_cert = create_uni_barrier_certificate_with_boundary();
 % Single-integrator position controller
-si_pos_controller = create_si_position_controller();
+leader_controller = create_si_position_controller('XVelocityGain', 0.8, 'YVelocityGain', 0.8, 'VelocityMagnitudeLimit', 0.1);
 
 waypoints = [1 0.75; -1 0.75; -1 -0.75; 1 -0.75]';
 close_enough = 0.05;
@@ -70,30 +71,39 @@ for t = 1:iterations
     
     switch state        
         case 1
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
             if(norm(x(1:2, 1) - waypoint) < close_enough)
                 state = 2;
             end
         case 2
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
             if(norm(x(1:2, 1) - waypoint) < close_enough)
                 state = 3;
             end
         case 3
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
             if(norm(x(1:2, 1) - waypoint) < close_enough)
                 state = 4;
             end
         case 4
-            dxi(:, 1) = si_pos_controller(x(1:2, 1), waypoint);
+            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
             if(norm(x(1:2, 1) - waypoint) < close_enough)
                 state = 1;
             end
     end
     
+        
+    %% Avoid actuator errors
+    
+    % To avoid errors, we need to threshold dxi
+    norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
+    threshold = 3/4*r.max_linear_velocity;
+    to_thresh = norms > threshold;
+    dxi(:, to_thresh) = threshold*dxi(:, to_thresh)./norms(to_thresh);
+    
     %% Use barrier certificate and convert to unicycle dynamics
-    dxi = si_barrier_cert(dxi, x);
     dxu = si_to_uni_dyn(dxi, x);
+    dxu = uni_barrier_cert(dxu, x);
     
     %% Send velocities to agents
     

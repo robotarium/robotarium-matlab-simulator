@@ -1,9 +1,10 @@
-%% Vanilla consensus with a static, undirected topology
-% Paul Glotfelter
-% 3/24/2016
+%% Consensus with a static, undirected topology
+% Sean Wilson
+% 07/2019
+
 % Demontrates a bare-bones example of the consensus algorithm.  Same as
-% consensus.m.  Except, this script contains a minor modification that
-% greatly reduces the number of errors.
+% consensus.m.  Except, this script contains modifications that
+% consider implementation needs.
 
 N = 12;
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
@@ -18,15 +19,14 @@ L = cycleGL(N);
 
 % Gain for the diffeomorphism transformation between single-integrator and
 % unicycle dynamics
-transformation_gain = 0.06;
-[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', transformation_gain);
+[~, uni_to_si_states] = create_si_to_uni_mapping();
+si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion();
 
-safety_radius = 0.21;
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', safety_radius);
+uni_barrier_cert_boundary = create_uni_barrier_certificate_with_boundary();
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
-iterations = 500;
+iterations = 3000;
 
 % Initialize velocity vector for agents.  Each agent expects a 2 x 1
 % velocity vector containing the linear and angular velocity, respectively.
@@ -63,20 +63,21 @@ for t = 1:iterations
         end        
     end
     
-    %% Avoid errors
+    %% Avoid actuator errors
     
     % To avoid errors, we need to threshold dxi
     norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
-    threshold = r.max_linear_velocity/2;
+    threshold = 3/4*r.max_linear_velocity;
     to_thresh = norms > threshold;
     dxi(:, to_thresh) = threshold*dxi(:, to_thresh)./norms(to_thresh);
     
-    %% Utilize barrier certificates
-    dxi = si_barrier_cert(dxi, xi);
+    %% Map SI to Uni dynamics and utilize barrier certificates
     
     % Transform the single-integrator to unicycle dynamics using the the
     % transformation we created earlier
     dxu = si_to_uni_dyn(dxi, x);
+    
+    dxu = uni_barrier_cert_boundary(dxu, x);
     
     %% Send velocities to agents
     

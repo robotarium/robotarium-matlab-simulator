@@ -20,8 +20,8 @@ function [ poses ] = generate_initial_conditions(N, varargin)
     
     parser = inputParser;
     parser.addParameter('Spacing', 0.2);
-    parser.addParameter('Width', 3.2);
-    parser.addParameter('Height', 2);
+    parser.addParameter('Width', 3.0);
+    parser.addParameter('Height', 1.8);
     parse(parser, varargin{:});
     
     spacing = parser.Results.Spacing;

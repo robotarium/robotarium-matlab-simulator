@@ -1,4 +1,4 @@
-%% create_si_to_uni_mapping3
+%% create_si_to_uni_dynamics
 % Returns a mapping $\left( f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3
 % \times N} \to \mathbf{R}^{2 \times N} \right)$
 % from single-integrator to unicycle dynamics
@@ -8,21 +8,19 @@
 % unicycle's angular velocity
 %% Example Usage 
 %   % si === single integrator
-%   si_to_uni_dynamics = create_si_to_uni_mapping2('LinearVelocityGain',
-%   1, 'AngularVelocityLimit', pi)
+%   si_to_uni_dynamics = create_si_to_uni_dynamics()
 %   dx_si = si_algorithm(si_states) 
 %   dx_uni = si_to_uni_dynamics(dx_si, states)
 %% Implementation
-function [si_to_uni_dyn] = create_si_to_uni_mapping3(varargin)
+function [si_to_uni_dyn] = create_si_to_uni_dynamics(varargin)
 
     parser = inputParser;
     addOptional(parser, 'LinearVelocityGain', 1);
-    addOptional(parser, 'AngularVelocityLimit', pi);
+    addOptional(parser, 'AngularVelocityLimit', pi/2);
     parse(parser, varargin{:});
     
     lvg = parser.Results.LinearVelocityGain;
     avl = parser.Results.AngularVelocityLimit;
-    wrap = @(x) atan2(sin(x), cos(x));
     
     si_to_uni_dyn = @si_to_uni;
     % A mapping from si -> uni dynamics.  THis is more of a
@@ -39,20 +37,10 @@ function [si_to_uni_dyn] = create_si_to_uni_mapping3(varargin)
         
         dxu = zeros(2, N);
         for i = 1:N
-            angle = wrap(atan2(dxi(2, i), dxi(1, i)) - states(3, i));
-            if(angle > -pi/2 && angle < pi/2)
-                s = 1;
-            else
-                s = -1;
-            end
-            if(s < 0)               
-                states(3, i) = wrap(states(3, i) + pi);
-            end
-            dxu(1, i) = lvg*[cos(states(3, i)) sin(states(3, i))] * dxi(:, i);            
+            dxu(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
             %Normalizing the output of atan2 to between -kw and kw
-            dxu(2, i) = avl*atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), ...
-                dxu(1, i))/(pi/2);
-            dxu(1, i) = s*dxu(1, i);
+            dxu(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), ...
+                                  [cos(states(3, i)) sin(states(3, i))]*dxi(:, i))/(pi/2);
         end
     end
 end

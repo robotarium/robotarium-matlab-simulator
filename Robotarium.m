@@ -125,6 +125,7 @@ classdef Robotarium < ARobotarium
             
             if(this.show_figure)
                 this.draw_robots();
+                uistack([this.robot_handle{:}],'top');
             end            
         end
         

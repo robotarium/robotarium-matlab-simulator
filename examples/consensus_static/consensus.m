@@ -1,8 +1,11 @@
-%% Vanilla consensus with a static, undirected topology
-% Paul Glotfelter
-% 3/24/2016
-% Demontrates a bare-bones example of the consensus algorithm.  Lacks items
-% such as velocity thresholding, which you probably need to utilize.  
+%% Consensus with a static, undirected topology
+% Sean Wilson
+% 07/2019
+% Demonstrates a theoretical example of the consensus algorithm.  Lacks 
+% implementation considerations such as obstacle avoidance, keeping robots 
+% inside the workspace, and robot velocity thresholding, which you must 
+% include. If you submit this example to be run on the Robotarium it will
+% be rejected.
 
 N = 12;
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
@@ -17,10 +20,7 @@ L = cycleGL(N);
 
 % Gain for the diffeomorphism transformation between single-integrator and
 % unicycle dynamics
-transformation_gain = 0.06;
-[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping('ProjectionDistance', transformation_gain);
-
-si_barrier_cert = create_si_barrier_certificate('SafetyRadius', 1.5*r.robot_diameter);
+[si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping();
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
@@ -61,10 +61,7 @@ for t = 1:iterations
         end        
     end
     
-    %% Utilize barrier certificates
-    
-%     dxi = si_barrier_cert(dxi, xi);
-    
+    %% Map to unicycle dynamics    
     % Transform the single-integrator to unicycle dynamics using the the
     % transformation we created earlier
     dxu = si_to_uni_dyn(dxi, x);
