@@ -1,5 +1,6 @@
 % Initializing the agents to random positions with barrier certificates. 
-% This script shows how to initialize robots to a particular point
+% This script shows how to initialize robots to a particular point.
+% Sean Wilson
 % 07/2019
 
 N = 6;

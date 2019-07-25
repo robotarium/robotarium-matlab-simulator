@@ -11,7 +11,7 @@ r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', ini
 % our agents to collide
 
 % Create a barrier certificate for use with the above parameters 
-unicycle_barrier_certificate = create_uni_barrier_certificate();
+unicycle_barrier_certificate = create_uni_barrier_certificate_with_boundary();
         
 %Get randomized initial conditions in the robotarium arena
 final_goal_points = generate_initial_conditions(N, ...
@@ -40,4 +40,3 @@ end
 % before submitting to maximize the chance that your experiment runs
 % successfully.
 r.debug();
-

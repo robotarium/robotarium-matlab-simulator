@@ -10,7 +10,7 @@ iterations = 5000;
 %% Set up the Robotarium object
 
 N = 4;
-initial_positions = generate_initial_conditions(N, 'Width', 1, 'Height', 1, 'Spacing', 0.2);
+initial_positions = generate_initial_conditions(N, 'Width', 1, 'Height', 1, 'Spacing', 0.3);
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_positions);
 
 %% Create the desired Laplacian
@@ -41,7 +41,7 @@ uni_barrier_cert = create_uni_barrier_certificate_with_boundary();
 % Single-integrator position controller
 leader_controller = create_si_position_controller('XVelocityGain', 0.8, 'YVelocityGain', 0.8, 'VelocityMagnitudeLimit', 0.1);
 
-waypoints = [1 0.75; -1 0.75; -1 -0.75; 1 -0.75]';
+waypoints = [-1 0.8; -1 -0.8; 1 -0.8; 1 0.8]';
 close_enough = 0.05;
 
 for t = 1:iterations
