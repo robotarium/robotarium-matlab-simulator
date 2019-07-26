@@ -24,7 +24,7 @@ L = cycleGL(N);
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
-iterations = 500;
+iterations = 1000;
 
 % Initialize velocity vector for agents.  Each agent expects a 2 x 1
 % velocity vector containing the linear and angular velocity, respectively.

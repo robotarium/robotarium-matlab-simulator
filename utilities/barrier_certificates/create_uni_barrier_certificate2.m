@@ -29,17 +29,16 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate2(varargin)
 %       BarrierGain should be a positive double
 %       In practice, the value for SafetyRadius should be a little more than double the
 %       size of the robots.
-
     parser = inputParser;
     addOptional(parser, 'BarrierGain', 150);
     addOptional(parser, 'SafetyRadius', 0.12);
-    addOptional(parser, 'ProjectionDistance', 0.03);
+    addOptional(parser, 'ProjectionDistance', 0.05);
     addOptional(parser, 'BaseLength', 0.105);
     addOptional(parser, 'WheelRadius', 0.016);
-    addOptional(parser, 'WheelVelocityLimit', 25);
-    addOptional(parser, 'Disturbance', 7);
+    addOptional(parser, 'WheelVelocityLimit', 12.5);
+    addOptional(parser, 'Disturbance', 5);
     addOptional(parser, 'MaxNumRobots', 30);
-    addOptional(parser, 'MaxNumObstacles', 30);
+    addOptional(parser, 'MaxNumObstacles', 100);
     parse(parser, varargin{:})  
     
     opts = optimoptions(@quadprog,'Display', 'off', 'TolFun', 1e-5, 'TolCon', 1e-4);       
@@ -77,14 +76,14 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate2(varargin)
         % BARRIER_UNICYCLE The parameterized barrier function
         %
         %   Args:
-        %       dxu: 2xN vector of unicycle control inputs.
-        %       x: 3xN vector of unicycle states.
+        %       dxu: 2xN vector of unicycle control inputs
+        %       x: 3xN vector of unicycle states
         %       obstacles: Optional 2xN vector of obtacle points.
         %
         %   Returns:
         %       A 2xN matrix of safe unicycle control inputs
         %
-        %   BARRIER_UNICYCLE(dxu, x, obstacles)
+        %   BARRIER_UNICYCLE(dxu, x)
         
         if nargin < 3
             obstacles = [];
@@ -102,7 +101,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate2(varargin)
         %Generate constraints for barrier certificates based on the size of
         %the safety radius
 %         num_constraints = (num_disturbs^2)*temp + num_robots*num_obstacles*num_disturbs + num_robots;
-        num_constraints = temp + num_robots*num_obstacles; %+ num_robots;
+        num_constraints = temp + num_robots*num_obstacles;
         A(1:num_constraints, 1:2*num_robots) = 0;
         Os(1,1:num_robots) = cos(x(3, :)); 
         Os(2,1:num_robots) = sin(x(3, :));
@@ -141,6 +140,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate2(varargin)
                 count = count + num_obstacles;
             end
         end
+        
         
         %Solve QP program generated earlier
         L_all = kron(eye(num_robots), L);

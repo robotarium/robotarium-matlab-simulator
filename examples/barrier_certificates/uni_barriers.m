@@ -44,14 +44,10 @@ uni_barrier_certificate = create_uni_barrier_certificate2();
 
 %Iterate for the previously specified number of iterations
 for t = 1:iterations
-
+    
     % Retrieve the most recent poses from the Robotarium.  The time delay is
     % approximately 0.033 seconds
-    %tic
     x = r.get_poses();
-    %toc   
-    
-%     x(3, :) = atan2(sin(x(3, :) + pi), cos(x(3, :) + pi));
     
     x_temp = x(1:2,:);
     

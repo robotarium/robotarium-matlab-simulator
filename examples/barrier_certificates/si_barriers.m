@@ -35,7 +35,7 @@ flag = 0; %flag of task completion
 % function, and a mapping from single-integrator to unicycle dynamics
 position_control = create_si_position_controller();
 si_barrier_certificate = create_si_barrier_certificate2();
-si_to_uni_dyn = create_si_to_uni_mapping2();
+si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion();
 
 %% Begin the experiment
 % This section contains the actual implementation of the barrier
