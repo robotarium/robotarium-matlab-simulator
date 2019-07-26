@@ -37,7 +37,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate_with_bound
     addOptional(parser, 'BaseLength', 0.105);
     addOptional(parser, 'WheelRadius', 0.016);
     addOptional(parser, 'WheelVelocityLimit', 12.5);
-    addOptional(parser, 'Disturbance', 5);
+    addOptional(parser, 'Disturbance', 2);
     addOptional(parser, 'MaxNumRobots', 30);
     addOptional(parser, 'MaxNumBoundaryPoints', 4);
     addOptional(parser, 'BoundaryPoints', [-1.6 1.6 -1.0 1.0]);

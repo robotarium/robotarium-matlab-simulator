@@ -4,7 +4,7 @@
 % 07/2019
 
 N = 6;
-initial_positions = generate_initial_conditions(N);
+initial_positions = generate_initial_conditions(N, 'Spacing', 0.5);
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_positions);
 
 % Set some parameters for use with the barrier certificates.  We don't want

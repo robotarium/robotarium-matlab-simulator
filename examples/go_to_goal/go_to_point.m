@@ -4,7 +4,7 @@
 % 07/2019
 
 N = 6;
-initial_positions = generate_initial_conditions(N);
+initial_positions = generate_initial_conditions(N, 'Spacing', 0.5);
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_positions);
 
 % Create a barrier certificate so that the robots don't collide

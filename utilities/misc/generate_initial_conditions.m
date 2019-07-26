@@ -19,7 +19,7 @@ function [ poses ] = generate_initial_conditions(N, varargin)
     poses = zeros(3, N);
     
     parser = inputParser;
-    parser.addParameter('Spacing', 0.2);
+    parser.addParameter('Spacing', 0.3);
     parser.addParameter('Width', 3.0);
     parser.addParameter('Height', 1.8);
     parse(parser, varargin{:});
