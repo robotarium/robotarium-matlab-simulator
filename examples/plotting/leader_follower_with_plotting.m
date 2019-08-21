@@ -238,7 +238,7 @@ function font_size = determine_font_size(robotarium_instance, font_height_meters
 
 % Get the size of the robotarium figure window in point units
 curunits = get(robotarium_instance.figure_handle, 'Units');
-set(robotarium_instance.figure_handle, 'Units', 'Points');
+set(robotarium_instance.figure_handle, 'Units', 'Pixels');
 cursize = get(robotarium_instance.figure_handle, 'Position');
 set(robotarium_instance.figure_handle, 'Units', curunits);
 

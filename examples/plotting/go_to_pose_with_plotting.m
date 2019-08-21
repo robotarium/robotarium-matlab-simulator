@@ -192,7 +192,7 @@ function marker_size = determine_robot_marker_size(robotarium_instance)
 
 % Get the size of the robotarium figure window in pixels
 curunits = get(robotarium_instance.figure_handle, 'Units');
-set(robotarium_instance.figure_handle, 'Units', 'Points');
+set(robotarium_instance.figure_handle, 'Units', 'Pixels');
 cursize = get(robotarium_instance.figure_handle, 'Position');
 set(robotarium_instance.figure_handle, 'Units', curunits);
 
@@ -214,7 +214,7 @@ function marker_size = determine_marker_size(robotarium_instance, marker_size_me
 
 % Get the size of the robotarium figure window in pixels
 curunits = get(robotarium_instance.figure_handle, 'Units');
-set(robotarium_instance.figure_handle, 'Units', 'Points');
+set(robotarium_instance.figure_handle, 'Units', 'Pixels');
 cursize = get(robotarium_instance.figure_handle, 'Position');
 set(robotarium_instance.figure_handle, 'Units', curunits);
 
@@ -236,7 +236,7 @@ function font_size = determine_font_size(robotarium_instance, font_height_meters
 
 % Get the size of the robotarium figure window in point units
 curunits = get(robotarium_instance.figure_handle, 'Units');
-set(robotarium_instance.figure_handle, 'Units', 'Points');
+set(robotarium_instance.figure_handle, 'Units', 'Pixels');
 cursize = get(robotarium_instance.figure_handle, 'Position');
 set(robotarium_instance.figure_handle, 'Units', curunits);
 
