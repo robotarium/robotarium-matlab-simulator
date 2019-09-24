@@ -39,6 +39,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate_with_bound
     addOptional(parser, 'WheelVelocityLimit', 12.5);
     addOptional(parser, 'Disturbance', 2);
     addOptional(parser, 'MaxNumRobots', 30);
+    addOptional(parser, 'MaxObstacles', 50);
     addOptional(parser, 'MaxNumBoundaryPoints', 4);
     addOptional(parser, 'BoundaryPoints', [-1.6 1.6 -1.0 1.0]);
     parse(parser, varargin{:})  
@@ -52,7 +53,8 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate_with_bound
     wheel_vel_limit = parser.Results.WheelVelocityLimit;
     d = parser.Results.Disturbance;
     max_num_robots = parser.Results.MaxNumRobots;
-    max_num_obstacles = parser.Results.MaxNumBoundaryPoints;
+    max_num_boundaries = parser.Results.MaxNumBoundaryPoints;
+    max_num_obstacles = parser.Results.MaxObstacles;
     boundary_points = parser.Results.BoundaryPoints;
     
     %Check given boundary points
@@ -67,7 +69,7 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate_with_bound
 % 
 %     max_num_constraints = (num_disturbs^2)*nchoosek(max_num_robots, 2) + max_num_robots*max_num_obstacles*num_disturbs + max_num_robots;
     
-    max_num_constraints = nchoosek(max_num_robots, 2) + max_num_robots*max_num_obstacles; %+ max_num_robots;
+    max_num_constraints = nchoosek(max_num_robots, 2) + max_num_robots*max_num_boundaries + max_num_robots*max_num_obstacles; %+ max_num_robots;
     A = zeros(max_num_constraints, 2*max_num_robots);
     b = zeros(max_num_constraints, 1);
 

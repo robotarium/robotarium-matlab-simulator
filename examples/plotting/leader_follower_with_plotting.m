@@ -33,7 +33,7 @@ state = 1;
 
 % These are gains for our formation control algorithm
 formation_control_gain = 10;
-desired_distance = 0.2;
+desired_distance = 0.3;
 
 %% Grab tools we need to convert from single-integrator to unicycle dynamics
 
@@ -42,7 +42,7 @@ si_to_uni_dyn = create_si_to_uni_dynamics('LinearVelocityGain', 0.8);
 % Single-integrator barrier certificates
 uni_barrier_cert = create_uni_barrier_certificate_with_boundary();
 % Single-integrator position controller
-leader_controller = create_si_position_controller('XVelocityGain', 0.8, 'YVelocityGain', 0.8, 'VelocityMagnitudeLimit', 0.1);
+leader_controller = create_si_position_controller('XVelocityGain', 0.8, 'YVelocityGain', 0.8, 'VelocityMagnitudeLimit', 0.08);
 
 waypoints = [-1 0.8; -1 -0.8; 1 -0.8; 1 0.8]';
 close_enough = 0.03;
@@ -153,6 +153,7 @@ for t = 1:iterations
     norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
     threshold = 3/4*r.max_linear_velocity;
     to_thresh = norms > threshold;
+    to_thresh(1) = 0;
     dxi(:, to_thresh) = threshold*dxi(:, to_thresh)./norms(to_thresh);
     
     %% Use barrier certificate and convert to unicycle dynamics
