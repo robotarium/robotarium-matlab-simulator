@@ -6,7 +6,7 @@
 %% Set up Robotarium object
 
 N = 6;
-initial_conditions = generate_initial_conditions(N, 'Width', 2, 'Height', 1);
+initial_conditions = generate_initial_conditions(N, 'Width', 2, 'Height', 1, 'Spacing', 0.5);
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_conditions);
 
 %% Set up constants for experiment

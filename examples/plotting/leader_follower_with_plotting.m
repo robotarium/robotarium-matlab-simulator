@@ -13,7 +13,7 @@ iterations = 5000;
 %% Set up the Robotarium object
 
 N = 4;
-initial_positions = generate_initial_conditions(N, 'Width', 1, 'Height', 1, 'Spacing', 0.3);
+initial_positions = generate_initial_conditions(N, 'Width', 1, 'Height', 1, 'Spacing', 0.5);
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_positions);
 
 %% Create the desired Laplacian

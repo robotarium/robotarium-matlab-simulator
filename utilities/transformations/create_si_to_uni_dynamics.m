@@ -16,7 +16,7 @@ function [si_to_uni_dyn] = create_si_to_uni_dynamics(varargin)
 
     parser = inputParser;
     addOptional(parser, 'LinearVelocityGain', 1);
-    addOptional(parser, 'AngularVelocityLimit', pi/2);
+    addOptional(parser, 'AngularVelocityLimit', pi);
     parse(parser, varargin{:});
     
     lvg = parser.Results.LinearVelocityGain;
