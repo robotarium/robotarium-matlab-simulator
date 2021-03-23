@@ -139,9 +139,9 @@ classdef Robotarium < ARobotarium
             fprintf('Your simulation took approximately %.2f real seconds.\n', this.iteration*this.time_step);
             
             error_strings = cell(1, num_errors);
-            error_strings{RobotariumError.RobotsTooClose} = 'robots were too close';
-            error_strings{RobotariumError.RobotsOutsideBoundaries} = 'robots were outside boundaries'; 
-            error_strings{RobotariumError.ExceededActuatorLimits} = 'robots exceeded actuator limits';            
+            error_strings{RobotariumError.RobotsTooClose} = 'time steps where robots were too close (potential collision)';
+            error_strings{RobotariumError.RobotsOutsideBoundaries} = 'time steps where robots were outside boundaries'; 
+            error_strings{RobotariumError.ExceededActuatorLimits} = 'staged velocity commands exceeded actuator limits';            
             
             fprintf('Error count for current simulation:\n');
             print_error = @(x) fprintf('\t Simulation had %i %s errors.\n', count(x), error_strings{x});            
