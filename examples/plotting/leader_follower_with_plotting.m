@@ -32,7 +32,7 @@ dxi = zeros(2, N);
 state = 1;
 
 % These are gains for our formation control algorithm
-formation_control_gain = 10;
+formation_control_gain = 5;
 desired_distance = 0.3;
 
 %% Grab tools we need to convert from single-integrator to unicycle dynamics
