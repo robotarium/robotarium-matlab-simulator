@@ -26,7 +26,7 @@ uni_barrier_cert_boundary = create_uni_barrier_certificate_with_boundary();
 
 % Select the number of iterations for the experiment.  This value is
 % arbitrary
-iterations = 3000;
+iterations = 2000;
 
 % Initialize velocity vector for agents.  Each agent expects a 2 x 1
 % velocity vector containing the linear and angular velocity, respectively.
