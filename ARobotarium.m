@@ -176,8 +176,6 @@ classdef ARobotarium < handle
               for j = i+1:N     
                   if(norm((p(1:2, i) + ARobotarium.collision_offset*[cos(p(3, i)); sin(p(3,i))]) - (p(1:2, j) + ARobotarium.collision_offset*[cos(p(3, j)); sin(p(3,j))])) <= ARobotarium.collision_diameter)
                       errors{end+1} = RobotariumError.RobotsTooClose;
-                      disp('Collsion');
-                      disp(p(1:2, i) + ARobotarium.collision_offset*[cos(p(3, i)); sin(p(3,i))]);
                   end
               end
            end
