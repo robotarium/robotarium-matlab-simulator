@@ -16,8 +16,8 @@ classdef ARobotarium < handle
         robot_diameter = 0.11
         wheel_radius = 0.016;
         base_length = 0.105;
-        collision_diameter = 0.12; % 0.053
-        collision_offset = 0.0475; % 0.028         
+        collision_diameter = 0.12;
+        collision_offset = 0.005;       
         boundaries = [-1.6, 1.6, -1, 1];      
     end
     
@@ -174,8 +174,10 @@ classdef ARobotarium < handle
         %    Collision checking:
            for i = 1:(N-1)
               for j = i+1:N     
-                  if(norm((p(1:2, i) + collision_offset*[cos(p(3, i)) sin(p(3,i))]) - (p(1:2, j) + collision_offset*[cos(p(3, j)) sin(p(3,j))])) <= collision_diameter)
+                  if(norm((p(1:2, i) + ARobotarium.collision_offset*[cos(p(3, i)); sin(p(3,i))]) - (p(1:2, j) + ARobotarium.collision_offset*[cos(p(3, j)); sin(p(3,j))])) <= ARobotarium.collision_diameter)
                       errors{end+1} = RobotariumError.RobotsTooClose;
+                      disp('Collsion');
+                      disp(p(1:2, i) + ARobotarium.collision_offset*[cos(p(3, i)); sin(p(3,i))]);
                   end
               end
            end
