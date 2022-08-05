@@ -1,6 +1,6 @@
 function [ automatic_parking_controller ] = create_waypoint_controller(varargin)
 % CREATE_AUTOMATIC_PARKING_CONTROLLER Creates a controller that drive a
-% unicycle-modeled sytsem to a particular point and stops it (within
+% unicycle-modeled system to a particular point and stops it (within
 % tolerances)
 % Works by driving the unicycle to within PositionError of the point then
 % rotating it to within RotationError of the desired rotation
