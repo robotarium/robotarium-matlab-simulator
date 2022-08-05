@@ -6,8 +6,8 @@ function [ patch_data ] = gritsbot_patch()
 % for a robot patch.
 
     % Make it facing 0 rads
-    robot_width = 0.11;
-    robot_height = 0.1; 
+    robot_width = 0.095;
+    robot_height = 0.09; 
     wheel_width = 0.02; 
     wheel_height = 0.04; 
     led_size = 0.01; 
@@ -23,10 +23,11 @@ function [ patch_data ] = gritsbot_patch()
     led = rectangle(led_size, led_size);
     
     % Use pre-generated vertices and shift them around to create a robot
-    left_wheel = shift(wheel, -(robot_width + wheel_width)/2, -robot_height/6);
-    right_wheel = shift(wheel, (robot_width + wheel_width)/2, -robot_height/6);
-    left_led = shift(led,  robot_width/8, robot_height/2 - 2*led_size);
-    right_led = shift(led,  robot_width/4, robot_height/2 - 2*led_size);
+    left_wheel = shift(wheel, -(robot_width + wheel_width)/2, robot_height/6);
+    right_wheel = shift(wheel, (robot_width + wheel_width)/2, robot_height/6);
+    body = shift(body, 0, robot_height/2);
+    left_led = shift(led,  robot_width/8, robot_height - 2*led_size);
+    right_led = shift(led,  robot_width/4, robot_height - 2*led_size);
     
     % Putting all the robot vertices together
     vertices = [
