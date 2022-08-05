@@ -16,7 +16,7 @@ classdef ARobotarium < handle
         robot_diameter = 0.11
         wheel_radius = 0.016;
         base_length = 0.105;
-        collision_diameter = 0.13;
+        collision_diameter = 0.14;
         collision_offset = 0.0325;       
         boundaries = [-1.6, 1.6, -1, 1];      
     end
