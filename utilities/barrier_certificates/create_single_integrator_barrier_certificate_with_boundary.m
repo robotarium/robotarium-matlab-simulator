@@ -1,4 +1,4 @@
-function [ si_barrier_certificate ] = create_si_barrier_certificate_with_boundary(varargin)
+function [ si_barrier_certificate ] = create_single_integrator_barrier_certificate_with_boundary(varargin)
 % CREATE_SI_BARRIER_CERTIFICATE Creates a single-integrator barrier
 % certificate function to avoid collisions and remain inside a bounded rectangle.
 %
@@ -31,8 +31,8 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate_with_boundar
         
     parser = inputParser;
     parser.addParameter('BarrierGain', 100);
-    parser.addParameter('SafetyRadius', 0.15);
-    parser.addParameter('MagnitudeLimit', 0.2);
+    parser.addParameter('SafetyRadius', 0.17);
+    parser.addParameter('MagnitudeLimit', 0.15);
     parser.addParameter('BoundaryPoints', [-1.6, 1.6, -1.0, 1.0])
     parse(parser, varargin{:})
     opts = optimoptions(@quadprog,'Display','off');
@@ -41,6 +41,21 @@ function [ si_barrier_certificate ] = create_si_barrier_certificate_with_boundar
     safety_radius = parser.Results.SafetyRadius;
     magnitude_limit = parser.Results.MagnitudeLimit;
     boundary_points = parser.Results.BoundaryPoints;
+
+    %Check given inputs
+    assert(isa(gamma,'numeric'), "In the function create_single_integrator_barrier_certificate_with_boundary, the barrier function gain (BarrierGain) must be a MATLAB numeric value.")
+    assert(isa(safety_radius,'numeric'), "In the function create_single_integrator_barrier_certificate_with_boundary, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be a MATLAB numeric value.")
+    assert(isa(magnitude_limit,'numeric'), "In the function create_single_integrator_barrier_certificate_with_boundary, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be a MATLAB numeric value.")
+
+    assert(gamma > 0, "In the function create_single_integrator_barrier_certificate_with_boundary, the barrier function gain (BarrierGain) must be a positive value.")
+    assert(safety_radius > 0, "In the function create_single_integrator_barrier_certificate_with_boundary, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be greater than the diameter of a single robot (0.15m).")
+    assert(safety_radius <= 0.15, "In the function create_single_integrator_barrier_certificate_with_boundary, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be less than the diameter of a single robot (0.15m).")
+    assert(magnitude_limit > 0, "In the function create_single_integrator_barrier_certificate_with_boundary, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be positive. Recieved " + num2str(magnitude_limit) ".")
+    assert(magnitude_limit <= 0.2, "In the function create_single_integrator_barrier_certificate_with_boundary, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be less than or equal to the max speed of the robot (0.2m/s). Recieved " + num2str(magnitude_limit) ".")
+    assert(length(boundary_points)==4, "In the function create_single_integrator_barrier_certificate_with_boundary, the boundary points vector (BoundaryPoints) must have a length of 4 representing the rectangle verticies.")
+    assert(boundary_points(2) > boundary_points(1), "In the function create_single_integrator_barrier_certificate_with_boundary, the first two entries of the boundary points vector (BoundaryPoints) representing the x-coordinates must be ordered as lower bound then upper bound.")
+    assert(boundary_points(4) > boundary_points(3), "In the function create_single_integrator_barrier_certificate_with_boundary, the second two entries of the boundary points vector (BoundaryPoints) representing the y-coordinates must be ordered as lower bound then upper bound.")
+    
 
     si_barrier_certificate = @barrier_certificate;
 
