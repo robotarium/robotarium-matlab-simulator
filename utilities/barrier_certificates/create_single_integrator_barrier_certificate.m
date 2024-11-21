@@ -38,18 +38,18 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
 
     gamma = parser.Results.BarrierGain;
     safety_radius = parser.Results.SafetyRadius;
-    mag_limit = parser.Results.MagnitudeLimit;
+    magnitude_limit = parser.Results.MagnitudeLimit;
 
     %Check given inputs
     assert(isa(gamma,'numeric'), "In the function create_single_integrator_barrier_certificate, the barrier function gain (BarrierGain) must be a MATLAB numeric value.")
     assert(isa(safety_radius,'numeric'), "In the function create_single_integrator_barrier_certificate, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be a MATLAB numeric value.")
-    assert(isa(mag_limit,'numeric'), "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be a MATLAB numeric value.")
+    assert(isa(magnitude_limit,'numeric'), "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be a MATLAB numeric value.")
 
-    assert(gamma > 0, "In the function create_single_integrator_barrier_certificate, the barrier function gain (BarrierGain) must be a positive value.")
-    assert(safety_radius > 0, "In the function create_single_integrator_barrier_certificate, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be greater than the diameter of a single robot (0.15m).")
-    assert(safety_radius <= 0.15, "In the function create_single_integrator_barrier_certificate, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be less than the diameter of a single robot (0.15m).")
-    assert(mag_limit > 0, "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be positive. Recieved " + num2str(magnitude_limit) ".")
-    assert(mag_limit <= 0.2, "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be less than or equal to the max speed of the robot (0.2m/s). Recieved " + num2str(magnitude_limit) ".")
+    assert(gamma > 0, "In the function create_single_integrator_barrier_certificate, the barrier function gain (BarrierGain) must be a positive value. Recieved " + num2str(gamma) + ".")
+    assert(safety_radius > 0, "In the function create_single_integrator_barrier_certificate, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be greater than the diameter of a single robot (0.15m). Recieved " + num2str(safety_radius) + ".")
+    assert(safety_radius >= 0.15, "In the function create_single_integrator_barrier_certificate, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be less than the diameter of a single robot (0.15m). Recieved " + num2str(safety_radius) + ".")
+    assert(magnitude_limit > 0, "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be positive. Recieved " + num2str(magnitude_limit) + ".")
+    assert(magnitude_limit <= 0.2, "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be less than or equal to the max speed of the robot (0.2m/s). Recieved " + num2str(magnitude_limit) + ".")
     
 
     si_barrier_certificate = @barrier_certificate;
@@ -86,7 +86,7 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
     
         % To avoid errors, we need to threshold dxi
         norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
-        threshold = mag_limit;
+        threshold = magnitude_limit;
         to_thresh = norms > threshold;
         dxi(:, to_thresh) = threshold*dxi(:, to_thresh)./norms(to_thresh);
         
