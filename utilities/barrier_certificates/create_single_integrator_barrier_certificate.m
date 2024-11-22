@@ -1,6 +1,12 @@
 function [ si_barrier_certificate ] = create_single_integrator_barrier_certificate(varargin)
-% CREATE_SINGLE_INTEGRATOR_BARRIER_CERTIFICATE Creates a single-integrator barrier
-% certificate function to avoid collisions.
+% CREATE_SINGLE_INTEGRATOR_BARRIER_CERTIFICATE 
+% Creates a single-integrator barrier certificate function to avoid collisions.
+% 
+% Returns a single-integrator barrier certificate function ($f :
+% \mathbf{R}^{2 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2
+% \times N}$).  This function takes a 2 x N single-integrator
+% velocity, 2 x N or 3 x N  and state vector, and returns a single-integrator
+% velocity vector that does not induce collisions in the agents.
 %
 %   Args:
 %       BarrierGain, optional: Positive double 
@@ -20,14 +26,14 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
 %   the more quickly the robots can approach each other.  
 %
 %   Example:
-%       bc = create_si_barrier_certificate('SafetyRadius', 0.2, 'BarrierGain', 500, 'MagnitudeLimit', 0.15)
+%       bc = create_single_integrator_barrier_certificate('SafetyRadius', 0.2, 'BarrierGain', 500, 'MagnitudeLimit', 0.15)
 %   
 %   Notes:
 %       SafetyRadius should be a positive double
 %       BarrierGain should be a positive double
 %       MagnitudeLimit should be a positive double
-%       In practice, the value for SafetyRadius should be a little more than double the
-%       size of the robots and MagnitudeLimit should be less than 0.2.
+%       In practice, the value for SafetyRadius should be a little more than the
+%       diameter of the robots (0.15m) and MagnitudeLimit should be less than 0.2.
         
     parser = inputParser;
     parser.addParameter('BarrierGain', 100); %unitless
@@ -46,7 +52,6 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
     assert(isa(magnitude_limit,'numeric'), "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be a MATLAB numeric value.")
 
     assert(gamma > 0, "In the function create_single_integrator_barrier_certificate, the barrier function gain (BarrierGain) must be a positive value. Recieved " + num2str(gamma) + ".")
-    assert(safety_radius > 0, "In the function create_single_integrator_barrier_certificate, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be greater than the diameter of a single robot (0.15m). Recieved " + num2str(safety_radius) + ".")
     assert(safety_radius >= 0.15, "In the function create_single_integrator_barrier_certificate, the safety distance that two robots cannot get closer to each other than (SafetyRadius) must be less than the diameter of a single robot (0.15m). Recieved " + num2str(safety_radius) + ".")
     assert(magnitude_limit > 0, "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be positive. Recieved " + num2str(magnitude_limit) + ".")
     assert(magnitude_limit <= 0.2, "In the function create_single_integrator_barrier_certificate, the maximum magnitude of the velocity vector for the robot to follow (MagnitudeLimit) must be less than or equal to the max speed of the robot (0.2m/s). Recieved " + num2str(magnitude_limit) + ".")
@@ -54,42 +59,56 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
 
     si_barrier_certificate = @barrier_certificate;
 
-    function [ dx ] = barrier_certificate(dxi, x)
+    function [ dxi ] = barrier_certificate(dxi, x)
         % BARRIERCERTIFICATE Wraps single-integrator dynamics in safety barrier
         % certificates
+        %
         % This function accepts single-integrator dynamics and wraps them in
         % barrier certificates to ensure that collisions do not occur.  Note that
         % this algorithm bounds the magnitude of the generated output to the input MagnitudeLimit.
         %        
-        %   BARRIER_CERTIFICATE(dxi, x) modifies dxi to become collision
+        %   BARRIER_CERTIFICATE(dxi, x) minimally modifies dxi to become collision
         %   free.
+        %
+        %
+        %   Input:
+        %       dxi is the single integrator control input vector size 2xN ([dx1, dx2, dx3,...,dxN;dy1,dy2,dy3,...,dyN])
+        %       x is the robot pose vector ([x-pos; y-pos; heading]) size 3xN ([x1, x2, x3,...,xN;y1,y2,y3,...,yN;h1,h2,h3,...,hN])
         %
         %   Example:
         %       dxi is size 2xN
-        %       x is size 2xN
-        %       BARRIER_CERTIFICATE(dxi, x)    
+        %       x is size 3xN
+        %       BARRIER_CERTIFICATE(dxi, x)
+        %
+        %   Returns:
+        %       A 2xN matrix of safe single integrator control inputs    
         %
         %   Notes:
-        %       Try not to threshold outputs of this function.  Rather, 
-        %       threshold them before calling the barrier certificate.
-        
+        %       The velocity vector input to this function will have its magnitude thresholded
+        %       in an attempt to guarentee safe control inputs generated do not exceed motor limits
+        %       without constraining the optimization.
+
+       % Check given inputs
+       assert(size(dxi,1) == 2, "In the function create_single_integrator_barrier_certificate, the single integrator vector input (dxi) must be 2xN. Recieved size" + num2str(size(dxi,1)) + "xN.")
+       assert((size(x,1) == 3 || size(x,1) == 2), "In the function create_single_integrator_barrier_certificate, the vector input (x) must be pose 3xN or position 2xN. Recieved size" + num2str(size(x,1)) + "xN.") 
+
         N = size(dxi, 2);
         
         if(N < 2)
-           dx = dxi;
            return 
         end
         
+        %% Reduce the state vector to only position.
         x = x(1:2, :);
         
-        %% Reduce the SI vector magnitude to reduce change of actuator error.
+        %% Reduce the SI vector magnitude to reduce change of actuator saturation.
     
-        % To avoid errors, we need to threshold dxi
+        % To avoid errors, we need to normalize dxi
         norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
-        threshold = magnitude_limit;
-        to_thresh = norms > threshold;
-        dxi(:, to_thresh) = threshold*dxi(:, to_thresh)./norms(to_thresh);
-        
+        to_normalize = norms > magnitude_limit;
+        if(size(to_normalize, 2) > 0)
+            dxi(:, to_normalize) = magnitude_limit*dxi(:, to_normalize)./norms(to_normalize);
+        end
 
         %Generate constraints for barrier certificates based on the size of
         %the safety radius
@@ -115,7 +134,7 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
         vnew = quadprog(sparse(H), double(f), A, b, [],[], [], [], [], opts);
         
         %Set robot velocities to new velocities
-        dx = reshape(vnew, 2, N);
+        dxi = reshape(vnew, 2, N);
     end
 end
 
