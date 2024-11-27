@@ -127,22 +127,22 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
         for k = 1:N
             %Pos Y
             A(count, (2*k-1):(2*k)) = [0,1];
-            b(count) = 0.4*gamma*(boundary_points(4)-safety_radius/2 - x(2,k))^3;
+            b(count) = gamma*(boundary_points(4)-safety_radius/2 - x(2,k))^3;
             count = count + 1;
 
             %Neg Y
             A(count, (2*k-1):(2*k)) = [0,-1];
-            b(count) = 0.4*gamma*(-boundary_points(3)-safety_radius/2 + x(2,k))^3;
+            b(count) = gamma*(-boundary_points(3)-safety_radius/2 + x(2,k))^3;
             count = count + 1;
 
             %Pos X
             A(count, (2*k-1):(2*k)) = [1,0];
-            b(count) = 0.4*gamma*(boundary_points(2)-safety_radius/2 - x(1,k))^3;
+            b(count) = gamma*(boundary_points(2)-safety_radius/2 - x(1,k))^3;
             count = count + 1;
 
             %Neg X
             A(count, (2*k-1):(2*k)) = [-1,0];
-            b(count) = 0.4*gamma*(-boundary_points(1)-safety_radius/2 + x(1,k))^3;
+            b(count) = gamma*(-boundary_points(1)-safety_radius/2 + x(1,k))^3;
             count = count + 1;
         end
 

@@ -154,22 +154,22 @@ function [ uni_barrier_certificate ] = create_uni_barrier_certificate_with_bound
         for i = 1:num_robots
             %Pos Y
             A(count,(2*i-1):(2*i)) =  -Ms(2,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(boundary_points(4) - safety_radius/2 - ps(2,i))^3;
+            b(count) = -gamma*(boundary_points(4) - safety_radius/2 - ps(2,i))^3;
             count = count + 1;
 
             %Neg Y
             A(count,(2*i-1):(2*i)) =  Ms(2,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(-boundary_points(3) - safety_radius/2 + ps(2,i))^3;
+            b(count) = -gamma*(-boundary_points(3) - safety_radius/2 + ps(2,i))^3;
             count = count + 1;
 
             %Pos X
             A(count,(2*i-1):(2*i)) =  -Ms(1,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(boundary_points(2) - safety_radius/2 - ps(1,i))^3;
+            b(count) = -gamma*(boundary_points(2) - safety_radius/2 - ps(1,i))^3;
             count = count + 1;
 
             %Neg X
             A(count,(2*i-1):(2*i)) =  Ms(1,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(-boundary_points(1) - safety_radius/2 + ps(1,i))^3;
+            b(count) = -gamma*(-boundary_points(1) - safety_radius/2 + ps(1,i))^3;
             count = count + 1;
         end
         
