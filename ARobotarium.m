@@ -232,7 +232,7 @@ classdef ARobotarium < handle
             
             this.robot_handle = cell(1, N);
             for i = 1:N
-                data = gritsbot_patch;
+                data = gternal_patch;
                 this.robot_body = data.vertices;
                 x  = this.poses(1, i);
                 y  = this.poses(2, i);

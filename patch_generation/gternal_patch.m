@@ -1,13 +1,13 @@
-function [ patch_data ] = gritsbot_patch()
-%GRITSBOT_PATCH This is a helper function to generate patches for the
-%simulated GRITSbots.  YOU SHOULD NEVER HAVE TO USE THIS FUNCTION.
+function [ patch_data ] = gternal_patch()
+%GTERNAL_PATCH This is a helper function to generate patches for the
+%simulated GTERNALs.  YOU SHOULD NEVER HAVE TO USE THIS FUNCTION.
 %
-% PATCH_DATA = GRITSBOT_PATCH() generates a struct containing patch data
+% PATCH_DATA = GTERNAL_PATCH() generates a struct containing patch data
 % for a robot patch.
 
     % Make it facing 0 rads
-    robot_width = 0.095;
-    robot_height = 0.09; 
+    robot_width = 0.11;
+    robot_height = 0.095; 
     wheel_width = 0.02; 
     wheel_height = 0.04; 
     led_size = 0.01; 

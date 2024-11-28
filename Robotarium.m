@@ -1,6 +1,6 @@
 classdef Robotarium < ARobotarium
     % Robotarium This object represents your communications with the 
-    % GRITSbots.
+    % GTERNAL robot.
     %
     % THIS CLASS SHOULD NEVER BE MODIFIED
 
