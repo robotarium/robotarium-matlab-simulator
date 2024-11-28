@@ -88,9 +88,10 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
         %       in an attempt to guarentee safe control inputs generated do not exceed motor limits
         %       without constraining the optimization.
 
-       % Check given inputs
-       assert(size(dxi,1) == 2, "In the function create_single_integrator_barrier_certificate, the single integrator vector input (dxi) must be 2xN. Recieved size" + num2str(size(dxi,1)) + "xN.")
-       assert((size(x,1) == 3 || size(x,1) == 2), "In the function create_single_integrator_barrier_certificate, the vector input (x) must be pose 3xN or position 2xN. Recieved size" + num2str(size(x,1)) + "xN.") 
+        % Check given inputs
+        assert(size(dxi,1) == 2, "In the function create_single_integrator_barrier_certificate, the single integrator vector input (dxi) must be 2xN. Recieved size" + num2str(size(dxi,1)) + "xN.")
+        assert((size(x,1) == 3 || size(x,1) == 2), "In the function create_single_integrator_barrier_certificate, the vector input (x) must be pose 3xN or position 2xN. Recieved size" + num2str(size(x,1)) + "xN.") 
+        assert(size(dxi,2) == size(x,2), "In the function create_single_integrator_barrier_certificate, the number of robot states (x) must be equal to the number of robot single integrator velocity commands (dxi). Recieved a current robot pose input array (x) of size " + num2str(size(x,1)) + "x" + num2str(size(x,2)) + "and single integrator velocity array (dxi) of size " + num2str(size(dxi,1)) + "x" + num2str(size(dxi,2)) + "."); 
 
         N = size(dxi, 2);
         
@@ -99,7 +100,9 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
         end
         
         %% Reduce the state vector to only position.
-        x = x(1:2, :);
+        if(size(x,1) == 3)
+            x = x(1:2, :);
+        end
         
         %% Reduce the SI vector magnitude to reduce change of actuator saturation.
     

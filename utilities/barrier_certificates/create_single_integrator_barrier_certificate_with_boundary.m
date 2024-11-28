@@ -97,9 +97,10 @@ function [ si_barrier_certificate ] = create_single_integrator_barrier_certifica
         %       without constraining the optimization.
 
        % Check given inputs
-       assert(size(dxi,1) == 2, "In the function create_single_integrator_barrier_certificate, the single integrator vector input (dxi) must be 2xN. Recieved size" + num2str(size(dxi,1)) + "xN.")
-       assert((size(x,1) == 3 || size(x,1) == 2), "In the function create_single_integrator_barrier_certificate, the vector input (x) must be pose 3xN or position 2xN. Recieved size" + num2str(size(x,1)) + "xN.")
-        
+       assert(size(dxi,1) == 2, "In the function create_single_integrator_barrier_certificate_with_boundary, the single integrator vector input (dxi) must be 2xN. Recieved size" + num2str(size(dxi,1)) + "xN.")
+       assert((size(x,1) == 3 || size(x,1) == 2), "In the function create_single_integrator_barrier_certificate_with_boundary, the vector input (x) must be pose 3xN or position 2xN. Recieved size" + num2str(size(x,1)) + "xN.")
+       assert(size(dxi,2) == size(x,2), "In the function create_single_integrator_barrier_certificate_with_boundary, the number of robot states (x) must be equal to the number of robot single integrator velocity commands (dxi). Recieved a current robot pose input array (x) of size " + num2str(size(x,1)) + "x" + num2str(size(x,2)) + "and single integrator velocity array (dxi) of size " + num2str(size(dxi,1)) + "x" + num2str(size(dxi,2)) + ".");  
+
         N = size(dxi, 2);
         
         if(N < 2)
