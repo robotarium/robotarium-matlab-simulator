@@ -1,89 +1,105 @@
-%% Single-integrator Barrier Certificate Algorithm
-% by Sean Wilson
+% SI_BARRIERS
+% Demonstrates the single-integrator barrier certificate on N robots.
+% Robots are arranged on an ellipse and repeatedly swap to the
+% positions on the opposite side of the ellipse, with the barrier 
+% certificate preventing collisions and boundary violations throughout.
+%
+% Sean Wilson
 % 07/2019
 
-%% Set up Robotarium object 
-% Before starting the algorithm, we need to initialize the Robotarium
-% object so that we can communicate with the agents
-N = 10;
+%% =========================================================
+%  SIMULATION PARAMETERS
+%  =========================================================
+
+N = 10;          % Number of robots
+iterations = 3000; % Total simulation steps
+
+%% =========================================================
+%  ROBOTARIUM INITIALIZATION
+%  =========================================================
+
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
-%This iis how many times the main loop will execute.
-iterations = 3000;
+%% =========================================================
+%  CONTROLLER AND SAFETY SETUP
+%  =========================================================
 
-%% Experiment constants 
-% Next, we set up some experiment constants
+% Single-integrator position controller drives robots toward goal positions
+position_control = create_si_position_controller();
 
-% Initialize velocity vector for agents.  Each agent expects a 2 x 1
-% velocity vector containing the linear and angular velocity, respectively.
+% Barrier certificate prevents collisions and boundary violations
+si_barrier_certificate = create_si_barrier_certificate_with_boundary();
+
+% Maps single-integrator velocities to unicycle commands
+si_to_uni_dyn = create_si_to_uni_dynamics();
+
+%% =========================================================
+%  GOAL INITIALIZATION
+%  =========================================================
+
+% Distribute 2N points evenly around an ellipse. Robots alternate between
+% the first N points and the antipodal N points, causing them to
+% repeatedly swap positions across the ellipse.
+xybound = [-1, 1, -0.8, 0.8];
+p_theta = (1:2:2*N) / (2*N) * 2*pi;
+p_circ = [xybound(2)*cos(p_theta),  xybound(2)*cos(p_theta + pi); ...
+          xybound(4)*sin(p_theta),  xybound(4)*sin(p_theta + pi)];
+
+% Initialize velocity vector for agents
 dx = zeros(2, N);
 
-% This code ensures that the agents are initially distributed around an
-% ellipse.  
-xybound = [-1, 1, -0.8, 0.8];
-p_theta = (1:2:2*N)/(2*N)*2*pi;
-p_circ = [xybound(2)*cos(p_theta) xybound(2)*cos(p_theta+pi); xybound(4)*sin(p_theta)  xybound(4)*sin(p_theta+pi)];
+% flag = 0: robots target first N ellipse points
+% flag = 1: robots target antipodal N ellipse points
+flag = 0;
+x_goal = p_circ(:, 1:N);
 
-x_goal = p_circ(:,1:N);
+%% =========================================================
+%  MAIN SIMULATION LOOP
+%  =========================================================
 
-flag = 0; %flag of task completion
-
-%% Retrieve tools for single-integrator -> unicycle mapping
-
-% Let's retrieve some of the tools we'll need.  We would like a
-% single-integrator position controller, a single-integrator barrier
-% function, and a mapping from single-integrator to unicycle dynamics
-position_control = create_si_position_controller();
-si_barrier_certificate = create_si_barrier_certificate_with_boundary();
-si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion();
-
-%% Begin the experiment
-% This section contains the actual implementation of the barrier
-% certificate experiment.
-
-%Iterate for the previously specified number of iterations
 for t = 1:iterations
 
-    % Retrieve the most recent poses from the Robotarium.  The time delay is
-    % approximately 0.033 seconds
+    % Retrieve the most recent poses from the Robotarium.
+    % The time delay is approximately 0.033 seconds.
     x = r.get_poses();
-    
-    x_position = x(1:2,:);
-    
-    %% Algorithm
-  
-    % Let's make sure we're close enough the the goals
-    if norm(x_goal-x_position,1)<0.03
-         flag = 1-flag;
+    x_position = x(1:2, :);
+
+    % ---------------------------------------------------------
+    % Check if all robots are close enough to their goals,
+    % then flip the flag to swap to the antipodal goal set
+    % ---------------------------------------------------------
+    if norm(x_goal - x_position, 1) < 0.03
+        flag = 1 - flag;
     end
-    
-    % This code makes the robots switch positions on the ellipse
+
     if flag == 0
-        x_goal = p_circ(:,1:N);
+        x_goal = p_circ(:, 1:N);
     else
-        x_goal = p_circ(:,N+1:2*N);
-    end    
-        
-    % Use a single-integrator position controller to drive the agents to
-    % the circular formation
-    dx = position_control(x(1:2, :), x_goal);
+        x_goal = p_circ(:, N+1:2*N);
+    end
 
-    %% Apply barrier certs. and map to unicycle dynamics    
-    %Ensure the robots don't collide
-    dx = si_barrier_certificate(dx, x);
-    
-    % Transform the single-integrator dynamics to unicycle dynamics using a
-    % diffeomorphism, which can be found in the utilities
-    dx = si_to_uni_dyn(dx, x);        
+    % ---------------------------------------------------------
+    % Compute control inputs and apply safety
+    % ---------------------------------------------------------
 
-    %% Set the velocities of the agents    
-    % Set velocities of agents 1,...,N
-    r.set_velocities(1:N, dx);        
+    % Drive robots toward their current goal positions using a single
+    % integrator position controller.
+    dxi = position_control(x_position, x_goal);
 
-    % Send the previously set velocities to the agents.  This function must be called!
-    r.step();    
+    % Apply barrier certificate to prevent collisions and boundary violations
+    dxi = si_barrier_certificate(dxi, x);
+
+    % Convert single-integrator to unicycle velocities
+    dxu = si_to_uni_dyn(dxi, x);
+
+    r.set_velocities(1:N, dxu);
+    r.step();
 end
 
-% Print out any simulation problems that will produce implementation 
-%differences and potential submission rejection.
-r.debug()
+%% =========================================================
+%  DEBUG REPORT
+%  =========================================================
+
+% Prints collision, boundary, and actuator limit error counts.
+% Fix any reported errors before submitting to the Robotarium.
+r.debug();

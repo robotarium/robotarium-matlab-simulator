@@ -1,108 +1,131 @@
-%% Formation control utilizing edge tension energy with a static, undirected
-% communication topology
-% Paul Glotfelter updated by Sean Wilson
+% FORMATION_CONTROL
+% Demonstrates formation control utilizing edge tension energy with a
+% static, undirected communication topology. Six robots converge to and
+% maintain a regular hexagonal formation using a potential field law that
+% drives each inter-agent distance toward a desired value.
+%
+% Paul Glotfelter, updated by Sean Wilson
 % 07/2019
 
-%% Set up Robotarium object
+%% =========================================================
+%  SIMULATION PARAMETERS
+%  =========================================================
 
-N = 6;
-initial_conditions = generate_initial_conditions(N, 'Width', 2, 'Height', 1, 'Spacing', 0.5);
+N = 6;           % Number of robots
+iterations = 3000; % Total simulation steps
+formation_control_gain = 10; % Scales the edge tension potential gradient
+
+%% =========================================================
+%  ROBOTARIUM INITIALIZATION
+%  =========================================================
+
+initial_conditions = generate_random_poses(N, 'Width', 2, 'Height', 1, 'Spacing', 0.5);
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_conditions);
 
-%% Set up constants for experiment
+%% =========================================================
+%  GRAPH TOPOLOGY
+%  =========================================================
 
-%Gains for the transformation from single-integrator to unicycle dynamics
-formation_control_gain = 10;
+% Communication topology for the desired hexagonal formation.
+% Robots 1–6 are arranged around the ring. Each robot is connected to its
+% two immediate ring neighbours (6 edges) and to the diametrically opposite
+% robot (3 long diagonals), giving 9 edges total — the minimum required
+% for a rigid formation in 2D (2*N - 3 = 9).  Every node has degree 3.
+%
+%   Ring edges      : (1,2),(2,3),(3,4),(4,5),(5,6),(6,1)
+%   Long diagonals  : (1,4),(2,5),(3,6)
+%
+L = [ 3 -1  0 -1  0 -1;
+     -1  3 -1  0 -1  0;
+      0 -1  3 -1  0 -1;
+     -1  0 -1  3 -1  0;
+      0 -1  0 -1  3 -1;
+     -1  0 -1  0 -1  3];
 
-% Select the number of iterations for the experiment.  This value is
-% arbitrary
-iterations = 2000;
+%% =========================================================
+%  FORMATION GEOMETRY
+%  =========================================================
 
-% Communication topology for the desired formation.  We need 2 * N - 3 = 9
-% edges to ensure that the formation is rigid.
-L = [3 -1 0 -1 0 -1 ; ... 
-    -1 3 -1 0 -1 0 ; ... 
-    0 -1 3 -1 0 -1 ; ... 
-    -1 0 -1 3 -1 0 ; ... 
-    0 -1 0 -1 3 -1 ; ... 
-   -1 0 -1 0 -1 3];
+% Side length of the regular hexagon (distance between adjacent ring nodes).
+d = 0.5;
 
-% The desired inter-agent distance for the formation
-d = 0.4; 
+% Distance between diametrically opposite nodes (long diagonal).
+% For a regular hexagon: d_long = 2 * d.
+d_long = 2 * d;
 
-% Pre-compute diagonal values for the rectangular formation
-ddiag = sqrt((2*d)^2 + d^2);
+% Weight matrix specifying the desired distance for each connected pair.
+% Zero entries indicate no edge between those agents.
+%   d      : adjacent ring pairs
+%   d_long : opposite pairs connected by long diagonals
+weights = [0      d      0      d_long 0      d;
+           d      0      d      0      d_long 0;
+           0      d      0      d      0      d_long;
+           d_long 0      d      0      d      0;
+           0      d_long 0      d      0      d;
+           d      0      d_long 0      d      0];
 
-% Weight matrix containing the desired inter-agent distances to achieve a
-% rectuangular formation
-weights = [ 0 d 0 d 0 ddiag; ... 
-            d 0 d 0 d 0; ... 
-            0 d 0 ddiag 0 d; ... 
-            d 0 ddiag 0 d 0; ... 
-            0 d 0 d 0 d; ... 
-            ddiag 0 d 0 d 0];
-    
-% Initialize velocity vector for agents.  Each agent expects a 2 x 1
-% velocity vector containing the linear and angular velocity, respectively.
-dx = zeros(2, N);
+%% =========================================================
+%  CONTROLLER AND SAFETY SETUP
+%  =========================================================
 
-%% Grab tools for converting to single-integrator dynamics and ensuring safety 
+% Barrier certificate keeps robots from colliding or leaving the arena
+si_barrier_cert = create_si_barrier_certificate_with_boundary();
 
-uni_barrier_cert = create_uni_barrier_certificate_with_boundary();
+% Maps single-integrator velocities to unicycle commands
 si_to_uni_dyn = create_si_to_uni_dynamics('LinearVelocityGain', 0.5, 'AngularVelocityLimit', pi/2);
 
-% Iterate for the previously specified number of iterations
-for t = 0:iterations
-    
-    
-    % Retrieve the most recent poses from the Robotarium.  The time delay is
-    % approximately 0.033 seconds
-    x = r.get_poses();
-    
-    %% Algorithm
-    
-    %This section contains the actual algorithm for formation control!
-    
-    %Calculate single integrator control inputs using edge-energy consensus
-    for i = 1:N
-        
-        % Initialize velocity to zero for each agent.  This allows us to sum
-        % over agent i's neighbors
-        dx(:, i) = [0 ; 0];
-        
-        % Get the topological neighbors of agent i from the communication
-        % topology
-        for j = topological_neighbors(L, i)
-                
-            % For each neighbor, calculate appropriate formation control term and
-            % add it to the total velocity
+% Initialize single-integrator velocity vector
+dx = zeros(2, N);
 
-            dx(:, i) = dx(:, i) + ...
-            formation_control_gain*(norm(x(1:2, i) - x(1:2, j))^2 - weights(i, j)^2) ... 
-            *(x(1:2, j) - x(1:2, i));
-        end 
+%% =========================================================
+%  MAIN SIMULATION LOOP
+%  =========================================================
+
+for t = 0:iterations
+
+    % Retrieve the most recent poses from the Robotarium.
+    % The time delay is approximately 0.033 seconds.
+    x = r.get_poses();
+
+    % ---------------------------------------------------------
+    % Formation control algorithm
+    % Each agent applies an edge tension potential toward each
+    % neighbor, driving the actual inter-agent distance toward
+    % the desired value in weights(i,j)
+    % ---------------------------------------------------------
+    for i = 1:N
+        dxi(:, i) = [0; 0];
+        for j = topological_neighbors(L, i)
+            dxi(:, i) = dxi(:, i) + ...
+                formation_control_gain * (norm(x(1:2,i) - x(1:2,j))^2 - weights(i,j)^2) ...
+                * (x(1:2,j) - x(1:2,i));
+        end
     end
-    
-    %% Avoid actuator errors
-    
-    % To avoid errors, we need to threshold dx
-    norms = arrayfun(@(x) norm(dx(:, x)), 1:N);
-    threshold = 3/4*r.max_linear_velocity;
+
+    % ---------------------------------------------------------
+    % Velocity thresholding
+    % Caps speeds at 3/4 of max linear velocity to avoid
+    % actuator limit errors
+    % ---------------------------------------------------------
+    norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
+    threshold = 3/4 * r.max_linear_velocity;
     to_thresh = norms > threshold;
-    dx(:, to_thresh) = threshold*dx(:, to_thresh)./norms(to_thresh);
-    
-    % Transform the single-integrator dynamics to unicycle dynamics using a provided utility function
-    dx = si_to_uni_dyn(dx, x);  
-    dx = uni_barrier_cert(dx, x);
-    
-    % Set velocities of agents 1:N
-    r.set_velocities(1:N, dx);
-    
-    % Send the previously set velocities to the agents.  This function must be called!
-    r.step();   
+    dxi(:, to_thresh) = threshold * dxi(:, to_thresh) ./ norms(to_thresh);
+
+    % ---------------------------------------------------------
+    % Convert to unicycle dynamics and apply barrier certificate
+    % ---------------------------------------------------------
+    dxi = si_barrier_cert(dxi, x);
+    dxu = si_to_uni_dyn(dxi, x);
+ 
+    r.set_velocities(1:N, dxu);
+    r.step();
 end
 
-% We can call this function to debug our experiment!  Fix all the errors
-% before submitting to maximize the chance that your experiment runs
-% successfully.
+%% =========================================================
+%  DEBUG REPORT
+%  =========================================================
+
+% Prints collision, boundary, and actuator limit error counts.
+% Fix any reported errors before submitting to the Robotarium.
 r.debug();

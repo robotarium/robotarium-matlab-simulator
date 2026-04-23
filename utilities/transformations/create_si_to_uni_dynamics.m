@@ -1,47 +1,67 @@
-%% create_si_to_uni_dynamics
-% Returns a mapping $\left( f: \mathbf{R}^{2 \times N} \times \mathbf{R}^{3
-% \times N} \to \mathbf{R}^{2 \times N} \right)$
-% from single-integrator to unicycle dynamics
-%% Detailed Description 
-% * LinearVelocityGain - affects the linear velocity for the unicycle
-% * AngularVelocityLimit - affects the upper (lower) bound for the
-% unicycle's angular velocity
-%% Example Usage 
-%   % si === single integrator
-%   si_to_uni_dynamics = create_si_to_uni_dynamics()
-%   dx_si = si_algorithm(si_states) 
-%   dx_uni = si_to_uni_dynamics(dx_si, states)
-%% Implementation
-function [si_to_uni_dyn] = create_si_to_uni_dynamics(varargin)
+function si_to_uni_dyn = create_si_to_uni_dynamics(varargin)
+% CREATE_SI_TO_UNI_DYNAMICS  Create a mapping from single-integrator to
+% unicycle dynamics.
+%
+%   Returns a function handle  f(dxi, states) -> dxu  that converts 2xN
+%   single-integrator velocities into 2xN unicycle velocities [v; omega]
+%   using a projection-based approach.
+%
+%   Optional named parameters
+%   -------------------------
+%   LinearVelocityGain  (default 1)  : scales the linear velocity output
+%   AngularVelocityLimit (default pi) : clamps angular velocity to [-avl, avl] (rad/s)
+%
+%   Example
+%   -------
+%       si_to_uni = create_si_to_uni_dynamics('LinearVelocityGain', 0.5);
+%       dxu = si_to_uni(dxi, states);
 
     parser = inputParser;
-    addOptional(parser, 'LinearVelocityGain', 1);
-    addOptional(parser, 'AngularVelocityLimit', pi);
+    parser.addParameter('LinearVelocityGain',   1);
+    parser.addParameter('AngularVelocityLimit', pi);
     parse(parser, varargin{:});
-    
+
     lvg = parser.Results.LinearVelocityGain;
     avl = parser.Results.AngularVelocityLimit;
-    
+
     si_to_uni_dyn = @si_to_uni;
-    % A mapping from si -> uni dynamics.  THis is more of a
-    % projection-based method.  Though, it's definitely similar to the
-    % NIDs.
+
     function dxu = si_to_uni(dxi, states)
-                
-        [M, N] = size(dxi); 
+        % SI_TO_UNI  Map single-integrator velocities to unicycle commands.
+        %
+        %   dxu = si_to_uni(dxi, states)
+        %
+        %   Inputs
+        %   ------
+        %   dxi    : 2xN single-integrator velocities  [vx; vy]
+        %   states : 3xN unicycle states               [x; y; theta]
+        %
+        %   Output
+        %   ------
+        %   dxu : 2xN unicycle commands  [v; omega]
+
+        [M, N]             = size(dxi);
         [M_states, N_states] = size(states);
-        
-        assert(M==2, 'Column size of given SI velocities (%i) must be 2', M);
-        assert(M_states==3, 'Column size of given poses (%i) must be 3', M_states);        
-        assert(N==N_states, 'Row sizes of SI velocities (%i) and poses (%i) must be the same', N, N_states);
-        
+
+        assert(M == 2, ...
+            'dxi must be 2xN. Got %dx%d.', M, N);
+        assert(M_states == 3, ...
+            'states must be 3xN. Got %dx%d.', M_states, N_states);
+        assert(N == N_states, ...
+            'dxi and states must have the same number of columns (%d vs %d).', N, N_states);
+
         dxu = zeros(2, N);
         for i = 1:N
-            dxu(1, i) = lvg * [cos(states(3, i)) sin(states(3, i))] * dxi(:, i);
-            %Normalizing the output of atan2 to between -kw and kw
-            dxu(2, i) = avl * atan2([-sin(states(3, i)) cos(states(3, i))]*dxi(:, i), ...
-                                  [cos(states(3, i)) sin(states(3, i))]*dxi(:, i))/(pi/2);
+            h = states(3, i);
+            e_fwd  = [ cos(h)  sin(h)];   % unit vector along heading
+            e_perp = [-sin(h)  cos(h)];   % unit vector perpendicular (left)
+
+            % Linear velocity: projection of dxi onto the heading direction.
+            dxu(1, i) = lvg * (e_fwd * dxi(:, i));
+
+            % Angular velocity: proportional to the angle between dxi and
+            % the heading, normalised so that a 90-degree error maps to avl.
+            dxu(2, i) = avl * atan2(e_perp * dxi(:, i), e_fwd * dxi(:, i)) / (pi/2);
         end
     end
 end
-

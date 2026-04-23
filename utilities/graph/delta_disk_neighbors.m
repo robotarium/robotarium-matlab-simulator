@@ -1,17 +1,34 @@
-%% delta_disk_neighbors $\mathbf{R}^{2 \times N} \times \mathbf{Z}^{+} \times \mathbf{R} \to \mathbf{Z}^{+}$
-% Returns the agents within the 2-norm of the supplied agent
-%% Example Usage 
-%   neighbors = delta_disk_neighbors(robot_poses, 1, 0.5);
+function neighbors = delta_disk_neighbors(poses, agent, delta)
+% DELTA_DISK_NEIGHBORS  Return the indices of all agents within a given
+% distance of a specified agent.
+%
+%   Computes the 2-norm distance from the agent to every other agent and
+%   returns those whose distance is at most delta (the "delta-disk"
+%   neighbourhood).  The agent itself is never included in the result.
+%
+%   Inputs
+%   ------
+%   poses : 2xN (or larger) matrix of agent positions; only rows 1-2 are used
+%   agent : index of the query agent (1-based integer)
+%   delta : neighbourhood radius (m)
+%
+%   Output
+%   ------
+%   neighbors : 1xK row vector of neighbour indices (may be empty)
+%
+%   Example
+%   -------
+%       neighbors = delta_disk_neighbors(poses, 1, 0.5);
 
-function [ neighbors ] = delta_disk_neighbors(poses, agent, delta)
-    
     N = size(poses, 2);
-    agents = 1:N;
-    agents(agent) = [];
-    
-    assert(agent<=N && agent>=1, 'Supplied agent (%i) must be between 1 and %i', agent, N);
 
-    within_distance = arrayfun(@(x) norm(poses(1:2, x) - poses(1:2, agent)) <= delta, agents);
-    neighbors = agents(within_distance);
+    assert(agent >= 1 && agent <= N, ...
+        'agent (%d) must be between 1 and %d.', agent, N);
+
+    % Build index list of all agents except the query agent.
+    others = [1:agent-1, agent+1:N];
+
+    % Keep only those within the delta-disk.
+    in_range  = vecnorm(poses(1:2, others) - poses(1:2, agent)) <= delta;
+    neighbors = others(in_range);
 end
-

@@ -1,50 +1,53 @@
-%% random_connectedGL: $\mathbf{Z}^{+} \to \mathbf{Z}^{N \times N}$
-% Returns a random, connected GL with v verticies and (v-1) + e edges 
-%% Example Usage 
-%   L = random_connectedGL(4, 3);
-%% Implementation
-function [ L ] = random_connectedGL(v, e)
+function L = random_connectedGL(v, e)
+% RANDOM_CONNECTEDGL  Return the graph Laplacian of a random connected graph.
+%
+%   Generates a guaranteed-connected graph on v nodes using a random
+%   spanning tree (Prüfer-style: each new node i connects to a uniformly
+%   random existing node), then adds up to e extra edges chosen uniformly
+%   at random from the remaining candidate pairs.  The total edge count is
+%   therefore between (v-1) and (v-1)+e.
+%
+%   Inputs
+%   ------
+%   v : number of nodes (positive integer)
+%   e : number of extra edges to add beyond the spanning tree (non-negative integer)
+%
+%   Output
+%   ------
+%   L : vxv graph Laplacian
+%
+%   Example
+%   -------
+%       L = random_connectedGL(6, 4);
 
-    L = zeros(v, v); 
+    L = zeros(v);
 
+    % ── Build a random spanning tree ─────────────────────────────────────
+    % Add each node i (2..v) with an edge to a uniformly random predecessor.
+    % This guarantees connectivity with exactly v-1 edges.
     for i = 2:v
-        
-        edge = randi(i-1, 1, 1);
-
-        %Update adjancency relations
-        L(i, edge) = -1;
-        L(edge, i) = -1;
-        
-        %Update node degrees
-        L(i, i) = L(i, i) + 1; 
-        L(edge, edge) = L(edge, edge) + 1;
+        j = randi(i - 1);
+        L(i, j) = -1;   L(j, i) = -1;
+        L(i, i) = L(i, i) + 1;
+        L(j, j) = L(j, j) + 1;
     end
-    
-    %This works becuase all nodes have at least 1 degree.  Choose from only
-    %upper diagonal portion 
-    potEdges = find(triu(bsxfun(@xor, L, 1)) == 1); 
-    sz = size(L);
-    
-    numEdges = min(e, length(potEdges)); 
-    
-    if (numEdges <= 0)
-       return 
-    end
-    
-    %Indices of randomly chosen extra edges
-    edgeIndices = randperm(length(potEdges), numEdges);
 
-    for index = edgeIndices 
-        
-       [i, j] = ind2sub(sz, potEdges(index));
-        
-        %Update adjacency relation
-        L(i, j) = -1;
-        L(j, i) = -1; 
-        
-        %Update degree relation
+    % ── Add extra random edges ────────────────────────────────────────────
+    % Candidate pairs are upper-triangular entries that are not yet edges
+    % (L entry == 0) and are not self-loops (off-diagonal).
+    % triu(...,1) restricts to strictly upper triangle, excluding diagonal.
+    candidates = find(triu(L == 0, 1));
+
+    numEdges = min(e, numel(candidates));
+    if numEdges <= 0
+        return
+    end
+
+    chosen = candidates(randperm(numel(candidates), numEdges));
+    for k = 1:numEdges
+        [i, j] = ind2sub([v, v], chosen(k));
+        L(i, j) = -1;   L(j, i) = -1;
         L(i, i) = L(i, i) + 1;
         L(j, j) = L(j, j) + 1;
     end
 end
-

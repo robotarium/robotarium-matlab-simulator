@@ -1,94 +1,98 @@
-%% Consensus with a static, undirected topology
+% CONSENSUS_FEWER_ERRORS
+% Demonstrates a submission-ready example of the consensus algorithm with
+% a static, undirected cyclic graph topology. Same as consensus.m but
+% with implementation considerations added: velocity thresholding to avoid
+% actuator limit errors and a barrier certificate to prevent collisions 
+% and boundary violations.
+%
 % Sean Wilson
 % 07/2019
 
-% Demontrates a bare-bones example of the consensus algorithm.  Same as
-% consensus.m.  Except, this script contains modifications that
-% consider implementation needs.
+%% =========================================================
+%  SIMULATION PARAMETERS
+%  =========================================================
 
-N = 12;
+N = 12;          % Number of robots
+iterations = 2000; % Total simulation steps
+
+%% =========================================================
+%  ROBOTARIUM INITIALIZATION
+%  =========================================================
+
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
-%% Experiment constants
+%% =========================================================
+%  GRAPH TOPOLOGY
+%  =========================================================
 
-% Generate a cyclic graph Laplacian from our handy utilities.  For this
-% algorithm, any connected graph will yield consensus
+% Cyclic graph Laplacian — any connected graph will yield consensus
 L = cycleGL(N);
 
-%% Grab tools we need to convert from single-integrator to unicycle dynamics
+%% =========================================================
+%  CONTROLLER AND SAFETY SETUP
+%  =========================================================
 
-% Gain for the diffeomorphism transformation between single-integrator and
-% unicycle dynamics
+% Backwards-motion-capable SI-to-unicycle mapping, more robust than
+% create_si_to_uni_mapping for consensus where agents may need to reverse
 [~, uni_to_si_states] = create_si_to_uni_mapping();
-si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion();
+si_to_uni_dyn = create_si_to_uni_dynamics();
 
+% Barrier certificate prevents collisions and boundary violations
 uni_barrier_cert_boundary = create_uni_barrier_certificate_with_boundary();
 
-% Select the number of iterations for the experiment.  This value is
-% arbitrary
-iterations = 2000;
-
-% Initialize velocity vector for agents.  Each agent expects a 2 x 1
-% velocity vector containing the linear and angular velocity, respectively.
+% Initialize single-integrator velocity vector
 dxi = zeros(2, N);
 
-%Iterate for the previously specified number of iterations
+%% =========================================================
+%  MAIN SIMULATION LOOP
+%  =========================================================
+
 for t = 1:iterations
-    
-    % Retrieve the most recent poses from the Robotarium.  The time delay is
-    % approximately 0.033 seconds
+
+    % Retrieve the most recent poses from the Robotarium.
+    % The time delay is approximately 0.033 seconds.
     x = r.get_poses();
-    
-    % Convert to SI states
+
+    % Convert unicycle states to single-integrator states
     xi = uni_to_si_states(x);
-    
-    %% Algorithm
-    
+
+    % ---------------------------------------------------------
+    % Consensus algorithm
+    % Each agent sums the relative positions of its graph
+    % neighbors to drive all agents toward agreement
+    % ---------------------------------------------------------
     for i = 1:N
-        
-        % Initialize velocity to zero for each agent.  This allows us to sum
-        %over agent i's neighbors
-        dxi(:, i) = [0 ; 0];
-        
-        % Get the topological neighbors of agent i based on the graph
-        %Laplacian L
+        dxi(:, i) = [0; 0];
         neighbors = topological_neighbors(L, i);
-        
-        % Iterate through agent i's neighbors
         for j = neighbors
-            
-            % For each neighbor, calculate appropriate consensus term and
-            %add it to the total velocity
             dxi(:, i) = dxi(:, i) + (xi(:, j) - xi(:, i));
-        end        
+        end
     end
-    
-    %% Avoid actuator errors
-    
-    % To avoid errors, we need to threshold dxi
+
+    % ---------------------------------------------------------
+    % Velocity thresholding
+    % Caps speeds at 3/4 of max linear velocity to avoid
+    % actuator limit errors
+    % ---------------------------------------------------------
     norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
-    threshold = 3/4*r.max_linear_velocity;
+    threshold = 3/4 * r.max_linear_velocity;
     to_thresh = norms > threshold;
-    dxi(:, to_thresh) = threshold*dxi(:, to_thresh)./norms(to_thresh);
-    
-    %% Map SI to Uni dynamics and utilize barrier certificates
-    
-    % Transform the single-integrator to unicycle dynamics using the the
-    % transformation we created earlier
+    dxi(:, to_thresh) = threshold * dxi(:, to_thresh) ./ norms(to_thresh);
+
+    % ---------------------------------------------------------
+    % Convert to unicycle dynamics and apply barrier certificate
+    % ---------------------------------------------------------
     dxu = si_to_uni_dyn(dxi, x);
-    
     dxu = uni_barrier_cert_boundary(dxu, x);
-    
-    %% Send velocities to agents
-    
-    % Set velocities of agents 1,...,N
+
     r.set_velocities(1:N, dxu);
-    
-    % Send the previously set velocities to the agents.  This function must be called!    
     r.step();
 end
 
-% We can call this function to debug our experiment!  Fix all the errors
-% before submitting to maximize the chance that your experiment runs
-% successfully.
+%% =========================================================
+%  DEBUG REPORT
+%  =========================================================
+
+% Prints collision, boundary, and actuator limit error counts.
+% Fix any reported errors before submitting to the Robotarium.
 r.debug();

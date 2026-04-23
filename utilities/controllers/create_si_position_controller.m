@@ -1,54 +1,63 @@
-%% create_si_position_controller 
-% Returns a controller ($u: \mathbf{R}^{2 \times N} \times \mathbf{R}^{2 \times N} \to \mathbf{R}^{2 \times N}$) 
-% for a single-integrator system.
-%% Detailed Description 
-% * XVelocityGain - affects the horizontal velocity of the
-% single integrator
-% * YVelocityGain - affects the vertical velocity of the single integrator
-%% Example Usage 
-%   si_position_controller = create_si_position_controller('XVelocityGain',
-%   1, 'YVelocityGain', 1);
-%% Implementation
-function [si_position_controller] = create_si_position_controller(varargin)
-    
-    parser = inputParser;
-    addOptional(parser, 'XVelocityGain', 0.8);
-    addOptional(parser, 'YVelocityGain', 0.8);
-    addOptional(parser, 'VelocityMagnitudeLimit', 0.15);
-    
-    parse(parser, varargin{:});
-    
-    x_vel_gain = parser.Results.XVelocityGain;
-    y_vel_gain = parser.Results.YVelocityGain;
-    velocity_magnitude_limit = parser.Results.VelocityMagnitudeLimit;
-    gains = diag([x_vel_gain ; y_vel_gain]);
-    
-    si_position_controller = @position_si;
-    
+function si_position_controller = create_si_position_controller(varargin)
+% CREATE_SI_POSITION_CONTROLLER Creates a single-integrator position controller.
+%
+%   Returns a function handle  f(states, poses) -> dx  that drives N
+%   single-integrator robots toward desired positions using proportional
+%   control, with output velocities clamped to VelocityMagnitudeLimit.
+%
+%   Optional named parameters
+%   -------------------------
+%   XVelocityGain          (default 0.8)  : proportional gain on x error
+%   YVelocityGain          (default 0.8)  : proportional gain on y error
+%   VelocityMagnitudeLimit (default 0.15) : max output velocity magnitude (m/s)
+%
+%   Example
+%   -------
+%       ctrl = create_si_position_controller('XVelocityGain', 1, 'YVelocityGain', 1);
+%       dx   = ctrl(states, poses);
 
-    function [ dx ] = position_si(states, poses)
-    %POSITIONINT Position controller via single integrator dynamics
-    
-        % Error checking
-    
-        [M, N] = size(states);
-        [M_poses, N_poses] = size(poses); 
-        
-        assert(M == 2, 'Row size of states (%i) must be 2', M); 
-        assert(M_poses==2, 'Row size of SI poses (%i) must be 2', M_poses);
-        assert(N==N_poses, 'Column size of states (%i) must be the same as poses (%i)', N, N_poses);
-        
-        dx = zeros(2, N);
-        for i = 1:N   
-           dx(:, i) = gains*(poses(:, i) - states(:, i));
-        end   
-        
-        % Normalize velocities to magnitude
-        norms = arrayfun(@(idx) norm(dx(:, idx)), 1:N);
-        to_normalize = norms > velocity_magnitude_limit;
-        if(~isempty(norms(to_normalize)))                        
-            dx(:, to_normalize) = velocity_magnitude_limit*dx(:, to_normalize)./norms(to_normalize);
+    parser = inputParser;
+    parser.addParameter('XVelocityGain',          0.8);
+    parser.addParameter('YVelocityGain',          0.8);
+    parser.addParameter('VelocityMagnitudeLimit', 0.15);
+    parse(parser, varargin{:});
+
+    gains      = diag([parser.Results.XVelocityGain; parser.Results.YVelocityGain]);
+    vel_limit  = parser.Results.VelocityMagnitudeLimit;
+
+    si_position_controller = @position_controller_si;
+
+    function dx = position_controller_si(states, poses)
+        % POSITION_CONTROLLER_SI  Proportional SI position control.
+        %
+        %   dx = position_controller_si(states, poses)
+        %
+        %   Inputs
+        %   ------
+        %   states : 2xN current positions
+        %   poses  : 2xN desired positions
+        %
+        %   Output
+        %   ------
+        %   dx : 2xN velocity commands, clamped to VelocityMagnitudeLimit
+
+        N = size(states, 2);
+
+        assert(size(states, 1) == 2, ...
+            'states must be 2xN. Got %dx%d.', size(states, 1), size(states, 2));
+        assert(size(poses, 1) == 2, ...
+            'poses must be 2xN. Got %dx%d.', size(poses, 1), size(poses, 2));
+        assert(size(poses, 2) == N, ...
+            'states and poses must have the same number of columns (%d vs %d).', N, size(poses, 2));
+
+        % Proportional control: dx = K * (goal - state)
+        dx = gains * (poses - states);
+
+        % Clamp any velocity that exceeds the magnitude limit, preserving direction
+        norms     = arrayfun(@(k) norm(dx(:,k)), 1:N);
+        to_clamp  = norms > vel_limit;
+        if any(to_clamp)
+            dx(:, to_clamp) = vel_limit * dx(:, to_clamp) ./ norms(to_clamp);
         end
     end
 end
-

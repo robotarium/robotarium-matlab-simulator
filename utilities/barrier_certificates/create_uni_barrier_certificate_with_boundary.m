@@ -1,194 +1,121 @@
-function [ uni_barrier_certificate ] = create_uni_barrier_certificate_with_boundary(varargin)
-% CREATE_SI_BARRIER_CERTIFICATE Creates a unicycle barrier
-% certificate function to avoid collisions.
+function uni_barrier_certificate = create_uni_barrier_certificate_with_boundary(varargin)
+% CREATE_UNI_BARRIER_CERTIFICATE_WITH_BOUNDARY Creates a unicycle barrier
+% certificate that avoids inter-robot collisions, obstacle collisions, and
+% keeps all robots inside a rectangular boundary.
 %
-%   Args:
-%       BarrierGain, optional: How quickly robots can approach eachother
-%       SafetyRadius, optional: How far apart centers of robots should
-%       remain
-%       ProjectionDistance, optional: How far ahead to project a virtual
-%       single integrator
-%       VelocityMagnitudeLimit, optional: The maximum velocity for the
-%       virtual single integrator
-%   
-%   Returns:
-%       A barrier certificate function (2xN, 3xN) -> 2xN representing the
-%       barrier certificate
+%   Unicycle inputs are projected into the single-integrator domain via a
+%   virtual point, made safe by CREATE_SI_BARRIER_CERTIFICATE_WITH_BOUNDARY,
+%   then mapped back to unicycle (linear/angular velocity) inputs.
 %
-%   CREATE_UNI_BARRIER_CERTIFICATE('BarrierGain', bg)
+%   Optional named parameters
+%   -------------------------
+%   SafetyRadius        (default 0.12)               : min center-to-center distance (m)
+%   BarrierGain         (default 150)                : higher values allow faster approach
+%   ProjectionDistance  (default 0.03)               : virtual SI point offset (m)
+%   VelocityMagnitudeLimit (default 0.2)             : max SI velocity magnitude (m/s)
+%   BoundaryPoints      (default [-1.6 1.6 -1.0 1.0]): rectangle [xmin xmax ymin ymax]
 %
-%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', sr)
-%
-%   CREATE_UNI_BARRIER_CERTIFICATE('SafetyRadius', sr, 'BarrierGain', bg)
-%
-%   Example:
-%       bc = create_si_barrier_certificate('SafetyRadius', 0.2)
-%   
-%   Notes:
-%       SafetyRadius should be a positive double
-%       BarrierGain should be a positive double
-%       In practice, the value for SafetyRadius should be a little more than double the
-%       size of the robots.
+%   Example
+%   -------
+%       bc = create_uni_barrier_certificate_with_boundary('SafetyRadius', 0.15);
+%       dxu_safe = bc(dxu_desired, x);
+%       dxu_safe = bc(dxu_desired, x, obstacles);  % with obstacle points (2xM)
 
     parser = inputParser;
-    addOptional(parser, 'BarrierGain', 150);
-    addOptional(parser, 'SafetyRadius', 0.12);
-    addOptional(parser, 'ProjectionDistance', 0.03);
-    addOptional(parser, 'BaseLength', 0.105);
-    addOptional(parser, 'WheelRadius', 0.016);
-    addOptional(parser, 'WheelVelocityLimit', 12.5);
-    addOptional(parser, 'Disturbance', 2);
-    addOptional(parser, 'MaxNumRobots', 30);
-    addOptional(parser, 'MaxObstacles', 50);
-    addOptional(parser, 'MaxNumBoundaryPoints', 4);
-    addOptional(parser, 'BoundaryPoints', [-1.6 1.6 -1.0 1.0]);
-    parse(parser, varargin{:})  
-    
-    opts = optimoptions(@quadprog,'Display', 'off', 'TolFun', 1e-5, 'TolCon', 1e-4);       
-    gamma = parser.Results.BarrierGain;
-    safety_radius = parser.Results.SafetyRadius;
-    projection_distance = parser.Results.ProjectionDistance;
-    wheel_radius = parser.Results.WheelRadius;
-    base_length = parser.Results.BaseLength;
-    wheel_vel_limit = parser.Results.WheelVelocityLimit;
-    d = parser.Results.Disturbance;
-    max_num_robots = parser.Results.MaxNumRobots;
-    max_num_boundaries = parser.Results.MaxNumBoundaryPoints;
-    max_num_obstacles = parser.Results.MaxObstacles;
-    boundary_points = parser.Results.BoundaryPoints;
-    
-    %Check given boundary points
-    assert(length(boundary_points)==4, "Boundary points must represent a rectangle.")
-    assert(boundary_points(2) > boundary_points(1), "Difference between x coordinates of defined rectangular boundary points must be positive.")
-    assert(boundary_points(4) > boundary_points(3), "Difference between y coordinates of defined rectangular boundary points must be positive.")
-     
-    D = [wheel_radius/2, wheel_radius/2; -wheel_radius/base_length, wheel_radius/base_length];
-    L = [1,0;0,projection_distance] * D;
-    disturb = [-d,-d,d,d;-d,d,d,-d];
-    num_disturbs = size(disturb, 2);
-% 
-%     max_num_constraints = (num_disturbs^2)*nchoosek(max_num_robots, 2) + max_num_robots*max_num_obstacles*num_disturbs + max_num_robots;
-    
-    max_num_constraints = nchoosek(max_num_robots, 2) + max_num_robots*max_num_boundaries + max_num_robots*max_num_obstacles; %+ max_num_robots;
-    A = zeros(max_num_constraints, 2*max_num_robots);
-    b = zeros(max_num_constraints, 1);
+    parser.addParameter('SafetyRadius',           0.12);
+    parser.addParameter('BarrierGain',            150);
+    parser.addParameter('ProjectionDistance',     0.03);
+    parser.addParameter('VelocityMagnitudeLimit', 0.2);
+    parser.addParameter('BoundaryPoints',         [-1.6, 1.6, -1.0, 1.0]);
+    parse(parser, varargin{:});
 
-    Os = zeros(2,max_num_robots);
-    ps = zeros(2,max_num_robots);
-    Ms = zeros(2,2*max_num_robots);
-    
-   
-    
+    safety_radius            = parser.Results.SafetyRadius;
+    gamma                    = parser.Results.BarrierGain;
+    projection_distance      = parser.Results.ProjectionDistance;
+    velocity_magnitude_limit = parser.Results.VelocityMagnitudeLimit;
+    boundary_points          = parser.Results.BoundaryPoints;
+
+    assert(numel(boundary_points) == 4, ...
+        'BoundaryPoints must be [xmin, xmax, ymin, ymax].');
+    assert(boundary_points(2) > boundary_points(1), ...
+        'BoundaryPoints: xmax must be greater than xmin.');
+    assert(boundary_points(4) > boundary_points(3), ...
+        'BoundaryPoints: ymax must be greater than ymin.');
+
+    % Build uni <-> SI mapping utilities
+    [si_uni_dyn, uni_si_states] = create_si_to_uni_mapping('ProjectionDistance', projection_distance);
+    uni_si_dyn = create_uni_to_si_mapping('ProjectionDistance', projection_distance);
+
+    % Build the SI barrier certificate. The effective safety radius is
+    % widened by 2*projection_distance to account for the virtual point
+    % sitting ahead of the robot centre.
+    si_barrier = create_si_barrier_certificate_with_boundary( ...
+        'SafetyRadius',   safety_radius + 2*projection_distance, ...
+        'BarrierGain',    gamma, ...
+        'MagnitudeLimit', velocity_magnitude_limit, ...
+        'BoundaryPoints', boundary_points);
+
     uni_barrier_certificate = @barrier_unicycle;
-    
 
-    function [ dxu, ret ] = barrier_unicycle(dxu, x, obstacles)   
-        % BARRIER_UNICYCLE The parameterized barrier function
+    function dxu = barrier_unicycle(dxu, x, obstacles)
+        % BARRIER_UNICYCLE  Minimally modifies dxu to ensure safety.
         %
-        %   Args:
-        %       dxu: 2xN vector of unicycle control inputs
-        %       x: 3xN vector of unicycle states
-        %       obstacles: Optional 2xN vector of obtacle points.
+        %   dxu = barrier_unicycle(dxu, x)
+        %   dxu = barrier_unicycle(dxu, x, obstacles)
         %
-        %   Returns:
-        %       A 2xN matrix of safe unicycle control inputs
+        %   Inputs
+        %   ------
+        %   dxu       : 2xN desired unicycle inputs [v; omega]
+        %   x         : 3xN unicycle states [x; y; theta]
+        %   obstacles : (optional) 2xM matrix of obstacle point positions
         %
-        %   BARRIER_UNICYCLE(dxu, x)
-        
+        %   Output
+        %   ------
+        %   dxu : 2xN collision-free, boundary-respecting unicycle inputs
+
         if nargin < 3
             obstacles = [];
         end
-        
-        num_robots = size(dxu, 2);
-        num_obstacles = size(obstacles, 2);
-        
-        if(num_robots < 2)
-           temp = 0;
-        else
-           temp = nchoosek(num_robots, 2); 
-        end
-           
-        %Generate constraints for barrier certificates based on the size of
-        %the safety radius
-%         num_constraints = (num_disturbs^2)*temp + num_robots*num_obstacles*num_disturbs + num_robots;
-        num_constraints = temp + num_robots*num_obstacles + 4*num_robots;
-        A(1:num_constraints, 1:2*num_robots) = 0;
-        Os(1,1:num_robots) = cos(x(3, :)); 
-        Os(2,1:num_robots) = sin(x(3, :));
-        ps(:,1:num_robots) = x(1:2, :) + projection_distance*Os(:,1:num_robots);
-        Ms(1,1:2:2*num_robots) = Os(1,1:num_robots);
-        Ms(1,2:2:2*num_robots) = -projection_distance*Os(2,1:num_robots);
-        Ms(2,2:2:2*num_robots) = projection_distance*Os(1,1:num_robots);
-        Ms(2,1:2:2*num_robots) = Os(2,1:num_robots);
-        ret = zeros(1, temp);
 
-        count = 1;
-        for i = 1:(num_robots-1)
-            for j = (i+1):num_robots
-                diff = ps(:, i) - ps(:, j);
-                hs = sum(diff.^2,1) - safety_radius^2;
-                
-                h_dot_i = 2*(diff)'*Ms(:,2*i-1:2*i)*D;
-                h_dot_j = -2*(diff)'*Ms(:,2*j-1:2*j)*D;                
-                A(count, (2*i-1):(2*i)) = h_dot_i;
-                A(count, (2*j-1):(2*j)) = h_dot_j;
-                b(count) = -gamma*hs.^3 - min(h_dot_i*disturb) - min(h_dot_j*disturb);  %repmat(h_i_disturbs, num_disturbs, 1) + repelem(h_j_disturbs, num_disturbs, 1);
-                ret(count) = hs;
-                
-                count = count + 1;
-            end
+        N = size(dxu, 2);
+
+        if N < 2
+            return
         end
-        
+
+        % 1. Map unicycle states/inputs -> single-integrator domain
+        xi  = uni_si_states(x);     % 2xN projected positions
+        dxi = uni_si_dyn(dxu, x);   % 2xN projected velocities
+
+        % 2. Augment SI positions with obstacle positions so the SI
+        %    certificate can treat them as additional boundary constraints.
+        %    Obstacles are appended as extra "robots" with zero velocity,
+        %    then stripped from the output.
         if ~isempty(obstacles)
-            % Do obstacles
-            for i = 1:num_robots            
-                diffs = (ps(:, i) - obstacles)';
-                h = sum(diffs.^2, 2) - safety_radius^2;
-                h_dot_i = 2*diffs*Ms(:,2*i-1:2*i)*D;
-                A(count:count+num_obstacles-1,(2*i-1):(2*i)) = h_dot_i;
-                b(count:count+num_obstacles-1) = -gamma*h.^3  - min(h_dot_i*disturb, [], 2);               
-                count = count + num_obstacles;
-            end
+            num_obs     = size(obstacles, 2);
+            xi_aug      = [xi, obstacles];
+            dxi_aug     = [dxi, zeros(2, num_obs)];
+        else
+            xi_aug  = xi;
+            dxi_aug = dxi;
         end
-        
-        for i = 1:num_robots
-            %Pos Y
-            A(count,(2*i-1):(2*i)) =  -Ms(2,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(boundary_points(4) - safety_radius/2 - ps(2,i))^3;
-            count = count + 1;
 
-            %Neg Y
-            A(count,(2*i-1):(2*i)) =  Ms(2,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(-boundary_points(3) - safety_radius/2 + ps(2,i))^3;
-            count = count + 1;
+        % 3. Apply SI barrier certificate for collision and boundary safety
+        lastwarn('');
+        prev_state = warning('off', 'create_si_barrier_certificate_with_boundary:QPFailed');
+        dxi_aug = si_barrier(dxi_aug, xi_aug);
+        [~, triggered_id] = lastwarn();
+        warning(prev_state);
 
-            %Pos X
-            A(count,(2*i-1):(2*i)) =  -Ms(1,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(boundary_points(2) - safety_radius/2 - ps(1,i))^3;
-            count = count + 1;
-
-            %Neg X
-            A(count,(2*i-1):(2*i)) =  Ms(1,(2*i-1):(2*i))*D;
-            b(count) = -0.4*gamma*(-boundary_points(1) - safety_radius/2 + ps(1,i))^3;
-            count = count + 1;
+        if strcmp(triggered_id, 'create_si_barrier_certificate_with_boundary:QPFailed')
+            warning('create_uni_barrier_certificate_with_boundary:QPFailed', ...
+                'create_uni_barrier_certificate_with_boundary: Safety QP failed. Commanding zero velocities.');
+            dxu = zeros(2, N);
+            return
         end
-        
-        %Solve QP program generated earlier
-        L_all = kron(eye(num_robots), L);
-        dxu = D \ dxu; % Convert user input to differential drive
-        %dxu(1:2,1:4)
-        vhat = reshape(dxu,2*num_robots,1);
-        %disp('vhat')
-        %vhat(1:4)
-        H = 2*(L_all')*L_all;
-        f = -2*vhat'*(L_all')*L_all;
-        vnew = quadprog(H, double(f), -A(1:num_constraints,1:2*num_robots), -b(1:num_constraints), [], [], -wheel_vel_limit*ones(2*num_robots,1), wheel_vel_limit*ones(2*num_robots,1), [], opts);
-        %disp('f')
-        %f(1:4)
-        %Set robot velocities to new velocities
-        dxu = reshape(vnew, 2, num_robots);
-        dxu = D*dxu;
-        
+
+        % 4. Strip obstacle columns and map safe SI velocities back to unicycle
+        dxi = dxi_aug(:, 1:N);
+        dxu = si_uni_dyn(dxi, x);
     end
 end
-

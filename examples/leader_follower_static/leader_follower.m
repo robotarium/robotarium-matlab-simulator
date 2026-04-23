@@ -1,120 +1,128 @@
-%% Leader-follower with static topology
-% Paul Glotfelter edited by Sean Wilson
+% LEADER_FOLLOWER
+% Demonstrates leader-follower control with a static, undirected topology.
+% One leader robot travels between four waypoints while N-1 follower robots
+% maintain a formation relative to it using a graph Laplacian-based
+% formation control law.
+%
+% Paul Glotfelter, edited by Sean Wilson
 % 07/2019
 
-%% Experiment Constants
+%% =========================================================
+%  SIMULATION PARAMETERS
+%  =========================================================
 
-%Run the simulation for a specific number of iterations
-iterations = 5000;
+N = 4;           % Number of robots (1 leader + N-1 followers)
+iterations = 5000; % Total simulation steps
 
-%% Set up the Robotarium object
+%% =========================================================
+%  ROBOTARIUM INITIALIZATION
+%  =========================================================
 
-N = 4;
-initial_positions = generate_initial_conditions(N, 'Width', 1, 'Height', 1, 'Spacing', 0.5);
+initial_positions = generate_random_poses(N, 'Width', 1, 'Height', 1, 'Spacing', 0.5);
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true, 'InitialConditions', initial_positions);
 
-%% Create the desired Laplacian
+%% =========================================================
+%  GRAPH LAPLACIAN AND FORMATION SETUP
+%  =========================================================
 
-%Graph laplacian
+% Build graph Laplacian: followers form a complete graph among themselves,
+% with robot 2 additionally connected to the leader (robot 1)
 followers = -completeGL(N-1);
 L = zeros(N, N);
 L(2:N, 2:N) = followers;
 L(2, 2) = L(2, 2) + 1;
 L(2, 1) = -1;
 
-%Initialize velocity vector
-dxi = zeros(2, N);
+formation_control_gain = 10; % Gain for formation control law
+desired_distance = 0.2;      % Desired inter-robot distance (meters)
 
-%State for leader
-state = 1;
+%% =========================================================
+%  CONTROLLER AND SAFETY SETUP
+%  =========================================================
 
-% These are gains for our formation control algorithm
-formation_control_gain = 10;
-desired_distance = 0.2;
-
-%% Grab tools we need to convert from single-integrator to unicycle dynamics
-
-% Single-integrator -> unicycle dynamics mapping
+% Maps single-integrator velocities to unicycle commands
 si_to_uni_dyn = create_si_to_uni_dynamics('LinearVelocityGain', 0.8);
-% Single-integrator barrier certificates
+
+% Barrier certificate keeps robots from colliding or leaving the arena
 uni_barrier_cert = create_uni_barrier_certificate_with_boundary();
-% Single-integrator position controller
+
+% Position controller drives the leader toward each waypoint
 leader_controller = create_si_position_controller('XVelocityGain', 0.8, 'YVelocityGain', 0.8, 'VelocityMagnitudeLimit', 0.1);
 
+%% =========================================================
+%  WAYPOINT INITIALIZATION
+%  =========================================================
+
+% Leader cycles through these four corner waypoints in order
 waypoints = [-1 0.8; -1 -0.8; 1 -0.8; 1 0.8]';
-close_enough = 0.05;
+close_enough = 0.05; % Distance threshold to consider a waypoint reached
+
+% Leader starts targeting waypoint 1
+state = 1;
+
+% Initialize single-integrator velocity vector
+dxi = zeros(2, N);
+
+%% =========================================================
+%  MAIN SIMULATION LOOP
+%  =========================================================
 
 for t = 1:iterations
-    
-    % Retrieve the most recent poses from the Robotarium.  The time delay is
-    % approximately 0.033 seconds
+
+    % Retrieve the most recent poses from the Robotarium.
+    % The time delay is approximately 0.033 seconds.
     x = r.get_poses();
-    
-    %% Algorithm
-    
+
+    % ---------------------------------------------------------
+    % Formation control for followers
+    % Each follower moves to maintain desired_distance from
+    % its graph neighbors using a potential field law
+    % ---------------------------------------------------------
     for i = 2:N
-        
-        %Zero velocity and get the topological neighbors of agent i
-        dxi(:, i) = [0 ; 0];
-        
+        dxi(:, i) = [0; 0];
         neighbors = topological_neighbors(L, i);
-        
         for j = neighbors
             dxi(:, i) = dxi(:, i) + ...
-                formation_control_gain*(norm(x(1:2, j) - x(1:2, i))^2 -  desired_distance^2)*(x(1:2, j) - x(1:2, i));
+                formation_control_gain * (norm(x(1:2,j) - x(1:2,i))^2 - desired_distance^2) * (x(1:2,j) - x(1:2,i));
         end
     end
-    
-    %% Make the leader travel between waypoints
-    
+
+    % ---------------------------------------------------------
+    % Leader waypoint tracking
+    % Cycles through waypoints in order; advances state when
+    % the leader gets within close_enough of the current waypoint
+    % ---------------------------------------------------------
     waypoint = waypoints(:, state);
-    
-    switch state        
-        case 1
-            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
-            if(norm(x(1:2, 1) - waypoint) < close_enough)
-                state = 2;
-            end
-        case 2
-            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
-            if(norm(x(1:2, 1) - waypoint) < close_enough)
-                state = 3;
-            end
-        case 3
-            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
-            if(norm(x(1:2, 1) - waypoint) < close_enough)
-                state = 4;
-            end
-        case 4
-            dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
-            if(norm(x(1:2, 1) - waypoint) < close_enough)
-                state = 1;
-            end
+    dxi(:, 1) = leader_controller(x(1:2, 1), waypoint);
+    if norm(x(1:2, 1) - waypoint) < close_enough
+        state = mod(state, length(waypoints)) + 1;
     end
-    
-        
-    %% Avoid actuator errors
-    
-    % To avoid errors, we need to threshold dxi
+
+    % ---------------------------------------------------------
+    % Velocity thresholding for followers
+    % Caps follower speeds at 3/4 of max linear velocity to
+    % avoid actuator limit errors. Leader is excluded (index 1).
+    % ---------------------------------------------------------
     norms = arrayfun(@(x) norm(dxi(:, x)), 1:N);
-    threshold = 3/4*r.max_linear_velocity;
+    threshold = 3/4 * r.max_linear_velocity;
     to_thresh = norms > threshold;
-    dxi(:, to_thresh) = threshold*dxi(:, to_thresh)./norms(to_thresh);
-    
-    %% Use barrier certificate and convert to unicycle dynamics
+    to_thresh(1) = 0;
+    dxi(:, to_thresh) = threshold * dxi(:, to_thresh) ./ norms(to_thresh);
+
+    % ---------------------------------------------------------
+    % Convert to unicycle dynamics and apply barrier certificate
+    % ---------------------------------------------------------
     dxu = si_to_uni_dyn(dxi, x);
     dxu = uni_barrier_cert(dxu, x);
-    
-    %% Send velocities to agents
-    
-    %Set velocities
+
     r.set_velocities(1:N, dxu);
-    
-    %Iterate experiment
     r.step();
 end
 
-% We can call this function to debug our experiment!  Fix all the errors
-% before submitting to maximize the chance that your experiment runs
-% successfully.
+%% =========================================================
+%  DEBUG REPORT
+%  =========================================================
+
+% Prints collision, boundary, and actuator limit error counts.
+% Fix any reported errors before submitting to the Robotarium.
 r.debug();

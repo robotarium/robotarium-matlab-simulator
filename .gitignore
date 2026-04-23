@@ -1,1 +1,8 @@
 *.mat
+
+# Exclude the recorded magnetic fields file
+!recorded_magnetic_fields_world_frame.mat
+
+# Exclude the created pngs and saved data files
+*.png
+*.mat

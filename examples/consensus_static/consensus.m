@@ -1,81 +1,83 @@
-%% Consensus with a static, undirected topology
+% CONSENSUS
+% Demonstrates a theoretical example of the consensus algorithm with a
+% static, undirected cyclic graph topology. All agents converge to the
+% same position using only local neighborhood information.
+%
+% NOTE: This script lacks implementation considerations such as obstacle
+% avoidance, boundary enforcement, and velocity thresholding. If submitted
+% to the Robotarium it will be rejected. See consensus_fewer_errors.m for
+% a submission-ready version.
+%
 % Sean Wilson
 % 07/2019
-% Demonstrates a theoretical example of the consensus algorithm.  Lacks 
-% implementation considerations such as obstacle avoidance, keeping robots 
-% inside the workspace, and robot velocity thresholding, which you must 
-% include. If you submit this example to be run on the Robotarium it will
-% be rejected.
 
-N = 12;
+%% =========================================================
+%  SIMULATION PARAMETERS
+%  =========================================================
+
+N = 12;          % Number of robots
+iterations = 1000; % Total simulation steps
+
+%% =========================================================
+%  ROBOTARIUM INITIALIZATION
+%  =========================================================
+
 r = Robotarium('NumberOfRobots', N, 'ShowFigure', true);
 
-%% Experiment constants
+%% =========================================================
+%  GRAPH TOPOLOGY
+%  =========================================================
 
-% Generate a cyclic graph Laplacian from our handy utilities.  For this
-% algorithm, any connected graph will yield consensus
+% Cyclic graph Laplacian — any connected graph will yield consensus
 L = cycleGL(N);
 
-%% Grab tools we need to convert from single-integrator to unicycle dynamics
+%% =========================================================
+%  CONTROLLER SETUP
+%  =========================================================
 
-% Gain for the diffeomorphism transformation between single-integrator and
-% unicycle dynamics
+% Diffeomorphism mapping between single-integrator and unicycle dynamics
 [si_to_uni_dyn, uni_to_si_states] = create_si_to_uni_mapping();
 
-% Select the number of iterations for the experiment.  This value is
-% arbitrary
-iterations = 1000;
-
-% Initialize velocity vector for agents.  Each agent expects a 2 x 1
-% velocity vector containing the linear and angular velocity, respectively.
+% Initialize single-integrator velocity vector
 dxi = zeros(2, N);
 
-%Iterate for the previously specified number of iterations
+%% =========================================================
+%  MAIN SIMULATION LOOP
+%  =========================================================
+
 for t = 1:iterations
-    
-    % Retrieve the most recent poses from the Robotarium.  The time delay is
-    % approximately 0.033 seconds
+
+    % Retrieve the most recent poses from the Robotarium.
+    % The time delay is approximately 0.033 seconds.
     x = r.get_poses();
-    
-    % Convert to SI states
+
+    % Convert unicycle states to single-integrator states
     xi = uni_to_si_states(x);
-    
-    %% Algorithm
-    
+
+    % ---------------------------------------------------------
+    % Consensus algorithm
+    % Each agent sums the relative positions of its graph
+    % neighbors to drive all agents toward agreement
+    % ---------------------------------------------------------
     for i = 1:N
-        
-        % Initialize velocity to zero for each agent.  This allows us to sum
-        %over agent i's neighbors
-        dxi(:, i) = [0 ; 0];
-        
-        % Get the topological neighbors of agent i based on the graph
-        %Laplacian L
+        dxi(:, i) = [0; 0];
         neighbors = topological_neighbors(L, i);
-        
-        % Iterate through agent i's neighbors
         for j = neighbors
-            
-            % For each neighbor, calculate appropriate consensus term and
-            %add it to the total velocity
             dxi(:, i) = dxi(:, i) + (xi(:, j) - xi(:, i));
-        end        
+        end
     end
-    
-    %% Map to unicycle dynamics    
-    % Transform the single-integrator to unicycle dynamics using the the
-    % transformation we created earlier
+
+    % Convert single-integrator to unicycle velocities
     dxu = si_to_uni_dyn(dxi, x);
-    
-    %% Send velocities to agents
-    
-    % Set velocities of agents 1,...,N
+
     r.set_velocities(1:N, dxu);
-    
-    % Send the previously set velocities to the agents.  This function must be called!    
     r.step();
 end
 
-% We can call this function to debug our experiment!  Fix all the errors
-% before submitting to maximize the chance that your experiment runs
-% successfully.
+%% =========================================================
+%  DEBUG REPORT
+%  =========================================================
+
+% Prints collision, boundary, and actuator limit error counts.
+% Fix any reported errors before submitting to the Robotarium.
 r.debug();
